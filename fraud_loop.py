@@ -32,7 +32,7 @@ log = logging.getLogger("fraud_detection")
 import google.generativeai as genai
 import dspy
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY_0")
 if not GOOGLE_API_KEY:
     raise RuntimeError("GOOGLE_API_KEY is not set. Please export it before running.")
 
