@@ -1,5 +1,5 @@
-# .github/workflows/main_agentzero.yml - Updated to include React frontend
-name: Build and deploy Full-Stack app to Azure Web App - AgentZero
+# .github/workflows/main_agentzero.yml - Updated for Node.js deployment
+name: Build and deploy Node.js app to Azure Web App - AgentZero
 
 on:
   push:
@@ -16,51 +16,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Build React Frontend
+      # Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
           
-      - name: Install frontend dependencies
+      - name: Install dependencies
         run: |
           cd frontend
-          npm install
+          npm ci
           
       - name: Build React frontend
         run: |
           cd frontend
           npm run build
           
-      - name: Copy frontend build to backend
+      - name: Create deployment package
         run: |
-          mkdir -p backend/frontend_build
-          cp -r frontend/build/* backend/frontend_build/
-
-      # Build Python Backend
-      - name: Set up Python version
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Create and start virtual environment
-        run: |
-          cd backend
-          python -m venv venv
-          source venv/bin/activate
-      
-      - name: Install backend dependencies
-        run: |
-          cd backend
-          pip install -r requirements.txt
+          mkdir deployment
+          cp -r frontend/build/* deployment/
+          cp frontend/package.json deployment/
+          cp frontend/index.js deployment/
+          cp frontend/web.config deployment/
         
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
-          name: python-app
-          path: |
-            backend/
-            !backend/venv/
+          name: node-app
+          path: deployment/
 
   deploy:
     runs-on: ubuntu-latest
@@ -73,7 +59,7 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: python-app
+          name: node-app
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -88,4 +74,4 @@ jobs:
         with:
           app-name: 'AgentZero'
           slot-name: 'Production'
-          startup-command: 'uvicorn main:app --host 0.0.0.0 --port 8000'
+          package: '.'
