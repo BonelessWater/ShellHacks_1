@@ -1,8 +1,15 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// Updated API service for Vercel deployment
+const API_BASE_URL = process.env.REACT_APP_API_URL || 
+  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8000');
 
 class APIService {
   async request(endpoint, options = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
+    // For production (Vercel), use relative URLs
+    // For development, use full URL to local backend
+    const url = process.env.NODE_ENV === 'production' 
+      ? endpoint 
+      : `${API_BASE_URL}${endpoint}`;
+    
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -24,6 +31,11 @@ class APIService {
     }
   }
 
+  // Health check
+  async healthCheck() {
+    return this.request('/api/health');
+  }
+
   // Invoice methods
   async uploadInvoices(files) {
     const formData = new FormData();
@@ -35,6 +47,13 @@ class APIService {
       method: 'POST',
       body: formData,
       headers: {}, // Remove Content-Type to let browser set it for FormData
+    });
+  }
+
+  async processInvoiceData(invoiceData) {
+    return this.request('/api/invoices/upload', {
+      method: 'POST',
+      body: JSON.stringify({ invoice_data: invoiceData }),
     });
   }
 
@@ -70,7 +89,7 @@ class APIService {
   async updateAgentConfig(config) {
     return this.request('/api/agents/config', {
       method: 'PUT',
-      body: JSON.stringify(config),
+      body: JSON.stringify({ config }),
     });
   }
 }

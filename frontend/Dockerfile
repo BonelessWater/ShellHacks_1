@@ -1,20 +1,36 @@
-# Frontend Dockerfile for React development
-FROM node:18-alpine
+# Multi-stage build for React app
+FROM node:18-alpine as build
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files first (for better caching)
+# Copy package files
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci --only=production
 
-# Copy all source code
+# Copy source code
 COPY . .
 
-# Expose port 3000
-EXPOSE 3000
+# Build the app
+RUN npm run build
 
-# Start development server
-CMD ["npm", "start"]
+# Production stage with nginx
+FROM nginx:alpine
+
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy built app from build stage
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost/ || exit 1
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
