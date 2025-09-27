@@ -4,6 +4,11 @@ Specialized Invoice Verification Agents System
 Each agent is specialized for specific invoice verification tasks
 """
 
+from google.cloud import bigquery
+from google.oauth2 import service_account
+import pandas as pd
+import os
+from dotenv import load_dotenv
 import asyncio
 import json
 import os
@@ -20,6 +25,8 @@ from concurrent.futures import ThreadPoolExecutor
 import sqlite3
 from collections import defaultdict, Counter
 import math
+
+load_dotenv()
 
 # Configure comprehensive logging
 class InvoiceSystemLogger:
@@ -132,183 +139,66 @@ class VerificationResult:
 class DatabaseManager:
     """Manages invoice database for duplicate detection and analytics"""
 
-    def __init__(self, db_path: str = "invoice_verification_system/data/invoices.db"):
-        self.db_path = Path(db_path)
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.init_database()
+    def __init__(self, project_id: str, dataset_name: str, table_name: str = "invoices"):
+        self.project_id = project_id
+        self.dataset_name = dataset_name
+        self.table_name = table_name
+        # It's recommended to use service account credentials for GCP authentication
+        # but for this example, we'll use the API key from the .env file
+        self.client = bigquery.Client()
+        self.table_id = f"{self.project_id}.{self.dataset_name}.{self.table_name}"
+
 
     def init_database(self):
         """Initialize database tables"""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS invoices (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    invoice_number TEXT UNIQUE,
-                    vendor_name TEXT,
-                    vendor_tax_id TEXT,
-                    invoice_date TEXT,
-                    due_date TEXT,
-                    subtotal REAL,
-                    tax_amount REAL,
-                    total_amount REAL,
-                    payment_terms TEXT,
-                    purchase_order TEXT,
-                    line_items_hash TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    verification_status TEXT,
-                    confidence_score REAL
-                )
-            """)
+        # In BigQuery, you typically create datasets and tables through the GCP console or `gcloud` commands.
+        # This function can be used to verify that the table exists, or to create it if it doesn't.
+        try:
+            self.client.get_table(self.table_id)
+            print(f"Table {self.table_id} already exists.")
+        except Exception as e:
+            print(f"Table {self.table_id} not found. Please create it in your BigQuery project.")
+            # You could also add table creation logic here, but it's often better to manage infrastructure separately.
 
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS verification_results (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    invoice_number TEXT,
-                    agent_name TEXT,
-                    status TEXT,
-                    confidence REAL,
-                    findings TEXT,
-                    recommendations TEXT,
-                    processing_time REAL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
-
-            conn.commit()
 
     def save_invoice(self, invoice: InvoiceData) -> bool:
-        """Save invoice to database"""
+        """Save invoice to BigQuery"""
         try:
-            line_items_hash = hashlib.md5(
-                json.dumps(invoice.line_items, sort_keys=True).encode()
-            ).hexdigest()
-
-            with sqlite3.connect(self.db_path) as conn:
-                conn.execute("""
-                    INSERT OR REPLACE INTO invoices
-                    (invoice_number, vendor_name, vendor_tax_id, invoice_date, due_date,
-                     subtotal, tax_amount, total_amount, payment_terms, purchase_order,
-                     line_items_hash, verification_status, confidence_score)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    invoice.invoice_number,
-                    invoice.vendor.get('name', ''),
-                    invoice.vendor.get('tax_id', ''),
-                    invoice.invoice_date,
-                    invoice.due_date,
-                    invoice.subtotal,
-                    invoice.tax_amount,
-                    invoice.total_amount,
-                    invoice.payment_terms,
-                    invoice.purchase_order,
-                    line_items_hash,
-                    invoice.verification_status,
-                    invoice.confidence_score
-                ))
-                conn.commit()
-            return True
+            df = pd.DataFrame([invoice.to_dict()])
+            errors = self.client.insert_rows_from_dataframe(self.table_id, df)
+            if errors == []:
+                print("New rows have been added.")
+                return True
+            else:
+                print(f"Encountered errors while inserting rows: {errors}")
+                return False
         except Exception as e:
-            invoice_logger.get_logger('data_extraction').error(f"Error saving invoice: {e}")
+            invoice_logger.get_logger('data_extraction').error(f"Error saving invoice to BigQuery: {e}")
             return False
 
-    def find_duplicates(self, invoice: InvoiceData) -> List[Dict[str, Any]]:
-        """Find potential duplicate invoices"""
+
+    def find_duplicates(self, invoice: InvoiceData) -> list:
+        """Find potential duplicate invoices in BigQuery"""
+        query = f"""
+            SELECT *
+            FROM `{self.table_id}`
+            WHERE invoice_number = '{invoice.invoice_number}'
+            AND vendor.name = '{invoice.vendor.get('name', '')}'
+        """
         try:
-            line_items_hash = hashlib.md5(
-                json.dumps(invoice.line_items, sort_keys=True).encode()
-            ).hexdigest()
-
-            with sqlite3.connect(self.db_path) as conn:
-                conn.row_factory = sqlite3.Row
-
-                # Check for exact matches
-                exact_matches = conn.execute("""
-                    SELECT * FROM invoices
-                    WHERE invoice_number = ? AND vendor_name = ?
-                """, (invoice.invoice_number, invoice.vendor.get('name', ''))).fetchall()
-
-                # Check for amount and vendor matches
-                amount_matches = conn.execute("""
-                    SELECT * FROM invoices
-                    WHERE vendor_name = ? AND total_amount = ? AND invoice_number != ?
-                """, (
-                    invoice.vendor.get('name', ''),
-                    invoice.total_amount,
-                    invoice.invoice_number
-                )).fetchall()
-
-                # Check for line items hash matches
-                hash_matches = conn.execute("""
-                    SELECT * FROM invoices
-                    WHERE line_items_hash = ? AND invoice_number != ?
-                """, (line_items_hash, invoice.invoice_number)).fetchall()
-
-                duplicates = []
-                for match in exact_matches:
-                    duplicates.append({
-                        'type': 'exact_match',
-                        'severity': 'critical',
-                        'existing_invoice': dict(match),
-                        'confidence': 1.0
-                    })
-
-                for match in amount_matches:
-                    duplicates.append({
-                        'type': 'amount_vendor_match',
-                        'severity': 'high',
-                        'existing_invoice': dict(match),
-                        'confidence': 0.8
-                    })
-
-                for match in hash_matches:
-                    duplicates.append({
-                        'type': 'line_items_match',
-                        'severity': 'high',
-                        'existing_invoice': dict(match),
-                        'confidence': 0.9
-                    })
-
-                return duplicates
-
+            query_job = self.client.query(query)
+            results = query_job.result()
+            return [dict(row) for row in results]
         except Exception as e:
-            invoice_logger.get_logger('duplicate_detection').error(f"Error finding duplicates: {e}")
+            invoice_logger.get_logger('duplicate_detection').error(f"Error finding duplicates in BigQuery: {e}")
             return []
-
-    def get_vendor_history(self, vendor_name: str) -> Dict[str, Any]:
-        """Get vendor transaction history"""
-        try:
-            with sqlite3.connect(self.db_path) as conn:
-                conn.row_factory = sqlite3.Row
-
-                summary = conn.execute("""
-                    SELECT COUNT(*) as total_invoices,
-                           AVG(total_amount) as avg_amount,
-                           SUM(total_amount) as total_amount,
-                           AVG(confidence_score) as avg_confidence,
-                           MIN(created_at) as first_transaction,
-                           MAX(created_at) as last_transaction
-                    FROM invoices
-                    WHERE vendor_name = ?
-                """, (vendor_name,)).fetchone()
-
-                recent = conn.execute("""
-                    SELECT * FROM invoices
-                    WHERE vendor_name = ?
-                    ORDER BY created_at DESC
-                    LIMIT 10
-                """, (vendor_name,)).fetchall()
-
-                return {
-                    'summary': dict(summary) if summary else {},
-                    'recent_invoices': [dict(row) for row in recent]
-                }
-
-        except Exception as e:
-            invoice_logger.get_logger('vendor_verification').error(f"Error getting vendor history: {e}")
-            return {'summary': {}, 'recent_invoices': []}
-
+        
 # Initialize database
-db_manager = DatabaseManager()
+db_manager = DatabaseManager(
+    project_id="vaulted-timing-473322-f9",
+    dataset_name="basic_dataset"  # <-- Use your new dataset name here
+)
+db_manager.init_database()
 
 class SpecializedAgent:
     """Base class for specialized invoice verification agents"""
