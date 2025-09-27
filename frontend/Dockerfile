@@ -3,7 +3,6 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
-COPY craco.config.js ./craco.config.js
 
 RUN npm ci || npm install
 COPY . .
@@ -20,4 +19,4 @@ RUN mkdir -p /var/cache/nginx
 EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost/ || exit 1
-CMD ["nginx", " -g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]
