@@ -3,7 +3,6 @@ venv
 
 .env
 poetry.lock
-package-lock.json
 .vercel
 
 */__pycache__
