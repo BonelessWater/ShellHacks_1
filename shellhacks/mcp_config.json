@@ -1,0 +1,32 @@
+{
+  "server": {
+    "host": "localhost",
+    "port": 8000,
+    "max_connections": 10
+  },
+  "tools": [
+    {
+      "name": "search_documentation",
+      "enabled": true,
+      "timeout": 30
+    },
+    {
+      "name": "execute_code",
+      "enabled": true,
+      "timeout": 60,
+      "languages": ["python", "javascript", "typescript"]
+    },
+    {
+      "name": "analyze_data",
+      "enabled": true,
+      "timeout": 120
+    }
+  ],
+  "security": {
+    "api_key_required": false,
+    "rate_limiting": {
+      "enabled": true,
+      "requests_per_minute": 60
+    }
+  }
+}

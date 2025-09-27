@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "shellhacks"
+version = "0.1.0"
+description = ""
+# The fix is here: comma-separated strings in the list
+authors = ["BonelessWater <domdd305@gmail.com>", "IlanDanial <ilan_danial@outlook.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.14"
+google-adk = ">=1.14.1,<2.0.0"
+
+# This section makes your project runnable with 'poetry run run-agent'
+fastapi = "^0.117.1"
+uvicorn = "^0.37.0"
+pandas = "^2.3.2"
+openpyxl = "^3.1.5"
+google = "^3.0.0"
+dspy = "^3.0.3"
+google-generativeai = "^0.8.5"
+dspy-ai = "^3.0.3"
+pydantic = "^2.11.9"
+httpx = "^0.28.1"
+[tool.poetry.scripts]
+run-agent = "shellhacks.main:start"
