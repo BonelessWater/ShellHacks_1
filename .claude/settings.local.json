@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(env)",
+      "Bash(set GOOGLE_API_KEY_0=test_key_placeholder)",
+      "Bash(python:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

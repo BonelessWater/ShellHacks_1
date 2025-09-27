@@ -15,8 +15,10 @@ import dspy
 
 # Configuration constants
 MODEL_CANDIDATES = [
-    "models/gemini-2.5-flash"
+    "models/gemini-2.5-flash",  # fast/cheaper
+    "models/gemini-2.5-pro",    # stronger
 ]
+
 
 MIN_DELAY_BETWEEN_CALLS = 1.0
 MAX_RETRIES = 3
@@ -35,7 +37,7 @@ class APIKeyManager:
         if not self.api_keys:
             raise RuntimeError("No valid GOOGLE_API_KEY found. Please set GOOGLE_API_KEY_1, GOOGLE_API_KEY_2, or GOOGLE_API_KEY_3")
         
-        log.info(f"✅ Loaded {len(self.api_keys)} API keys")
+        log.info(f"Loaded {len(self.api_keys)} API keys")
     
     def _load_api_keys(self) -> list:
         """Load all available API keys from environment"""
@@ -46,13 +48,13 @@ class APIKeyManager:
             key = os.getenv(f"GOOGLE_API_KEY_{i}")
             if key and key.strip():
                 keys.append(key.strip())
-                log.info(f"✅ Found GOOGLE_API_KEY_{i}")
+                log.info(f"Found GOOGLE_API_KEY_{i}")
         
         # Fallback to original key name
         fallback_key = os.getenv("GOOGLE_API_KEY")
         if fallback_key and fallback_key.strip() and fallback_key not in keys:
             keys.append(fallback_key.strip())
-            log.info("✅ Found GOOGLE_API_KEY (fallback)")
+            log.info("Found GOOGLE_API_KEY (fallback)")
         
         return keys
     
@@ -75,7 +77,7 @@ class APIKeyManager:
         
         # All keys failed, reset and try again
         if self.failed_keys:
-            log.warning("⚠️ All keys failed, resetting failure tracking")
+            log.warning("All keys failed, resetting failure tracking")
             self.failed_keys.clear()
             return self.api_keys[self.current_key_index]
         
@@ -87,7 +89,7 @@ class APIKeyManager:
             return self.get_current_key()
         
         self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
-        log.info(f"🔄 Rotated to API key #{self.current_key_index + 1}")
+        log.info(f"Rotated to API key #{self.current_key_index + 1}")
         return self.get_current_key()
     
     def mark_key_failed(self, key: str, error_msg: str = ""):
@@ -95,7 +97,7 @@ class APIKeyManager:
         if key in self.api_keys:
             self.failed_keys.add(key)
             key_index = self.api_keys.index(key) + 1
-            log.warning(f"❌ Marked API key #{key_index} as failed: {error_msg[:100]}")
+            log.warning(f"Marked API key #{key_index} as failed: {error_msg[:100]}")
             
             # Rotate to next key
             self.rotate_key()
@@ -107,7 +109,7 @@ class APIKeyManager:
     def reset_failures(self):
         """Reset all failure tracking"""
         self.failed_keys.clear()
-        log.info("🔄 Reset all API key failures")
+        log.info("Reset all API key failures")
 
 # Global API key manager
 api_key_manager = APIKeyManager()
@@ -129,15 +131,15 @@ class MultiKeyGeminiLM(dspy.LM):
         """Configure the API with current key"""
         api_key = api_key_manager.get_current_key()
         if not api_key:
-            log.error("❌ No available API keys")
+            log.error("No available API keys")
             return False
         
         try:
             genai.configure(api_key=api_key)
-            log.debug(f"✅ Configured API key #{api_key_manager.current_key_index + 1}")
+            log.debug(f"Configured API key #{api_key_manager.current_key_index + 1}")
             return True
         except Exception as e:
-            log.error(f"❌ Failed to configure API key: {e}")
+            log.error(f"Failed to configure API key: {e}")
             api_key_manager.mark_key_failed(api_key, str(e))
             return False
     
@@ -165,7 +167,7 @@ class MultiKeyGeminiLM(dspy.LM):
                     self.model = test_model
                     self.current_model_name = candidate
                     self.initialized = True
-                    log.info(f"✅ Initialized: {candidate} with key #{api_key_manager.current_key_index + 1}")
+                    log.info(f"Initialized: {candidate} with key #{api_key_manager.current_key_index + 1}")
                     return True
                     
             except Exception as e:
@@ -173,7 +175,7 @@ class MultiKeyGeminiLM(dspy.LM):
                 last_error = e
                 
                 if "429" in error_msg or "quota" in error_msg.lower():
-                    log.warning(f"❌ Quota exceeded for {candidate}")
+                    log.warning(f"Quota exceeded for {candidate}")
                     # Mark this key as failed and try next one
                     current_key = api_key_manager.get_current_key()
                     api_key_manager.mark_key_failed(current_key, error_msg)
@@ -183,7 +185,7 @@ class MultiKeyGeminiLM(dspy.LM):
                         time.sleep(1)  # Brief pause before trying next key
                         return self._try_initialize_model()  # Recursive retry with new key
                     else:
-                        log.error("❌ All API keys exhausted")
+                        log.error("All API keys exhausted")
                         return False
                         
                 elif "404" in error_msg:
@@ -194,7 +196,7 @@ class MultiKeyGeminiLM(dspy.LM):
                 time.sleep(0.5)
                 continue
         
-        log.error(f"❌ Could not initialize any model. Last error: {last_error}")
+        log.error(f"Could not initialize any model. Last error: {last_error}")
         return False
     
     def _handle_rate_limit_error(self, error_msg: str, attempt: int) -> Optional[float]:
@@ -206,7 +208,7 @@ class MultiKeyGeminiLM(dspy.LM):
         
         # Try to rotate to next available key
         if api_key_manager.get_available_count() > 0:
-            log.info(f"🔄 Rate limited, rotating to next API key...")
+            log.info(f"Rate limited, rotating to next API key...")
             if self._try_initialize_model():
                 return 1.0  # Short delay before retrying with new key
         
@@ -243,7 +245,7 @@ class MultiKeyGeminiLM(dspy.LM):
         
         # Rotate every 10 calls to distribute load
         if self.call_count % 10 == 0 and api_key_manager.get_available_count() > 1:
-            log.info(f"🔄 Proactive key rotation after {self.call_count} calls")
+            log.info(f"Proactive key rotation after {self.call_count} calls")
             old_key = api_key_manager.get_current_key()
             api_key_manager.rotate_key()
             
@@ -256,7 +258,7 @@ class MultiKeyGeminiLM(dspy.LM):
         # Initialize if needed
         if not self.initialized:
             if not self._try_initialize_model():
-                log.error("❌ No working Gemini model available")
+                log.error("No working Gemini model available")
                 return "Error: No working model available"
         
         # Process input
@@ -286,7 +288,7 @@ class MultiKeyGeminiLM(dspy.LM):
                 
                 if response and response.text:
                     result = response.text.strip()
-                    log.debug(f"✅ Success with {self.current_model_name} (key #{api_key_manager.current_key_index + 1})")
+                    log.debug(f"Success with {self.current_model_name} (key #{api_key_manager.current_key_index + 1})")
                     return result
                 else:
                     log.warning("Empty response from Gemini")
@@ -299,7 +301,7 @@ class MultiKeyGeminiLM(dspy.LM):
                     retry_delay = self._handle_rate_limit_error(error_msg, attempt)
                     
                     if retry_delay and attempt < MAX_RETRIES - 1:
-                        log.warning(f"⏳ Retrying in {retry_delay:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})")
+                        log.warning(f"Retrying in {retry_delay:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})")
                         time.sleep(retry_delay)
                         continue
                     else:
@@ -309,18 +311,18 @@ class MultiKeyGeminiLM(dspy.LM):
                             if self._try_initialize_model():
                                 continue
                         
-                        log.error("❌ Rate limit exceeded on all keys")
+                        log.error("Rate limit exceeded on all keys")
                         return "Error: Rate limit exceeded"
                 
                 elif "404" in error_msg:
-                    log.error(f"❌ Model not found: {self.current_model_name}")
+                    log.error(f"Model not found: {self.current_model_name}")
                     return "Error: Model not available"
                 
                 else:
-                    log.error(f"❌ API error: {error_msg}")
+                    log.error(f"API error: {error_msg}")
                     if attempt < MAX_RETRIES - 1:
                         delay = 1 + (attempt * 0.5)
-                        log.info(f"⏳ Retrying in {delay}s...")
+                        log.info(f"Retrying in {delay}s...")
                         time.sleep(delay)
                         continue
                     return f"Error: {error_msg[:100]}"
@@ -333,20 +335,20 @@ def get_configured_lm():
     try:
         return MultiKeyGeminiLM()
     except Exception as e:
-        log.error(f"❌ Failed to create LM: {e}")
+        log.error(f"Failed to create LM: {e}")
         return None
 
 def reset_api_keys():
     """Reset API key failure tracking"""
     api_key_manager.reset_failures()
-    log.info("🔄 API key failures reset")
+    log.info("API key failures reset")
 
 def rotate_api_key():
     """Manually rotate to next API key"""
     old_key = api_key_manager.current_key_index + 1
     api_key_manager.rotate_key()
     new_key = api_key_manager.current_key_index + 1
-    log.info(f"🔄 Manually rotated from key #{old_key} to key #{new_key}")
+    log.info(f"Manually rotated from key #{old_key} to key #{new_key}")
 
 def get_api_status():
     """Get API key status information"""
