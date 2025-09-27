@@ -29,7 +29,7 @@ log = logging.getLogger("test_gemini_keys")
 
 PREFERRED_MODELS = [
     "models/gemini-2.5-flash",  # fast/cheaper
-    "models/gemini-2.5-pro",    # stronger
+    #"models/gemini-2.5-pro",    # stronger
 ]
 
 def _parse_version(v: str) -> List[int]:

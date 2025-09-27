@@ -1,0 +1,29 @@
+2025-09-27 17:49:48,886 [WARNING] invoice_processor: DSPy setup failed: module 'dspy' has no attribute 'GoogleGenAI'. Falling back to direct API calls.
+2025-09-27 17:49:49,185 [WARNING] invoice_processor: Agent selection attempt 1 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:50,260 [WARNING] invoice_processor: Agent selection attempt 2 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:51,330 [WARNING] invoice_processor: Agent selection attempt 3 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:51,331 [ERROR] invoice_processor: All agent selection attempts failed, using defaults
+2025-09-27 17:49:51,473 [WARNING] invoice_processor: Agent amount_validator attempt 1 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:52,530 [WARNING] invoice_processor: Agent amount_validator attempt 2 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:53,588 [WARNING] invoice_processor: Agent amount_validator attempt 3 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:53,748 [WARNING] invoice_processor: Agent vendor_authenticator attempt 1 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:54,803 [WARNING] invoice_processor: Agent vendor_authenticator attempt 2 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:55,866 [WARNING] invoice_processor: Agent vendor_authenticator attempt 3 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:56,014 [WARNING] invoice_processor: Agent format_inspector attempt 1 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:57,072 [WARNING] invoice_processor: Agent format_inspector attempt 2 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:58,126 [WARNING] invoice_processor: Agent format_inspector attempt 3 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:58,276 [WARNING] invoice_processor: Results compilation attempt 1 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:49:59,326 [WARNING] invoice_processor: Results compilation attempt 2 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:50:00,383 [WARNING] invoice_processor: Results compilation attempt 3 failed: 404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+2025-09-27 17:50:00,386 [DEBUG] asyncio: Using proactor: IocpProactor
+2025-09-27 17:52:11,060 [WARNING] invoice_processor: DSPy setup failed: module 'dspy' has no attribute 'GoogleGenAI'. Falling back to direct API calls.
+2025-09-27 17:53:17,002 [DEBUG] asyncio: Using proactor: IocpProactor
+2025-09-27 17:54:30,649 [WARNING] invoice_processor: DSPy setup failed: module 'dspy' has no attribute 'GoogleGenAI'. Falling back to direct API calls.
+2025-09-27 17:54:30,650 [INFO] main_detector: 🔍 Starting comprehensive invoice fraud analysis...
+2025-09-27 17:54:30,650 [INFO] invoice_processor: 🔍 Starting invoice fraud analysis with error recovery...
+2025-09-27 17:54:40,704 [INFO] invoice_processor: 📋 Summoning 4 agents: line_item_validator, amount_validator, tax_calculator, vendor_authenticator
+2025-09-27 17:54:47,463 [INFO] invoice_processor: ✅ line_item_validator: Risk 9/10, Confidence 9/10
+2025-09-27 17:55:01,465 [INFO] invoice_processor: ✅ amount_validator: Risk 8/10, Confidence 9/10
+2025-09-27 17:55:15,373 [INFO] invoice_processor: ✅ tax_calculator: Risk 5/10, Confidence 6/10
+2025-09-27 17:55:22,973 [INFO] invoice_processor: ✅ vendor_authenticator: Risk 8/10, Confidence 9/10
+2025-09-27 17:55:31,303 [DEBUG] asyncio: Using proactor: IocpProactor
