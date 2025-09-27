@@ -9,6 +9,8 @@ services:
     environment:
       - ENVIRONMENT=development
       - CORS_ORIGINS=http://localhost:3001,http://frontend:80
+      - REACT_APP_API_URL=https://agentzero.azurewebsites.net  # Instead of http://localhost:8000
+      - REACT_APP_ENVIRONMENT=development 
     volumes:
       - ./backend:/app
     restart: unless-stopped
