@@ -3,3 +3,4 @@ venv
 
 .env
 poetry.lock
+package-lock.json
