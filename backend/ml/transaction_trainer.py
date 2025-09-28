@@ -4,6 +4,7 @@ This module provides a thin wrapper around TensorFlow and Vertex AI when
 available. The module is guarded so tests and local dev don't require heavy
 dependencies. It also documents how to use the trainer in production.
 """
+from __future__ import annotations
 import logging
 from typing import Any
 
@@ -18,6 +19,10 @@ except Exception:
     tf = None
     aiplatform = None
     _HAS_TF = False
+
+# Provide a placeholder name for tests that monkeypatch backend.ml.transaction_trainer.bigquery
+# Some tests do monkeypatch.setattr('backend.ml.transaction_trainer.bigquery', ...)
+bigquery = None
 
 
 class TransactionAnomalyTrainer:
@@ -274,7 +279,9 @@ class TransactionAnomalyTrainer:
 
         return res
 
-    def split_train_test(self, X, y, test_size: float = 0.2, random_state: int | None = None):
+    from typing import Optional
+
+    def split_train_test(self, X, y, test_size: float = 0.2, random_state: Optional[int] = None):
         """Split dataset into train/test. Uses sklearn if available, otherwise falls back to a simple numpy-based shuffle.
 
         Returns: (X_train, X_test, y_train, y_test)

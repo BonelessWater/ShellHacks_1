@@ -167,6 +167,74 @@ export const apiService = {
     }
   },
 
+  // Check backend connectivity (returns boolean)
+  checkBackendConnection: async () => {
+    try {
+      const response = await api.get('/api/system/status');
+      // Consider backend connected when it returns a healthy status
+      return response && response.data && response.data.status && response.data.status === 'healthy';
+    } catch (error) {
+      return false;
+    }
+  },
+
+  // Get invoices (used by frontend hooks)
+  getInvoices: async (params = {}) => {
+    try {
+      const response = await api.get('/api/invoices', { params });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to get invoices: ${error.message}`);
+    }
+  },
+
+  // Get a small dev-only sample (obfuscated) for UI prototyping
+  getSampleInvoices: async (limit = 25, dynamic = false) => {
+    try {
+      const response = await api.get('/api/invoices/sample', { params: { limit, dynamic } });
+      return response.data;
+    } catch (error) {
+      console.warn('Failed to fetch sample invoices, falling back to /api/invoices', error.message);
+      return apiService.getInvoices({ limit });
+    }
+  },
+
+  // Score invoices using a safe heuristic endpoint (dev-only)
+  scoreInvoices: async (invoices) => {
+    try {
+      const response = await api.post('/api/invoices/score', { invoices });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to score invoices: ${error.message}`);
+    }
+  },
+
+  // Upload multiple invoice files (used by frontend)
+  uploadInvoices: async (files) => {
+    try {
+      const formData = new FormData();
+      files.forEach((file) => formData.append('files', file));
+
+      const response = await api.post('/api/invoices/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000,
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Invoice upload failed: ${error.message}`);
+    }
+  },
+
+  // Update invoice status
+  updateInvoiceStatus: async (invoiceId, status) => {
+    try {
+      const response = await api.patch(`/api/invoices/${invoiceId}/status`, { status });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to update invoice status: ${error.message}`);
+    }
+  },
+
   // Get uploaded files
   getUploadedFiles: async () => {
     try {
