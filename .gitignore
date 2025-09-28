@@ -39,3 +39,10 @@ htmlcov/
 
 # macOS
 .DS_Store
+# Environment files - NEVER COMMIT THESE
+tools/.env
+*.env
+.env
+.env.*
+vaulted-timing-*.json
+C:\Users\johnp\Downloads\vaulted-timing-473322-f9-5f312b3321cc.json
