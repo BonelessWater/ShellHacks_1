@@ -18,7 +18,7 @@ class TestStreamingPipeline:
     @pytest.fixture
     def stream_processor(self, mock_bigquery_client):
         """Create stream processor"""
-        with patch("data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
+        with patch("backend.data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
             with patch("google.cloud.pubsub_v1.PublisherClient"):
                 with patch("google.cloud.pubsub_v1.SubscriberClient"):
                     pipeline = mock_pipeline.return_value

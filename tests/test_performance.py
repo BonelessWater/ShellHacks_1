@@ -30,7 +30,7 @@ class TestPerformance:
             }
         )
 
-        with patch("data_pipeline.core.data_access.DataPipeline"):
+        with patch("backend.data_pipeline.core.data_access.DataPipeline"):
             feature_store = FeatureStore(Mock())
 
             # Benchmark feature engineering
