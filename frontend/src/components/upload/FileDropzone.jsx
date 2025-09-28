@@ -1,6 +1,6 @@
 // frontend/src/components/upload/FileDropzone.jsx
 import React, { useState } from 'react';
-import { Upload, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 const FileDropzone = ({ onFileUpload, processing }) => {
   const [message, setMessage] = useState('');
