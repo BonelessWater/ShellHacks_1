@@ -1,7 +1,7 @@
-// frontend/src/App.js
 import React from 'react';
 import ApiTest from './components/ApiTest';
-import './App.css';
+// Remove the App.css import and use index.css instead
+// import './App.css';  // Remove this line
 
 function App() {
   return (
