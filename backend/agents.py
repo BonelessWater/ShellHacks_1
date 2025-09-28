@@ -1,16 +1,29 @@
-"""Compatibility shim exporting the archived agents implementation.
+"""Public agent implementations.
 
-This keeps `backend.agents` imports working after the merge that moved the
-implementation into `backend.archive`.
+This module exposes the concrete agent classes at `backend.agents` by importing
+the canonical implementations from `backend.archive.agents`. Keeping this file
+helps callers import from `backend.agents` while the archive-based
+implementations remain the canonical source of truth.
 """
 
-"""Shim for `backend.agents` that re-exports archived implementation.
+from backend.archive.agents import (
+	VendorAgent,
+	TotalsAgent,
+	PatternAgent,
+	AgentCoordinator,
+	create_agent_coordinator,
+	validate_agent_config,
+	APPROVED_VENDORS,
+	SUSPICIOUS_KEYWORDS,
+)
 
-See `backend/compat.py` for the re-export helper. This file is temporary and
-can be removed in a follow-up cleanup PR once callers are migrated.
-"""
-
-from backend import compat
-
-# Re-export public symbols from backend.archive.agents (or fallbacks)
-compat.reexport_module("agents", globals())
+__all__ = [
+	"VendorAgent",
+	"TotalsAgent",
+	"PatternAgent",
+	"AgentCoordinator",
+	"create_agent_coordinator",
+	"validate_agent_config",
+	"APPROVED_VENDORS",
+	"SUSPICIOUS_KEYWORDS",
+]

@@ -998,6 +998,51 @@ class AgentCoordinator:
             log.error(f"❌ Error configuring agents: {e}")
             return False
 
+    def apply_feedback(self, feedback: Dict[str, Any]) -> bool:
+        """Apply human or automated feedback to agents to correct errors.
+
+        Expected feedback shape (examples):
+          {"vendor": {"blacklist": ["BadCo"], "approve": ["New Vendor"]},
+           "totals": {"adjust_tolerance": 0.02},
+           "patterns": {"add_keywords": ["suspicious_word"]}}
+
+        The method updates agent state accordingly and returns True on success.
+        """
+        try:
+            # Vendor feedback
+            vendor_fb = feedback.get("vendor") or {}
+            for v in vendor_fb.get("blacklist", []):
+                self.vendor_agent.blacklist_vendor(v, reason="feedback_blacklist")
+
+            for v in vendor_fb.get("approve", []):
+                self.vendor_agent.add_approved_vendor(v)
+
+            # Totals feedback
+            totals_fb = feedback.get("totals") or {}
+            if "adjust_tolerance" in totals_fb:
+                try:
+                    self.totals_agent.tolerance = float(totals_fb["adjust_tolerance"])
+                    log.info(f"Adjusted totals tolerance to {self.totals_agent.tolerance} via feedback")
+                except Exception:
+                    log.warning("Invalid adjust_tolerance value in feedback")
+
+            # Patterns feedback
+            patterns_fb = feedback.get("patterns") or {}
+            for kw in patterns_fb.get("add_keywords", []):
+                self.pattern_agent.add_suspicious_keyword(kw)
+
+            for kw in patterns_fb.get("remove_keywords", []):
+                self.pattern_agent.remove_suspicious_keyword(kw)
+
+            # Optionally accept direct resets
+            if feedback.get("reset_all"):
+                self.reset_agents()
+
+            return True
+        except Exception as e:
+            log.error(f"Error applying feedback: {e}")
+            return False
+
     def reset_agents(self) -> bool:
         """Reset all agent states and histories"""
         try:
