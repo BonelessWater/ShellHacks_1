@@ -11,8 +11,8 @@ import { useSystemStatus } from './hooks/useSystemStatus';
 
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
-  const { invoices, processing, error, backendConnected, handleFileUpload, updateInvoiceStatus, refreshInvoices } = useInvoices();
-  const { systemStatus, backendConnected: systemBackendConnected, error: systemError } = useSystemStatus();
+  const { invoices, processing, error, backendConnected, handleFileUpload } = useInvoices();
+  const { systemStatus, backendConnected: systemBackendConnected } = useSystemStatus();
 
   const renderContent = () => {
     switch (activeView) {
