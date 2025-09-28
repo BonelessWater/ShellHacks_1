@@ -8,11 +8,11 @@ from unittest.mock import MagicMock, Mock, patch
 import numpy as np
 import pandas as pd
 import pytest
-from data_pipeline.monitoring.data_monitor import DataMonitor, DataVersion
+from backend.data_pipeline.monitoring.data_monitor import DataMonitor, DataVersion
 
 # Import your modules
-from data_pipeline.core.data_access import DataPipeline
-from data_pipeline.features.feature_store import FeatureStore
+from backend.data_pipeline.core.data_access import DataPipeline
+from backend.data_pipeline.features.feature_store import FeatureStore
 
 
 class TestDataPipeline:
@@ -22,11 +22,11 @@ class TestDataPipeline:
     def pipeline(self, mock_bigquery_client, mock_storage_client):
         """Create DataPipeline instance with mocked clients"""
         with patch(
-            "data_pipeline.core.data_access.bigquery.Client",
+            "backend.data_pipeline.core.data_access.bigquery.Client",
             return_value=mock_bigquery_client,
         ):
             with patch(
-                "data_pipeline.core.data_access.storage.Client",
+                "backend.data_pipeline.core.data_access.storage.Client",
                 return_value=mock_storage_client,
             ):
                 return DataPipeline(project_id="test-project-123")
@@ -104,7 +104,7 @@ class TestFeatureStore:
     @pytest.fixture
     def feature_store(self, mock_bigquery_client):
         """Create FeatureStore instance"""
-        with patch("data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
+        with patch("backend.data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
             mock_pipeline.return_value.bq_client = mock_bigquery_client
             mock_pipeline.return_value.project_id = "test-project-123"
             return FeatureStore(mock_pipeline.return_value)
@@ -175,7 +175,7 @@ class TestDataMonitor:
     @pytest.fixture
     def monitor(self, mock_bigquery_client):
         """Create DataMonitor instance"""
-        with patch("data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
+        with patch("backend.data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
             mock_pipeline.return_value.bq_client = mock_bigquery_client
             mock_pipeline.return_value.project_id = "test-project-123"
             return DataMonitor(mock_pipeline.return_value)

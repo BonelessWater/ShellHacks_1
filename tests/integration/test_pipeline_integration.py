@@ -20,7 +20,7 @@ class TestPipelineIntegration:
     @pytest.mark.integration
     def test_easy_access_interface(self, sample_transaction_data):
         """Test the easy access interface"""
-    with patch("backend.data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
+        with patch("backend.data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
             # Mock the pipeline methods
             mock_pipeline.return_value.get_dataset.return_value = (
                 sample_transaction_data

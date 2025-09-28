@@ -17,7 +17,7 @@ class TestEndToEnd:
         self, sample_transaction_data, sample_invoice_data
     ):
         """Test complete fraud detection workflow"""
-        with patch("data_pipeline.api.easy_access.EasyDataAccess") as mock_easy_access:
+        with patch("backend.data_pipeline.api.easy_access.EasyDataAccess") as mock_easy_access:
             # Setup mocks
             easy_access = mock_easy_access.return_value
             easy_access.get_training_data.return_value = sample_transaction_data
@@ -64,7 +64,7 @@ class TestEndToEnd:
 
             # 3. Create TensorFlow dataset (mocked)
             with patch(
-                "data_pipeline.integrations.ml_frameworks.TensorFlowDataPipeline"
+                "backend.data_pipeline.integrations.ml_frameworks.TensorFlowDataPipeline"
             ) as mock_tf:
                 tf_pipeline = mock_tf.return_value
                 tf_pipeline.create_image_dataset.return_value = Mock()
@@ -76,9 +76,9 @@ class TestEndToEnd:
     @pytest.mark.integration
     def test_monitoring_workflow(self):
         """Test monitoring and alerting workflow"""
-    from backend.data_pipeline.monitoring.data_monitor import DataMonitor
+        from backend.data_pipeline.monitoring.data_monitor import DataMonitor
 
-        with patch("data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
+        with patch("backend.data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
             monitor = DataMonitor(mock_pipeline.return_value)
 
             # Create sample data with quality issues
