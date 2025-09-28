@@ -160,7 +160,29 @@ class TransactionAnomalyTrainer:
             raise RuntimeError("Training from BigQuery is disabled by default. Set RUN_TRAINING=1 to proceed.")
 
         # Load data
-        X, y = self.load_from_bigquery(query=query, table=table, project=project, dataset=dataset, feature_columns=feature_columns, label_column=label_column)
+        X_raw, y_raw = self.load_from_bigquery(query=query, table=table, project=project, dataset=dataset, feature_columns=feature_columns, label_column=label_column)
+
+        # Optional feature transform hook (import feature_utils lazily to avoid heavy deps)
+        feature_transform = None
+        try:
+            from backend.ml.feature_utils import rows_to_feature_matrix
+            # If X_raw came back as numpy arrays of rows, try to convert to dict rows
+            rows_for_transform = None
+            try:
+                # X_raw may be a numpy array of dict-like objects or 2D numeric array
+                import numpy as _np  # type: ignore
+                if hasattr(X_raw, "dtype") and X_raw.dtype == object:
+                    rows_for_transform = [dict(r) for r in X_raw]
+            except Exception:
+                rows_for_transform = None
+
+            if rows_for_transform:
+                X, y = rows_to_feature_matrix(rows_for_transform, feature_columns=feature_columns, label_column=label_column)
+            else:
+                # Assume X_raw is already numeric 2D
+                X, y = X_raw, y_raw
+        except Exception:
+            X, y = X_raw, y_raw
 
         # Optional Optuna tuning (thin wrapper). If optuna not available this will raise.
         if optuna_search and n_trials > 0:
@@ -207,7 +229,33 @@ class TransactionAnomalyTrainer:
             run_optuna_study(objective, n_trials=n_trials, trial_log_path=os.path.join(save_dir, "optuna_trials.jsonl"))
 
         # Finally, run full training & evaluation
-        return self.train_and_evaluate(X, y, save_dir=save_dir)
+        res = self.train_and_evaluate(X, y, save_dir=save_dir)
+
+        # Write a simple manifest.json with artifact locations and dataset fingerprint
+        try:
+            from backend.ml.manifest import write_manifest
+
+            manifest = {
+                "model_path": res.get("model_path"),
+                "scaler_path": res.get("scaler_path"),
+                "metadata_path": res.get("metadata_path"),
+            }
+            # Attempt to read dataset fingerprint from metadata
+            try:
+                import json as _json
+                if res.get("metadata_path"):
+                    with open(res["metadata_path"], "r") as fh:
+                        md = _json.load(fh)
+                        manifest["dataset_fingerprint"] = md.get("dataset_fingerprint")
+                        manifest["metrics"] = md.get("metrics")
+            except Exception:
+                pass
+
+            write_manifest(os.path.join(save_dir, "manifest.json"), manifest)
+        except Exception:
+            pass
+
+        return res
 
     def split_train_test(self, X, y, test_size: float = 0.2, random_state: int | None = None):
         """Split dataset into train/test. Uses sklearn if available, otherwise falls back to a simple numpy-based shuffle.
