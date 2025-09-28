@@ -1,4 +1,4 @@
-# .github/workflows/main_agentzero.yml - Fixed for Azure Static Web App
+# .github/workflows/main_agentzero.yml - Simplified static deployment
 name: Build and deploy React app to Azure Web App - AgentZero
 
 on:
@@ -24,14 +24,14 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
           
-      # Install dependencies with error handling
+      # Install dependencies
       - name: Install dependencies
         run: |
           cd frontend
           npm cache clean --force
           npm ci --legacy-peer-deps || npm install --legacy-peer-deps
           
-      # Build React app with proper environment
+      # Build React app
       - name: Build React frontend
         env:
           CI: false
@@ -41,18 +41,25 @@ jobs:
           cd frontend
           npm run build
           
-      # Verify build output
-      - name: Verify build
+      # Copy web.config to build directory
+      - name: Prepare for static deployment
         run: |
           cd frontend
+          # Copy the updated web.config to the build directory
+          cp web.config build/
+          
+          # Verify build contents
+          echo "Build directory contents:"
           ls -la build/
-          echo "Build completed successfully"
+          echo "Checking for required files:"
+          ls -la build/index.html || echo "ERROR: index.html missing!"
+          ls -la build/web.config || echo "ERROR: web.config missing!"
         
       # Upload the build directory directly
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
-          name: react-build
+          name: react-static-app
           path: frontend/build/
 
   deploy:
@@ -66,17 +73,17 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: react-build
-          path: ./build
+          name: react-static-app
       
-      # Verify downloaded files
-      - name: Verify deployment files
+      # Verify deployment structure
+      - name: Verify static files
         run: |
-          echo "Contents of deployment directory:"
-          ls -la ./build/
-          echo "Checking for index.html:"
-          ls -la ./build/index.html || echo "index.html not found!"
-      
+          echo "Static files to deploy:"
+          ls -la
+          echo "Checking critical files:"
+          ls -la index.html || echo "ERROR: index.html missing!"
+          ls -la web.config || echo "ERROR: web.config missing!"
+          
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -84,11 +91,10 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7DE0416DFB4B4CB88EDDCA0CC26BC123 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AD05817C00C745649FDAAE35BB36A645 }}
 
-      # Deploy static files to Azure
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'AgentZero'
           slot-name: 'Production'
-          package: './build'
+          package: '.'

@@ -24,23 +24,13 @@ app.add_middleware(
 async def health_check():
     return {"status": "healthy", "message": "Backend is running"}
 
-<<<<<<< Updated upstream
 @app.get("/api/health")
 async def api_health_check():
     return {"status": "healthy", "message": "Backend API is running"}
-=======
->>>>>>> Stashed changes
 
 @app.get("/api/message")
 async def get_message():
     return {"message": "Hello from ShellHacks backend!", "status": "success"}
-
-
-
-# Add your other API endpoints here...
-# @app.post("/api/invoices/upload")
-# @app.get("/api/invoices")
-# etc.
 
 # Root endpoint (simple API response)
 @app.get("/")
