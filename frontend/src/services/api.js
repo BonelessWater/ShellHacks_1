@@ -109,6 +109,72 @@ export const apiService = {
     } catch (error) {
       throw new Error(`Failed to update agent config: ${error.message}`);
     }
+  },
+
+  // File upload functionality
+  uploadFile: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await api.post('/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 60000, // 60 seconds for file uploads
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(`File upload failed: ${error.message}`);
+    }
+  },
+
+  uploadMultipleFiles: async (files) => {
+    try {
+      const formData = new FormData();
+      files.forEach((file, index) => {
+        formData.append(`files`, file);
+      });
+
+      const response = await api.post('/api/upload/multiple', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 120000, // 2 minutes for multiple files
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Multiple file upload failed: ${error.message}`);
+    }
+  },
+
+  // Invoice analysis functionality
+  analyzeInvoice: async (invoiceData) => {
+    try {
+      const response = await api.post('/api/invoices/analyze', invoiceData);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Invoice analysis failed: ${error.message}`);
+    }
+  },
+
+  getInvoiceAnalysis: async (invoiceId) => {
+    try {
+      const response = await api.get(`/api/invoices/${invoiceId}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to get invoice analysis: ${error.message}`);
+    }
+  },
+
+  // Get uploaded files
+  getUploadedFiles: async () => {
+    try {
+      const response = await api.get('/api/uploads');
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to get uploaded files: ${error.message}`);
+    }
   }
 };
 
