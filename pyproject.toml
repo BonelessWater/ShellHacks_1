@@ -1,28 +1,96 @@
 [tool.poetry]
-name = "shellhacks"
+name = "fraud-detection-pipeline"
 version = "0.1.0"
-description = ""
-# The fix is here: comma-separated strings in the list
-authors = ["BonelessWater <domdd305@gmail.com>", "IlanDanial <ilan_danial@outlook.com>"]
+description = "Comprehensive fraud detection and document forgery ML pipeline"
+authors = ["Your Team <team@example.com>"]
 readme = "README.md"
+packages = [{include = "data_pipeline"}, {include = "backend"}]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.14"
-google-adk = ">=1.14.1,<2.0.0"
+python = "^3.9"
 
-# This section makes your project runnable with 'poetry run run-agent'
-fastapi = "^0.117.1"
-uvicorn = "^0.37.0"
-pandas = "^2.3.2"
-openpyxl = "^3.1.5"
-google = "^3.0.0"
-dspy = "^3.0.3"
-google-generativeai = "^0.8.5"
-dspy-ai = "^3.0.3"
-pydantic = "^2.11.9"
-httpx = "^0.28.1"
-google-cloud-bigquery = "^3.38.0"
-pyarrow = "^21.0.0"
-python-dotenv = "^1.1.1"
-[tool.poetry.scripts]
-run-agent = "shellhacks.main:start"
+schedule = "^1.1.0" 
+
+# Google Cloud
+google-cloud-bigquery = "^3.13.0"
+google-cloud-bigquery-storage = "^2.22.0"
+google-cloud-storage = "^2.10.0"
+google-cloud-pubsub = "^2.18.0"
+google-cloud-aiplatform = "^1.38.0"
+
+# Data Processing
+pandas = "^2.1.0"
+numpy = "^1.24.0"
+pyarrow = ">=14.0.0"
+db-dtypes = "^1.1.0"
+pandas-gbq = "^0.19.0"
+
+# ML Frameworks
+torch = "^2.1.0"
+torchvision = "^0.16.0"
+scikit-learn = "^1.3.0"
+xgboost = "^2.0.0"
+
+# Image Processing
+pillow = "^10.1.0"
+opencv-python = "^4.8.0"
+
+# Feature Engineering
+scipy = "^1.11.0"
+statsmodels = "^0.14.0"
+
+# API and Web
+fastapi = "^0.104.0"
+uvicorn = {extras = ["standard"], version = "^0.24.0"}
+httpx = "^0.25.0"
+pydantic = "^2.5.0"
+
+# Monitoring and Logging
+prometheus-client = "^0.19.0"
+structlog = "^23.2.0"
+
+# Testing
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.0"
+pytest-cov = "^4.1.0"
+pytest-mock = "^3.12.0"
+faker = "^20.0.0"
+pytest-benchmark = "^4.0.0"
+
+# Development Tools
+black = "^23.11.0"
+isort = "^5.12.0"
+flake8 = "^6.1.0"
+mypy = "^1.7.0"
+pre-commit = "^3.5.0"
+
+# Documentation
+mkdocs = "^1.5.0"
+mkdocs-material = "^9.4.0"
+
+# Additional ML Tools
+dspy-ai = "^2.4.0"
+openai = "^1.3.0"
+anthropic = "^0.7.0"
+cohere = "^4.37.0"
+langchain = "^0.0.340"
+
+# Utilities
+python-dotenv = "^1.0.0"
+pyyaml = "^6.0.1"
+tqdm = "^4.66.0"
+coloredlogs = "^15.0.1"
+hashids = "^1.3.1"
+
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.0.0"
+ipython = "^8.17.0"
+notebook = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.flake8]
+max-line-length = 100
+extend-ignore = "E203,E501"
