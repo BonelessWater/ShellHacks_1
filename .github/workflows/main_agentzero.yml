@@ -63,13 +63,15 @@ jobs:
           mkdir -p deploy/api
 
           # Frontend: production bits only
-          cp frontend/package.json frontend/package-lock.json deploy/
-          cp frontend/server.js deploy/
+          cp package.json package-lock.json deploy/
+          cp server.js deploy/
           cp -r frontend/build deploy/build
 
           # Backend: Python files + requirements (no tests, no __pycache__)
-          if [ -f backend/requirements.txt ]; then
-            cp backend/requirements.txt deploy/api/
+          if [ -f requirements.txt ]; then
+            cp requirements.txt deploy/api/requirements.txt
+          elif [ -f backend/requirements.txt ]; then
+            cp backend/requirements.txt deploy/api/requirements.txt
           fi
 
           # prefer main.py, fallback to any .py
