@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: 'AgentZero'  # Single web app for both frontend and backend
+  AZURE_WEBAPP_NAME: 'shellhacks-backend'  # Single web app for both frontend and backend
   NODE_VERSION: '22.x'
   PYTHON_VERSION: '3.11'
 
@@ -56,13 +56,23 @@ jobs:
       run: |
         mkdir -p deploy
         
-        # Copy backend Python files
+        # Copy backend Python files (only Python files to avoid Node.js detection)
         cp requirements.txt deploy/
         cp -r backend/* deploy/
         
         # Copy built frontend files to static directory
         mkdir -p deploy/static
         cp -r frontend/build/* deploy/static/
+        
+        # Create .deployment file to force Python platform detection
+        cat > deploy/.deployment << 'EOF'
+        [config]
+        SCM_DO_BUILD_DURING_DEPLOYMENT=true
+        PYTHON_VERSION=3.11
+        EOF
+        
+        # Remove any package.json files that might confuse Oryx
+        find deploy -name "package*.json" -delete || true
         
         # Create startup script for Azure App Service
         cat > deploy/startup.sh << 'EOF'
@@ -91,3 +101,6 @@ jobs:
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         package: deploy/
+      env:
+        # Force Python platform detection
+        ORYX_BUILD_FLAGS: "--platform python --platform-version 3.11"
