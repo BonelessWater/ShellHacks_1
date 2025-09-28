@@ -41,3 +41,215 @@
 2025-09-28 00:15:35,489 [INFO] main_detector: Extracted data: vendor=QuickFix Solutions LLC, amounts=30
 2025-09-28 00:15:35,490 [INFO] main_detector: Selected 7 agents: amount_validator, tax_calculator, date_analyzer, vendor_authenticator, format_inspector, line_item_validator, payment_terms_checker
 2025-09-28 00:15:51,480 [INFO] main_detector: Analysis completed in 15.99s using 7 agents
+2025-09-28 00:46:50,504 [WARNING] main_detector: ⚠️  No GOOGLE_API_KEY found in environment
+2025-09-28 00:46:50,504 [WARNING] main_detector: ⚠️  Google GenerativeAI not available or no API key
+2025-09-28 00:46:50,505 [INFO] main_detector: 📋 Registered agent: amount_validator
+2025-09-28 00:46:50,505 [INFO] main_detector: 📋 Registered agent: vendor_validator
+2025-09-28 00:46:50,505 [INFO] main_detector: 📋 Registered agent: date_analyzer
+2025-09-28 00:46:50,505 [INFO] main_detector: 📋 Registered agent: payment_analyzer
+2025-09-28 00:46:50,505 [INFO] main_detector: 📋 Registered 4 specialized fraud detection agents
+2025-09-28 00:46:50,505 [INFO] main_detector: 🔍 Starting enhanced parallel invoice fraud analysis...
+2025-09-28 00:46:50,506 [INFO] main_detector: 🤔 Core LLM determining which agents to summon...
+2025-09-28 00:46:50,506 [INFO] main_detector: 📋 Summoning 4 specialized agents: amount_validator, vendor_validator, date_analyzer, payment_analyzer
+2025-09-28 00:46:50,506 [INFO] main_detector: 🚀 Executing 4 LLM tasks in parallel
+2025-09-28 00:46:50,506 [INFO] main_detector: 🤖 Agent amount_validator analyzing task amount_validator_analysis
+2025-09-28 00:46:50,506 [INFO] main_detector: 🤖 Agent vendor_validator analyzing task vendor_validator_analysis
+2025-09-28 00:46:50,506 [INFO] main_detector: 🤖 Agent date_analyzer analyzing task date_analyzer_analysis
+2025-09-28 00:46:50,506 [INFO] main_detector: 🤖 Agent payment_analyzer analyzing task payment_analyzer_analysis
+2025-09-28 00:46:51,009 [WARNING] main_detector: Could not parse JSON from amount_validator_1759034810506
+2025-09-28 00:46:51,009 [INFO] main_detector: ✅ Agent amount_validator completed in 0.50s
+2025-09-28 00:46:51,010 [WARNING] main_detector: Could not parse JSON from date_analyzer_1759034810506
+2025-09-28 00:46:51,010 [INFO] main_detector: ✅ Agent date_analyzer completed in 0.50s
+2025-09-28 00:46:51,010 [WARNING] main_detector: Could not parse JSON from vendor_validator_1759034810506
+2025-09-28 00:46:51,010 [INFO] main_detector: ✅ Agent vendor_validator completed in 0.50s
+2025-09-28 00:46:51,011 [WARNING] main_detector: Could not parse JSON from payment_analyzer_1759034810506
+2025-09-28 00:46:51,011 [INFO] main_detector: ✅ Agent payment_analyzer completed in 0.51s
+2025-09-28 00:46:51,011 [INFO] main_detector: ✅ Parallel execution completed in 0.51s (4/4 successful)
+2025-09-28 00:46:51,011 [INFO] main_detector: ✅ Analysis completed in 0.51s
+2025-09-28 00:46:51,011 [INFO] main_detector: 📋 Registered agent: urgency_detector
+2025-09-28 00:46:51,012 [INFO] main_detector: 🚀 Executing 1 LLM tasks in parallel
+2025-09-28 00:46:51,012 [INFO] main_detector: 🤖 Agent urgency_detector analyzing task urgency_analysis
+2025-09-28 00:46:51,524 [WARNING] main_detector: Could not parse JSON from urgency_detector_1759034811012
+2025-09-28 00:46:51,524 [INFO] main_detector: ✅ Agent urgency_detector completed in 0.51s
+2025-09-28 00:46:51,524 [INFO] main_detector: ✅ Parallel execution completed in 0.51s (1/1 successful)
+2025-09-28 00:46:51,524 [INFO] main_detector: 🔍 Starting enhanced parallel invoice fraud analysis...
+2025-09-28 00:46:51,525 [INFO] main_detector: 🤔 Core LLM determining which agents to summon...
+2025-09-28 00:46:51,525 [INFO] main_detector: 📋 Summoning 5 specialized agents: amount_validator, vendor_validator, date_analyzer, payment_analyzer, urgency_detector
+2025-09-28 00:46:51,525 [INFO] main_detector: 🚀 Executing 5 LLM tasks in parallel
+2025-09-28 00:46:51,525 [INFO] main_detector: 🤖 Agent amount_validator analyzing task amount_validator_analysis
+2025-09-28 00:46:51,525 [INFO] main_detector: 🤖 Agent vendor_validator analyzing task vendor_validator_analysis
+2025-09-28 00:46:51,525 [INFO] main_detector: 🤖 Agent date_analyzer analyzing task date_analyzer_analysis
+2025-09-28 00:46:51,526 [INFO] main_detector: 🤖 Agent payment_analyzer analyzing task payment_analyzer_analysis
+2025-09-28 00:46:51,526 [INFO] main_detector: 🤖 Agent urgency_detector analyzing task urgency_detector_analysis
+2025-09-28 00:46:52,024 [WARNING] main_detector: Could not parse JSON from payment_analyzer_1759034811525
+2025-09-28 00:46:52,024 [INFO] main_detector: ✅ Agent payment_analyzer completed in 0.50s
+2025-09-28 00:46:52,024 [WARNING] main_detector: Could not parse JSON from urgency_detector_1759034811525
+2025-09-28 00:46:52,025 [INFO] main_detector: ✅ Agent urgency_detector completed in 0.50s
+2025-09-28 00:46:52,025 [WARNING] main_detector: Could not parse JSON from date_analyzer_1759034811525
+2025-09-28 00:46:52,025 [INFO] main_detector: ✅ Agent date_analyzer completed in 0.50s
+2025-09-28 00:46:52,025 [WARNING] main_detector: Could not parse JSON from vendor_validator_1759034811525
+2025-09-28 00:46:52,025 [INFO] main_detector: ✅ Agent vendor_validator completed in 0.50s
+2025-09-28 00:46:52,025 [WARNING] main_detector: Could not parse JSON from amount_validator_1759034811525
+2025-09-28 00:46:52,025 [INFO] main_detector: ✅ Agent amount_validator completed in 0.50s
+2025-09-28 00:46:52,026 [INFO] main_detector: ✅ Parallel execution completed in 0.50s (5/5 successful)
+2025-09-28 00:46:52,026 [INFO] main_detector: ✅ Analysis completed in 0.50s
+2025-09-28 00:48:10,491 [INFO] main_detector: 📋 Registered agent: amount_validator
+2025-09-28 00:48:10,491 [INFO] main_detector: 📋 Registered agent: vendor_validator
+2025-09-28 00:48:10,491 [INFO] main_detector: 📋 Registered agent: date_analyzer
+2025-09-28 00:48:10,492 [INFO] main_detector: 📋 Registered agent: payment_analyzer
+2025-09-28 00:48:10,492 [INFO] main_detector: 📋 Registered 4 specialized fraud detection agents
+2025-09-28 00:48:10,492 [INFO] main_detector: 🔍 Starting enhanced parallel invoice fraud analysis...
+2025-09-28 00:48:10,492 [INFO] main_detector: 🤔 Core LLM determining which agents to summon...
+2025-09-28 00:48:19,003 [INFO] main_detector: 🎯 Core LLM selected agents: amount_validator, vendor_validator, payment_analyzer
+2025-09-28 00:48:19,003 [INFO] main_detector: 📋 Summoning 3 specialized agents: amount_validator, vendor_validator, payment_analyzer
+2025-09-28 00:48:19,003 [INFO] main_detector: 🚀 Executing 3 LLM tasks in parallel
+2025-09-28 00:48:19,003 [INFO] main_detector: 🤖 Agent amount_validator analyzing task amount_validator_analysis
+2025-09-28 00:48:30,280 [INFO] main_detector: ✅ Agent amount_validator completed in 11.28s
+2025-09-28 00:48:30,280 [INFO] main_detector: 🤖 Agent vendor_validator analyzing task vendor_validator_analysis
+2025-09-28 00:48:40,401 [INFO] main_detector: ✅ Agent vendor_validator completed in 10.12s
+2025-09-28 00:48:40,402 [INFO] main_detector: 🤖 Agent payment_analyzer analyzing task payment_analyzer_analysis
+2025-09-28 00:48:51,518 [INFO] main_detector: ✅ Agent payment_analyzer completed in 11.12s
+2025-09-28 00:48:51,518 [INFO] main_detector: ✅ Parallel execution completed in 32.51s (0/3 successful)
+2025-09-28 00:48:51,518 [INFO] main_detector: ✅ Analysis completed in 41.03s
+2025-09-28 00:56:51,220 [INFO] main_detector: 📋 Registered agent: amount_validator
+2025-09-28 00:56:51,220 [INFO] main_detector: 📋 Registered agent: vendor_validator
+2025-09-28 00:56:51,220 [INFO] main_detector: 📋 Registered agent: date_analyzer
+2025-09-28 00:56:51,222 [INFO] main_detector: 📋 Registered agent: payment_analyzer
+2025-09-28 00:56:51,222 [INFO] main_detector: 📋 Registered 4 specialized fraud detection agents
+2025-09-28 00:56:51,222 [INFO] main_detector: 🔍 Starting enhanced parallel invoice fraud analysis...
+2025-09-28 00:56:51,222 [INFO] main_detector: 🤔 Core LLM determining which agents to summon...
+2025-09-28 00:57:00,522 [INFO] main_detector: 🎯 Core LLM selected agents: amount_validator, vendor_validator, payment_analyzer
+2025-09-28 00:57:00,522 [INFO] main_detector: 📋 Summoning 3 specialized agents: amount_validator, vendor_validator, payment_analyzer
+2025-09-28 00:57:00,522 [INFO] main_detector: 🚀 Executing 3 LLM tasks in parallel
+2025-09-28 00:57:00,523 [INFO] main_detector: 🔄 Starting 3 agents concurrently...
+2025-09-28 00:57:00,523 [INFO] main_detector: ⏳ Waiting for all agents to complete...
+2025-09-28 00:57:00,524 [INFO] main_detector: 🤖 Agent amount_validator analyzing task amount_validator_analysis
+2025-09-28 00:57:12,299 [INFO] main_detector: ✅ Agent amount_validator completed in 11.78s
+2025-09-28 00:57:12,299 [INFO] main_detector: 🤖 Agent vendor_validator analyzing task vendor_validator_analysis
+2025-09-28 00:57:22,952 [INFO] main_detector: ✅ Agent vendor_validator completed in 10.65s
+2025-09-28 00:57:22,952 [INFO] main_detector: 🤖 Agent payment_analyzer analyzing task payment_analyzer_analysis
+2025-09-28 00:57:34,982 [INFO] main_detector: ✅ Agent payment_analyzer completed in 12.03s
+2025-09-28 00:57:34,984 [INFO] main_detector: ✅ Parallel execution completed in 34.46s (0/3 successful)
+2025-09-28 00:57:34,984 [INFO] main_detector: ✅ Analysis completed in 43.76s
+2025-09-28 00:57:34,984 [INFO] main_detector: 📋 Registered agent: urgency_detector
+2025-09-28 00:57:34,984 [INFO] main_detector: 🚀 Executing 1 LLM tasks in parallel
+2025-09-28 00:57:34,984 [INFO] main_detector: 🔄 Starting 1 agents concurrently...
+2025-09-28 00:57:34,986 [INFO] main_detector: ⏳ Waiting for all agents to complete...
+2025-09-28 00:57:34,986 [INFO] main_detector: 🤖 Agent urgency_detector analyzing task urgency_analysis
+2025-09-28 00:57:47,713 [INFO] main_detector: ✅ Agent urgency_detector completed in 12.73s
+2025-09-28 00:57:47,715 [INFO] main_detector: ✅ Parallel execution completed in 12.73s (0/1 successful)
+2025-09-28 00:57:47,715 [INFO] main_detector: 🔍 Starting enhanced parallel invoice fraud analysis...
+2025-09-28 00:57:47,716 [INFO] main_detector: 🤔 Core LLM determining which agents to summon...
+2025-09-28 00:57:56,009 [INFO] main_detector: 🎯 Core LLM selected agents: amount_validator, vendor_validator, payment_analyzer
+2025-09-28 00:57:56,009 [INFO] main_detector: 📋 Summoning 3 specialized agents: amount_validator, vendor_validator, payment_analyzer
+2025-09-28 00:57:56,010 [INFO] main_detector: 🚀 Executing 3 LLM tasks in parallel
+2025-09-28 00:57:56,010 [INFO] main_detector: 🔄 Starting 3 agents concurrently...
+2025-09-28 00:57:56,010 [INFO] main_detector: ⏳ Waiting for all agents to complete...
+2025-09-28 00:57:56,011 [INFO] main_detector: 🤖 Agent amount_validator analyzing task amount_validator_analysis
+2025-09-28 00:58:08,618 [INFO] main_detector: ✅ Agent amount_validator completed in 12.61s
+2025-09-28 00:58:08,620 [INFO] main_detector: 🤖 Agent vendor_validator analyzing task vendor_validator_analysis
+2025-09-28 00:58:19,878 [INFO] main_detector: ✅ Agent vendor_validator completed in 11.26s
+2025-09-28 00:58:19,879 [INFO] main_detector: 🤖 Agent payment_analyzer analyzing task payment_analyzer_analysis
+2025-09-28 00:58:31,195 [INFO] main_detector: ✅ Agent payment_analyzer completed in 11.32s
+2025-09-28 00:58:31,196 [INFO] main_detector: ✅ Parallel execution completed in 35.19s (0/3 successful)
+2025-09-28 00:58:31,196 [INFO] main_detector: ✅ Analysis completed in 43.48s
+2025-09-28 00:59:15,447 [INFO] main_detector: 📋 Registered agent: amount_validator
+2025-09-28 00:59:15,447 [INFO] main_detector: 📋 Registered agent: vendor_validator
+2025-09-28 00:59:15,447 [INFO] main_detector: 📋 Registered agent: date_analyzer
+2025-09-28 00:59:15,447 [INFO] main_detector: 📋 Registered agent: payment_analyzer
+2025-09-28 00:59:15,447 [INFO] main_detector: 📋 Registered 4 specialized fraud detection agents
+2025-09-28 00:59:15,447 [INFO] main_detector: 🔍 Starting enhanced parallel invoice fraud analysis...
+2025-09-28 00:59:15,454 [INFO] main_detector: 🤔 Core LLM determining which agents to summon...
+2025-09-28 00:59:23,347 [INFO] main_detector: 🎯 Core LLM selected agents: vendor_validator, amount_validator, payment_analyzer
+2025-09-28 00:59:23,347 [INFO] main_detector: 📋 Summoning 3 specialized agents: vendor_validator, amount_validator, payment_analyzer
+2025-09-28 00:59:23,347 [INFO] main_detector: 🚀 Executing 3 LLM tasks in parallel
+2025-09-28 00:59:23,347 [INFO] main_detector: 🔄 Starting 3 agents concurrently...
+2025-09-28 00:59:23,349 [INFO] main_detector: ⏳ Waiting for all agents to complete...
+2025-09-28 00:59:23,349 [INFO] main_detector: 🤖 Agent vendor_validator analyzing task vendor_validator_analysis
+2025-09-28 00:59:35,765 [INFO] main_detector: ✅ Agent vendor_validator completed in 12.42s
+2025-09-28 00:59:35,766 [INFO] main_detector: 🤖 Agent amount_validator analyzing task amount_validator_analysis
+2025-09-28 00:59:48,364 [INFO] main_detector: ✅ Agent amount_validator completed in 12.60s
+2025-09-28 00:59:48,364 [INFO] main_detector: 🤖 Agent payment_analyzer analyzing task payment_analyzer_analysis
+2025-09-28 01:00:01,015 [INFO] main_detector: ✅ Agent payment_analyzer completed in 12.65s
+2025-09-28 01:00:01,016 [INFO] main_detector: ✅ Parallel execution completed in 37.67s (0/3 successful)
+2025-09-28 01:00:01,016 [INFO] main_detector: ✅ Analysis completed in 45.57s
+2025-09-28 01:00:01,017 [INFO] main_detector: 📋 Registered agent: urgency_detector
+2025-09-28 01:00:01,017 [INFO] main_detector: 🚀 Executing 1 LLM tasks in parallel
+2025-09-28 01:00:01,017 [INFO] main_detector: 🔄 Starting 1 agents concurrently...
+2025-09-28 01:00:01,018 [INFO] main_detector: ⏳ Waiting for all agents to complete...
+2025-09-28 01:00:01,018 [INFO] main_detector: 🤖 Agent urgency_detector analyzing task urgency_analysis
+2025-09-28 01:00:12,369 [INFO] main_detector: ✅ Agent urgency_detector completed in 11.35s
+2025-09-28 01:00:12,370 [INFO] main_detector: ✅ Parallel execution completed in 11.35s (0/1 successful)
+2025-09-28 01:00:12,370 [INFO] main_detector: 🔍 Starting enhanced parallel invoice fraud analysis...
+2025-09-28 01:00:12,370 [INFO] main_detector: 🤔 Core LLM determining which agents to summon...
+2025-09-28 01:00:22,402 [INFO] main_detector: 🎯 Core LLM selected agents: vendor_validator, amount_validator, payment_analyzer, date_analyzer
+2025-09-28 01:00:22,402 [INFO] main_detector: 📋 Summoning 4 specialized agents: vendor_validator, amount_validator, payment_analyzer, date_analyzer
+2025-09-28 01:00:22,402 [INFO] main_detector: 🚀 Executing 4 LLM tasks in parallel
+2025-09-28 01:00:22,402 [INFO] main_detector: 🔄 Starting 4 agents concurrently...
+2025-09-28 01:00:22,402 [INFO] main_detector: ⏳ Waiting for all agents to complete...
+2025-09-28 01:00:22,402 [INFO] main_detector: 🤖 Agent vendor_validator analyzing task vendor_validator_analysis
+2025-09-28 01:00:32,591 [INFO] main_detector: ✅ Agent vendor_validator completed in 10.19s
+2025-09-28 01:00:32,591 [INFO] main_detector: 🤖 Agent amount_validator analyzing task amount_validator_analysis
+2025-09-28 01:00:44,731 [INFO] main_detector: ✅ Agent amount_validator completed in 12.14s
+2025-09-28 01:00:44,744 [INFO] main_detector: 🤖 Agent payment_analyzer analyzing task payment_analyzer_analysis
+2025-09-28 01:00:57,798 [INFO] main_detector: ✅ Agent payment_analyzer completed in 13.05s
+2025-09-28 01:00:57,798 [INFO] main_detector: 🤖 Agent date_analyzer analyzing task date_analyzer_analysis
+2025-09-28 01:01:10,793 [INFO] main_detector: ✅ Agent date_analyzer completed in 12.99s
+2025-09-28 01:01:10,794 [INFO] main_detector: ✅ Parallel execution completed in 48.39s (0/4 successful)
+2025-09-28 01:01:10,794 [INFO] main_detector: ✅ Analysis completed in 58.42s
+2025-09-28 01:06:37,720 [INFO] main_detector: 📋 Registered agent: amount_validator
+2025-09-28 01:06:37,721 [INFO] main_detector: 📋 Registered agent: vendor_validator
+2025-09-28 01:06:37,721 [INFO] main_detector: 📋 Registered agent: date_analyzer
+2025-09-28 01:06:37,721 [INFO] main_detector: 📋 Registered agent: payment_analyzer
+2025-09-28 01:06:37,721 [INFO] main_detector: 📋 Registered 4 specialized fraud detection agents
+2025-09-28 01:06:37,722 [INFO] main_detector: 🔍 Starting enhanced parallel invoice fraud analysis...
+2025-09-28 01:06:37,722 [INFO] main_detector: 🤔 Core LLM determining which agents to summon...
+2025-09-28 01:06:48,596 [INFO] main_detector: 🎯 Core LLM selected agents: amount_validator, vendor_validator, payment_analyzer
+2025-09-28 01:06:48,596 [INFO] main_detector: 📋 Summoning 3 specialized agents: amount_validator, vendor_validator, payment_analyzer
+2025-09-28 01:06:48,596 [INFO] main_detector: 🚀 Executing 3 LLM tasks in parallel
+2025-09-28 01:06:48,596 [INFO] main_detector: 🔄 Starting 3 agents concurrently...
+2025-09-28 01:06:48,601 [INFO] main_detector: 🚀 Started agent amount_validator for task amount_validator_analysis
+2025-09-28 01:06:48,601 [INFO] main_detector: 🚀 Started agent vendor_validator for task vendor_validator_analysis
+2025-09-28 01:06:48,601 [INFO] main_detector: 🚀 Started agent payment_analyzer for task payment_analyzer_analysis
+2025-09-28 01:06:48,601 [INFO] main_detector: ⏳ Waiting for all agents to complete...
+2025-09-28 01:06:48,601 [INFO] main_detector: 🤖 Agent amount_validator starting task amount_validator_analysis
+2025-09-28 01:07:00,690 [ERROR] main_detector: ❌ LLM API call failed for amount_validator: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none were returned. The candidate's [finish_reason](https://ai.google.dev/api/generate-content#finishreason) is 2.
+2025-09-28 01:07:00,693 [INFO] main_detector: ✅ Agent amount_validator completed in 12.09s
+2025-09-28 01:07:00,693 [INFO] main_detector: 🤖 Agent vendor_validator starting task vendor_validator_analysis
+2025-09-28 01:07:11,183 [ERROR] main_detector: ❌ LLM API call failed for vendor_validator: Unknown field for UsageMetadata: get
+2025-09-28 01:07:11,183 [INFO] main_detector: ✅ Agent vendor_validator completed in 10.49s
+2025-09-28 01:07:11,183 [INFO] main_detector: 🤖 Agent payment_analyzer starting task payment_analyzer_analysis
+2025-09-28 01:07:23,948 [ERROR] main_detector: ❌ LLM API call failed for payment_analyzer: Unknown field for UsageMetadata: get
+2025-09-28 01:07:23,948 [INFO] main_detector: ✅ Agent payment_analyzer completed in 12.77s
+2025-09-28 01:07:23,948 [INFO] main_detector: ✅ Parallel execution completed in 35.35s (3/3 successful)
+2025-09-28 01:07:23,950 [INFO] main_detector: ✅ Analysis completed in 46.23s
+2025-09-28 01:07:23,950 [INFO] main_detector: 📋 Registered agent: urgency_detector
+2025-09-28 01:07:23,950 [INFO] main_detector: 🚀 Executing 1 LLM tasks in parallel
+2025-09-28 01:07:23,950 [INFO] main_detector: 🔄 Starting 1 agents concurrently...
+2025-09-28 01:07:23,952 [INFO] main_detector: 🚀 Started agent urgency_detector for task urgency_analysis
+2025-09-28 01:07:23,952 [INFO] main_detector: ⏳ Waiting for all agents to complete...
+2025-09-28 01:07:23,952 [INFO] main_detector: 🤖 Agent urgency_detector starting task urgency_analysis
+2025-09-28 01:07:35,881 [ERROR] main_detector: ❌ LLM API call failed for urgency_detector: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none were returned. The candidate's [finish_reason](https://ai.google.dev/api/generate-content#finishreason) is 2.
+2025-09-28 01:07:35,882 [INFO] main_detector: ✅ Agent urgency_detector completed in 11.93s
+2025-09-28 01:07:35,883 [INFO] main_detector: ✅ Parallel execution completed in 11.93s (1/1 successful)
+2025-09-28 01:07:35,883 [INFO] main_detector: 🔍 Starting enhanced parallel invoice fraud analysis...
+2025-09-28 01:07:35,883 [INFO] main_detector: 🤔 Core LLM determining which agents to summon...
+2025-09-28 01:07:43,218 [INFO] main_detector: 🎯 Core LLM selected agents: vendor_validator, amount_validator, payment_analyzer
+2025-09-28 01:07:43,218 [INFO] main_detector: 📋 Summoning 3 specialized agents: vendor_validator, amount_validator, payment_analyzer
+2025-09-28 01:07:43,218 [INFO] main_detector: 🚀 Executing 3 LLM tasks in parallel
+2025-09-28 01:07:43,218 [INFO] main_detector: 🔄 Starting 3 agents concurrently...
+2025-09-28 01:07:43,218 [INFO] main_detector: 🚀 Started agent vendor_validator for task vendor_validator_analysis
+2025-09-28 01:07:43,218 [INFO] main_detector: 🚀 Started agent amount_validator for task amount_validator_analysis
+2025-09-28 01:07:43,218 [INFO] main_detector: 🚀 Started agent payment_analyzer for task payment_analyzer_analysis
+2025-09-28 01:07:43,218 [INFO] main_detector: ⏳ Waiting for all agents to complete...
+2025-09-28 01:07:43,218 [INFO] main_detector: 🤖 Agent vendor_validator starting task vendor_validator_analysis
+2025-09-28 01:07:54,597 [ERROR] main_detector: ❌ LLM API call failed for vendor_validator: Unknown field for UsageMetadata: get
+2025-09-28 01:07:54,597 [INFO] main_detector: ✅ Agent vendor_validator completed in 11.38s
+2025-09-28 01:07:54,597 [INFO] main_detector: 🤖 Agent amount_validator starting task amount_validator_analysis
+2025-09-28 01:08:05,550 [ERROR] main_detector: ❌ LLM API call failed for amount_validator: Unknown field for UsageMetadata: get
+2025-09-28 01:08:05,550 [INFO] main_detector: ✅ Agent amount_validator completed in 10.95s
+2025-09-28 01:08:05,550 [INFO] main_detector: 🤖 Agent payment_analyzer starting task payment_analyzer_analysis
+2025-09-28 01:08:18,429 [ERROR] main_detector: ❌ LLM API call failed for payment_analyzer: Unknown field for UsageMetadata: get
+2025-09-28 01:08:18,429 [INFO] main_detector: ✅ Agent payment_analyzer completed in 12.88s
+2025-09-28 01:08:18,429 [INFO] main_detector: ✅ Parallel execution completed in 35.21s (3/3 successful)
+2025-09-28 01:08:18,429 [INFO] main_detector: ✅ Analysis completed in 42.55s

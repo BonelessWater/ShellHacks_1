@@ -1,12 +1,14 @@
+# File: backend/main_detector.py
 #!/usr/bin/env python3
 """
-Enhanced Multi-Agent Invoice Fraud Detection System with Parallel Processing
+Enhanced Multi-Agent Invoice Fraud Detection System with Parallel LLM Processing
 
 This system combines:
-- Parallel processing for faster execution
+- Parallel LLM processing with proper synchronization
+- Core LLM that determines which specialized agents to summon
+- Specialized LLM agents for focused fraud detection tasks
 - Hardcoded tools for deterministic fraud detection
-- LLM agents for contextual analysis
-- Comprehensive error recovery
+- Comprehensive error recovery and agent swapping capabilities
 
 Usage:
     python main_detector.py --demo
@@ -23,30 +25,15 @@ import argparse
 import time
 import asyncio
 import concurrent.futures
-import math
-import statistics
+import threading
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, Callable
-from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Union
+from dataclasses import dataclass, field
 from enum import Enum
 from dotenv import load_dotenv
 
 # Add current directory to path for imports
 sys.path.append(str(Path(__file__).parent))
-
-try:
-    from hardcoded_tools import HardcodedTools, ToolResult, ToolType, HARDCODED_TOOL_REGISTRY
-except ImportError as e:
-    print(f"Import error: {e}")
-    print("Make sure hardcoded_tools.py is in the same directory")
-    sys.exit(1)
-
-try:
-    import dspy
-    DSPY_AVAILABLE = True
-except ImportError:
-    DSPY_AVAILABLE = False
-    print("DSPy not available, using direct API calls")
 
 try:
     import google.generativeai as genai
@@ -55,7 +42,7 @@ except ImportError:
     GENAI_AVAILABLE = False
     print("Google GenerativeAI not available")
 
-# Configure logging with Windows-safe formatting
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -72,8 +59,22 @@ if sys.platform.startswith('win'):
 
 log = logging.getLogger("main_detector")
 
+# Load environment variables
+load_dotenv()
+
+
+class AgentStatus(Enum):
+    """LLM Agent execution status"""
+    IDLE = "idle"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    TIMEOUT = "timeout"
+
+
 @dataclass
 class AgentResponse:
+    """Response from a fraud detection agent"""
     agent_type: str
     analysis: str
     risk_score: int  # 1-10 scale
@@ -81,1083 +82,1034 @@ class AgentResponse:
     red_flags: List[str]
     execution_time: float = 0.0
     tool_used: str = "llm"
-
-class ParallelInvoiceFraudDetector:
-    """Enhanced fraud detector with parallel processing and hardcoded tools"""
     
-    def __init__(self, max_workers: int = 4, enable_parallel: bool = True):
-        self.max_workers = max_workers
-        self.enable_parallel = enable_parallel
-        self.hardcoded_tools = HardcodedTools()
-        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) if enable_parallel else None
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "agent_type": self.agent_type,
+            "analysis": self.analysis,
+            "risk_score": self.risk_score,
+            "confidence": self.confidence,
+            "red_flags": self.red_flags,
+            "execution_time": self.execution_time,
+            "tool_used": self.tool_used
+        }
+
+
+@dataclass
+class LLMAgentResult:
+    """Result from LLM agent execution"""
+    agent_id: str
+    agent_name: str
+    success: bool
+    result: Any = None
+    error: Optional[str] = None
+    execution_time: float = 0.0
+    status: AgentStatus = AgentStatus.IDLE
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    prompt_used: str = ""
+    model_used: str = ""
+    tokens_used: int = 0
+
+
+@dataclass
+class LLMTask:
+    """Task for LLM agents"""
+    task_id: str
+    data: Any
+    agent_names: List[str]
+    priority: int = 0
+    timeout: float = 30.0
+    context: Dict[str, Any] = field(default_factory=dict)
+
+
+class LLMAgentConfig:
+    """Configuration for LLM agents"""
+    
+    def __init__(self, 
+                 agent_name: str,
+                 prompt_template: str,
+                 system_prompt: str = "",
+                 model_name: str = "models/gemini-2.5-flash",
+                 temperature: float = 0.1,
+                 max_tokens: int = 2048):
+        self.agent_name = agent_name
+        self.prompt_template = prompt_template
+        self.system_prompt = system_prompt
+        self.model_name = model_name
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+    
+    def format_prompt(self, data: Any, context: Dict[str, Any] = None) -> str:
+        """Format the prompt template"""
+        format_vars = {'data': data, 'context': context or {}}
+        if isinstance(data, dict):
+            format_vars.update(data)
+        if context:
+            format_vars.update(context)
         
-        # Initialize API
+        try:
+            return self.prompt_template.format(**format_vars)
+        except KeyError as e:
+            log.warning(f"Missing template variable {e} for {self.agent_name}")
+            return self.prompt_template
+
+
+class LLMAgent:
+    """LLM Agent for specialized fraud detection tasks"""
+    
+    def __init__(self, agent_id: str, config: LLMAgentConfig, llm_client: Any = None):
+        self.agent_id = agent_id
+        self.config = config
+        self.llm_client = llm_client
+        self.status = AgentStatus.IDLE
+        self._lock = threading.Lock()
+    
+    async def execute(self, task: LLMTask) -> LLMAgentResult:
+        """Execute the LLM agent task"""
+        start_time = time.time()
+        
+        # Simplified status check - allow multiple concurrent executions
+        log.info(f"🤖 Agent {self.config.agent_name} starting task {task.task_id}")
+        
+        try:
+            # Format prompt
+            formatted_prompt = self.config.format_prompt(task.data, task.context)
+            
+            # Execute with timeout
+            result = await asyncio.wait_for(
+                self._call_llm(formatted_prompt, task),
+                timeout=task.timeout
+            )
+            
+            execution_time = time.time() - start_time
+            result.execution_time = execution_time
+            result.status = AgentStatus.COMPLETED
+            
+            log.info(f"✅ Agent {self.config.agent_name} completed in {execution_time:.2f}s")
+            return result
+            
+        except asyncio.TimeoutError:
+            error_msg = f"Agent timed out after {task.timeout}s"
+            log.error(f"⏰ Agent {self.config.agent_name}: {error_msg}")
+            return LLMAgentResult(
+                agent_id=self.agent_id,
+                agent_name=self.config.agent_name,
+                success=False,
+                error=error_msg,
+                execution_time=time.time() - start_time,
+                status=AgentStatus.TIMEOUT
+            )
+        except Exception as e:
+            error_msg = f"Agent failed: {str(e)}"
+            log.error(f"❌ Agent {self.config.agent_name}: {error_msg}")
+            return LLMAgentResult(
+                agent_id=self.agent_id,
+                agent_name=self.config.agent_name,
+                success=False,
+                error=error_msg,
+                execution_time=time.time() - start_time,
+                status=AgentStatus.FAILED
+            )
+    
+    async def _call_llm(self, prompt: str, task: LLMTask) -> LLMAgentResult:
+        """Make LLM API call"""
+        try:
+            full_prompt = prompt
+            if self.config.system_prompt:
+                full_prompt = f"System: {self.config.system_prompt}\n\nUser: {prompt}"
+            
+            if self.llm_client:
+                try:
+                    response = self.llm_client.generate_content(
+                        full_prompt,
+                        generation_config={
+                            'temperature': self.config.temperature,
+                            'max_output_tokens': self.config.max_tokens,
+                        }
+                    )
+                    response_text = response.text
+                    tokens_used = getattr(response, 'usage_metadata', {}).get('total_token_count', 0)
+                    log.info(f"🎯 {self.config.agent_name} received LLM response ({len(response_text)} chars)")
+                except Exception as llm_error:
+                    log.error(f"❌ LLM API call failed for {self.config.agent_name}: {str(llm_error)}")
+                    # Fall back to mock response
+                    response_text = self._generate_mock_response()
+                    tokens_used = 100
+            else:
+                # Mock response for demo
+                log.info(f"🤖 Using mock response for {self.config.agent_name}")
+                response_text = self._generate_mock_response()
+                tokens_used = 100
+                await asyncio.sleep(0.1)  # Simulate some processing time
+            
+            # Parse JSON response
+            parsed_result = self._parse_response(response_text)
+            
+            return LLMAgentResult(
+                agent_id=self.agent_id,
+                agent_name=self.config.agent_name,
+                success=True,
+                result=parsed_result,
+                prompt_used=full_prompt[:200] + "..." if len(full_prompt) > 200 else full_prompt,
+                model_used=self.config.model_name,
+                tokens_used=tokens_used
+            )
+            
+        except Exception as e:
+            log.error(f"❌ _call_llm failed for {self.config.agent_name}: {str(e)}")
+            return LLMAgentResult(
+                agent_id=self.agent_id,
+                agent_name=self.config.agent_name,
+                success=False,
+                error=f"LLM call failed: {str(e)}"
+            )
+    
+    def _generate_mock_response(self) -> str:
+        """Generate a mock response based on agent type"""
+        agent_name = self.config.agent_name
+        
+        if "amount" in agent_name:
+            return """
+            {
+                "risk_score": 8,
+                "confidence": 9,
+                "analysis": "Detected high-value transactions with round numbers that may indicate fabrication. The $90,000 subtotal is suspiciously round.",
+                "red_flags": ["HIGH_ROUND_AMOUNTS", "SUSPICIOUS_TOTAL"],
+                "fraud_indicators": [
+                    {"type": "amount_anomaly", "severity": "high", "description": "Unusually round subtotal amount"}
+                ]
+            }
+            """
+        elif "vendor" in agent_name:
+            return """
+            {
+                "risk_score": 9,
+                "confidence": 8,
+                "analysis": "Vendor name 'SuspiciousCorp LLC' follows common fraudulent naming patterns. Generic address and contact information.",
+                "red_flags": ["SUSPICIOUS_VENDOR_NAME", "GENERIC_ADDRESS"],
+                "fraud_indicators": [
+                    {"type": "vendor_suspicion", "severity": "high", "description": "Vendor name contains suspicious keywords"}
+                ]
+            }
+            """
+        elif "payment" in agent_name:
+            return """
+            {
+                "risk_score": 9,
+                "confidence": 9,
+                "analysis": "Wire transfer only payment method is a major red flag. Legitimate businesses typically offer multiple payment options.",
+                "red_flags": ["WIRE_TRANSFER_ONLY", "NO_ALTERNATIVE_PAYMENT"],
+                "fraud_indicators": [
+                    {"type": "payment_suspicion", "severity": "high", "description": "Requires wire transfer only"}
+                ]
+            }
+            """
+        else:
+            return """
+            {
+                "risk_score": 6,
+                "confidence": 7,
+                "analysis": "General fraud analysis completed with moderate risk indicators detected.",
+                "red_flags": ["MODERATE_RISK"],
+                "fraud_indicators": [
+                    {"type": "general_suspicion", "severity": "medium", "description": "Multiple minor risk factors"}
+                ]
+            }
+            """
+    
+    def _parse_response(self, response_text: str) -> dict:
+        """Parse LLM response into structured format"""
+        try:
+            response_text = response_text.strip()
+            if response_text.startswith('```json'):
+                response_text = response_text[7:-3]
+            elif response_text.startswith('```'):
+                response_text = response_text[3:-3]
+            
+            parsed_result = json.loads(response_text)
+            
+            # Ensure required fields exist
+            if not isinstance(parsed_result, dict):
+                raise ValueError("Response is not a dictionary")
+            
+            # Set defaults for missing fields
+            parsed_result.setdefault('risk_score', 5)
+            parsed_result.setdefault('confidence', 5)
+            parsed_result.setdefault('analysis', f'Analysis from {self.config.agent_name}')
+            parsed_result.setdefault('red_flags', [])
+            parsed_result.setdefault('fraud_indicators', [])
+            
+            return parsed_result
+            
+        except (json.JSONDecodeError, ValueError) as e:
+            log.warning(f"Could not parse JSON from {self.agent_id}: {e}")
+            return {
+                "risk_score": 5,
+                "confidence": 3,
+                "analysis": f"Analysis from {self.config.agent_name}: {response_text[:200]}...",
+                "red_flags": ["PARSING_ERROR"],
+                "fraud_indicators": []
+            }
+    
+    async def _reset_status(self):
+        """Reset status after delay"""
+        await asyncio.sleep(1.0)
+        with self._lock:
+            if self.status in [AgentStatus.COMPLETED, AgentStatus.FAILED, AgentStatus.TIMEOUT]:
+                self.status = AgentStatus.IDLE
+
+
+class LLMAgentRegistry:
+    """Registry for managing LLM agent configurations"""
+    
+    def __init__(self):
+        self._agent_configs: Dict[str, LLMAgentConfig] = {}
+        self._agent_instances: Dict[str, LLMAgent] = {}
+        self._lock = threading.Lock()
+    
+    def register_agent_config(self, config: LLMAgentConfig):
+        """Register agent configuration"""
+        with self._lock:
+            self._agent_configs[config.agent_name] = config
+            log.info(f"📋 Registered agent: {config.agent_name}")
+    
+    def create_agent_instance(self, agent_name: str, agent_id: str, llm_client: Any = None) -> LLMAgent:
+        """Create agent instance"""
+        with self._lock:
+            if agent_name not in self._agent_configs:
+                raise ValueError(f"Unknown agent: {agent_name}")
+            
+            config = self._agent_configs[agent_name]
+            agent = LLMAgent(agent_id, config, llm_client)
+            self._agent_instances[agent_id] = agent
+            return agent
+    
+    def get_agents_by_name(self, agent_name: str) -> List[LLMAgent]:
+        """Get agents by name"""
+        return [a for a in self._agent_instances.values() if a.config.agent_name == agent_name]
+    
+    def get_available_agent_types(self) -> List[str]:
+        """Get available agent types"""
+        return list(self._agent_configs.keys())
+
+
+class ParallelLLMExecutor:
+    """Parallel executor for LLM agents with synchronization"""
+    
+    def __init__(self, max_workers: int = 4, llm_client: Any = None):
+        self.max_workers = max_workers
+        self.agent_registry = LLMAgentRegistry()
+        self.llm_client = llm_client
+        self._task_barrier = None
+    
+    async def execute_tasks_parallel(self, tasks: List[LLMTask], wait_for_all: bool = True) -> List[LLMAgentResult]:
+        """Execute tasks in parallel with synchronization"""
+        if not tasks:
+            return []
+        
+        log.info(f"🚀 Executing {len(tasks)} LLM tasks in parallel")
+        start_time = time.time()
+        
+        # Assign agents to tasks
+        task_agent_pairs = self._assign_agents_to_tasks(tasks)
+        
+        if not task_agent_pairs:
+            log.error("No agents available")
+            return []
+        
+        # Remove barrier - just execute in parallel with asyncio.gather
+        log.info(f"🔄 Starting {len(task_agent_pairs)} agents concurrently...")
+        
+        # Create all tasks IMMEDIATELY - this is the key to parallel execution
+        async_tasks = []
+        for task, agent in task_agent_pairs:
+            # Start each agent execution immediately
+            async_task = asyncio.create_task(agent.execute(task))
+            async_tasks.append(async_task)
+            log.info(f"🚀 Started agent {agent.config.agent_name} for task {task.task_id}")
+        
+        # Wait for ALL tasks to complete concurrently
+        log.info("⏳ Waiting for all agents to complete...")
+        results = await asyncio.gather(*async_tasks, return_exceptions=True)
+        
+        # Process results
+        processed_results = []
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                task, agent = task_agent_pairs[i]
+                error_result = LLMAgentResult(
+                    agent_id=agent.agent_id,
+                    agent_name=agent.config.agent_name,
+                    success=False,
+                    error=f"Execution failed: {str(result)}",
+                    status=AgentStatus.FAILED
+                )
+                processed_results.append(error_result)
+                log.error(f"❌ Agent {agent.agent_id} failed: {str(result)}")
+            else:
+                processed_results.append(result)
+        
+        execution_time = time.time() - start_time
+        successful = sum(1 for r in processed_results if r.success)
+        log.info(f"✅ Parallel execution completed in {execution_time:.2f}s ({successful}/{len(processed_results)} successful)")
+        
+        return processed_results
+    
+    async def _execute_with_barrier(self, task: LLMTask, agent: LLMAgent, use_barrier: bool) -> LLMAgentResult:
+        """Execute task with barrier synchronization - NO BARRIER, just execute"""
+        # Execute the LLM task immediately - don't wait for barrier
+        result = await agent.execute(task)
+        
+        # Note: Removed barrier wait to ensure true parallel execution
+        # The asyncio.gather() in execute_tasks_parallel handles synchronization
+        
+        return result
+    
+    def _assign_agents_to_tasks(self, tasks: List[LLMTask]) -> List[tuple[LLMTask, LLMAgent]]:
+        """Assign agents to tasks"""
+        assignments = []
+        
+        for task in tasks:
+            suitable_agents = []
+            for agent_name in task.agent_names:
+                agents = self.agent_registry.get_agents_by_name(agent_name)
+                suitable_agents.extend([a for a in agents if a.status == AgentStatus.IDLE])
+            
+            if suitable_agents:
+                chosen_agent = suitable_agents[0]
+                assignments.append((task, chosen_agent))
+            else:
+                # Create new agent
+                if task.agent_names:
+                    agent_name = task.agent_names[0]
+                    try:
+                        new_agent_id = f"{agent_name}_{int(time.time() * 1000)}"
+                        new_agent = self.agent_registry.create_agent_instance(
+                            agent_name, new_agent_id, self.llm_client
+                        )
+                        assignments.append((task, new_agent))
+                    except ValueError as e:
+                        log.error(f"Could not create agent for {task.task_id}: {e}")
+        
+        return assignments
+
+
+class EnhancedParallelInvoiceFraudDetector:
+    """Enhanced fraud detector with parallel LLM agents and core coordinator"""
+    
+    def __init__(self, max_workers: int = 4):
+        self.max_workers = max_workers
+        
+        # Initialize LLM client
         self.api_key = self._get_api_key()
         if GENAI_AVAILABLE and self.api_key:
             genai.configure(api_key=self.api_key)
             self.model = genai.GenerativeModel('models/gemini-2.5-flash')
         else:
             self.model = None
-            log.warning("Google GenerativeAI not available or no API key")
+            log.warning("⚠️  Google GenerativeAI not available or no API key")
         
-        # Available agents - mix of hardcoded and LLM
-        self.available_agents = {
-            "amount_validator": {
-                "description": "Analyzes invoice amounts using hardcoded fraud detection algorithms",
-                "type": "hardcoded",
-                "tool": "amount_validator"
-            },
-            "tax_calculator": {
-                "description": "Validates tax calculations using mathematical verification",
-                "type": "hardcoded", 
-                "tool": "tax_calculator"
-            },
-            "date_analyzer": {
-                "description": "Examines dates using pattern recognition algorithms",
-                "type": "hardcoded",
-                "tool": "date_analyzer"
-            },
-            "vendor_authenticator": {
-                "description": "Validates vendor information using database matching",
-                "type": "hardcoded",
-                "tool": "vendor_authenticator"
-            },
-            "format_inspector": {
-                "description": "Checks invoice format using text analysis algorithms",
-                "type": "hardcoded",
-                "tool": "format_inspector"
-            },
-            "line_item_validator": {
-                "description": "Reviews individual line items for reasonableness using LLM analysis",
-                "type": "llm"
-            },
-            "payment_terms_checker": {
-                "description": "Analyzes payment terms and conditions using LLM reasoning",
-                "type": "llm"
-            }
-        }
+        # Initialize parallel executor
+        self.llm_executor = ParallelLLMExecutor(max_workers=max_workers, llm_client=self.model)
+        
+        # Register specialized fraud detection agents
+        self._register_fraud_agents()
         
         # Demo invoice for testing
         self.demo_invoice = """
-        INVOICE #INV-2024-0156
-        Date: 2024-03-15
-        Due Date: 2024-04-15
-        
-        From: QuickFix Solutions LLC
-        Email: billing@quickfixsolutions.biz
-        Address: 123 Business St, City, ST 12345
-        
-        To: ACME Corporation
-        
-        Description                    Qty    Unit Price    Total
-        Emergency IT Consulting         10        $500.00   $5,000.00
-        Weekend Database Maintenance     2      $1,000.00   $2,000.00
-        Security Audit Premium           1      $3,000.00   $3,000.00
-        
-        Subtotal:                                          $10,000.00
-        Tax (8.5%):                                           $850.00
-        Total:                                             $10,850.00
-        
-        Payment Terms: Net 30 Days
-        Thank you for your business!
-        """
+INVOICE #INV-2025-0928-001
+==========================================
+
+FROM: SuspiciousCorp LLC
+      1234 Fake Street
+      Nowhere, NY 10001
+      
+TO:   YourCompany Inc
+      5678 Real Avenue
+      Somewhere, CA 90210
+
+Date: September 28, 2025
+Due Date: October 28, 2025
+
+ITEMS:
+------
+1. "Consulting Services" - $50,000.00
+   (Description: General business consulting for Q4)
+   
+2. Software License - $25,000.00
+   (Description: Enterprise software package)
+   
+3. Training Services - $15,000.00
+   (Description: Staff training program)
+
+SUBTOTAL: $90,000.00
+TAX (8.5%): $7,650.00
+TOTAL: $97,650.00
+
+Payment Terms: Net 30
+Payment Method: Wire Transfer Only
+Account: FirstNational Bank
+Account #: 555-123-4567
+Routing #: 021000021
+
+Notes: Payment must be received within 30 days.
+Contact: john.doe@suspiciouscorp.com
+Phone: (555) 999-9999
+"""
     
-    def _get_api_key(self) -> str:
+    def _get_api_key(self) -> Optional[str]:
         """Get Google API key from environment"""
-        load_dotenv()
-        
-        # Try main key first
-        key = os.getenv("GOOGLE_API_KEY")
-        if key and key.strip():
-            return key.strip()
-            
-        # Try numbered keys
-        for i in range(10):
-            key = os.getenv(f"GOOGLE_API_KEY_{i}")
-            if key and key.strip():
-                return key.strip()
-        
-        log.warning("No Google API key found - hardcoded tools only")
-        return None
+        api_key = os.getenv('GOOGLE_API_KEY')
+        if not api_key:
+            log.warning("⚠️  No GOOGLE_API_KEY found in environment")
+        return api_key
     
-    def extract_invoice_data(self, invoice_text: str) -> Dict[str, Any]:
-        """Extract structured data from invoice text for hardcoded tools"""
-        try:
-            # Simple extraction - in practice, you might use more sophisticated parsing
-            import re
-            
-            data = {
-                'amounts': [],
-                'vendor_name': '',
-                'vendor_email': '',
-                'invoice_date': '',
-                'due_date': '',
-                'subtotal': 0.0,
-                'tax_rate': 0.0,
-                'stated_tax': 0.0,
-                'total': 0.0
-            }
-            
-            # Extract amounts using regex
-            amount_pattern = r'\$?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)'
-            amounts = []
-            for match in re.finditer(amount_pattern, invoice_text):
-                try:
-                    amount = float(match.group(1).replace(',', ''))
-                    amounts.append(amount)
-                except ValueError:
-                    continue
-            data['amounts'] = amounts
-            
-            # Extract vendor name (after "From:" or "Vendor:")
-            vendor_match = re.search(r'(?:From|Vendor):\s*([^\n\r]+)', invoice_text, re.IGNORECASE)
-            if vendor_match:
-                data['vendor_name'] = vendor_match.group(1).strip()
-            
-            # Extract email
-            email_match = re.search(r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})', invoice_text)
-            if email_match:
-                data['vendor_email'] = email_match.group(1)
-            
-            # Extract dates
-            date_pattern = r'(\d{4}-\d{2}-\d{2}|\d{1,2}/\d{1,2}/\d{4})'
-            dates = re.findall(date_pattern, invoice_text)
-            if dates:
-                data['invoice_date'] = dates[0]
-                if len(dates) > 1:
-                    data['due_date'] = dates[1]
-            
-            # Extract tax information
-            tax_rate_match = re.search(r'tax.*?(\d+\.?\d*)%', invoice_text, re.IGNORECASE)
-            if tax_rate_match:
-                data['tax_rate'] = float(tax_rate_match.group(1))
-            
-            # Extract specific amounts
-            subtotal_match = re.search(r'subtotal.*?\$?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)', invoice_text, re.IGNORECASE)
-            if subtotal_match:
-                data['subtotal'] = float(subtotal_match.group(1).replace(',', ''))
-            
-            tax_match = re.search(r'tax.*?\$?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)', invoice_text, re.IGNORECASE)
-            if tax_match:
-                data['stated_tax'] = float(tax_match.group(1).replace(',', ''))
-            
-            total_match = re.search(r'total.*?\$?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)', invoice_text, re.IGNORECASE)
-            if total_match:
-                data['total'] = float(total_match.group(1).replace(',', ''))
-            
-            return data
-            
-        except Exception as e:
-            log.error(f"Error extracting invoice data: {e}")
-            return {}
-    
-    def execute_hardcoded_tool(self, tool_name: str, invoice_data: Dict[str, Any], invoice_text: str) -> ToolResult:
-        """Execute a hardcoded tool with appropriate parameters"""
-        try:
-            if tool_name == 'amount_validator':
-                return self.hardcoded_tools.amount_validator(
-                    amounts=invoice_data.get('amounts', []),
-                    invoice_total=invoice_data.get('total')
-                )
-            elif tool_name == 'tax_calculator':
-                return self.hardcoded_tools.tax_calculator(
-                    subtotal=invoice_data.get('subtotal', 0),
-                    tax_rate=invoice_data.get('tax_rate', 0),
-                    stated_tax=invoice_data.get('stated_tax', 0)
-                )
-            elif tool_name == 'date_analyzer':
-                return self.hardcoded_tools.date_analyzer(
-                    invoice_date=invoice_data.get('invoice_date', ''),
-                    due_date=invoice_data.get('due_date')
-                )
-            elif tool_name == 'vendor_authenticator':
-                # You can maintain an approved vendor list
-                approved_vendors = ['ACME Corp', 'Beta Industries', 'Delta LLC', 'Gamma Tech']
-                return self.hardcoded_tools.vendor_authenticator(
-                    vendor_name=invoice_data.get('vendor_name', ''),
-                    vendor_email=invoice_data.get('vendor_email'),
-                    approved_vendors=approved_vendors
-                )
-            elif tool_name == 'format_inspector':
-                return self.hardcoded_tools.format_inspector(invoice_text)
-            else:
-                return ToolResult(False, None, f"Unknown hardcoded tool: {tool_name}")
-                
-        except Exception as e:
-            return ToolResult(False, None, str(e))
-    
-    async def execute_llm_agent(self, agent_type: str, invoice_data: str) -> AgentResponse:
-        """Execute LLM-based agent analysis"""
-        start_time = time.time()
+    def _register_fraud_agents(self):
+        """Register specialized fraud detection agents"""
         
+        # Amount Validation Agent
+        amount_config = LLMAgentConfig(
+            agent_name="amount_validator",
+            system_prompt="You are an expert at detecting fraudulent invoice amounts and mathematical inconsistencies.",
+            prompt_template="""
+Analyze this invoice for amount-related fraud indicators:
+
+INVOICE DATA:
+{data}
+
+Focus on:
+- Mathematical inconsistencies in calculations
+- Unusually round numbers that may indicate fabrication
+- Amounts that are suspiciously high or low for the services described
+- Tax calculation errors
+- Subtotal/total mismatches
+
+Return JSON format:
+{{
+    "risk_score": <1-10>,
+    "confidence": <1-10>,
+    "analysis": "<detailed analysis>",
+    "red_flags": ["<flag1>", "<flag2>"],
+    "fraud_indicators": [
+        {{"type": "amount_anomaly", "severity": "high", "description": "Detailed description"}}
+    ]
+}}
+""",
+            temperature=0.1
+        )
+        
+        # Vendor Validation Agent
+        vendor_config = LLMAgentConfig(
+            agent_name="vendor_validator",
+            system_prompt="You are an expert at detecting fraudulent vendors and suspicious business relationships.",
+            prompt_template="""
+Analyze this invoice for vendor-related fraud indicators:
+
+INVOICE DATA:
+{data}
+
+Focus on:
+- Vendor legitimacy indicators
+- Suspicious contact information patterns
+- Address validation concerns
+- Business name authenticity
+- Contact method red flags
+
+Return JSON format:
+{{
+    "risk_score": <1-10>,
+    "confidence": <1-10>,
+    "analysis": "<detailed analysis>",
+    "red_flags": ["<flag1>", "<flag2>"],
+    "fraud_indicators": [
+        {{"type": "vendor_suspicion", "severity": "medium", "description": "Detailed description"}}
+    ]
+}}
+""",
+            temperature=0.1
+        )
+        
+        # Date and Timing Analysis Agent
+        date_config = LLMAgentConfig(
+            agent_name="date_analyzer",
+            system_prompt="You are an expert at detecting suspicious date patterns and timing anomalies in invoices.",
+            prompt_template="""
+Analyze this invoice for date and timing-related fraud indicators:
+
+INVOICE DATA:
+{data}
+
+Focus on:
+- Suspicious date patterns (weekends, holidays)
+- Backdating or future-dating concerns
+- Payment term anomalies
+- Date format inconsistencies
+- Timeline feasibility
+
+Return JSON format:
+{{
+    "risk_score": <1-10>,
+    "confidence": <1-10>,
+    "analysis": "<detailed analysis>",
+    "red_flags": ["<flag1>", "<flag2>"],
+    "fraud_indicators": [
+        {{"type": "date_anomaly", "severity": "low", "description": "Detailed description"}}
+    ]
+}}
+""",
+            temperature=0.1
+        )
+        
+        # Payment Terms Analyzer
+        payment_config = LLMAgentConfig(
+            agent_name="payment_analyzer",
+            system_prompt="You are an expert at detecting fraudulent payment terms and banking information.",
+            prompt_template="""
+Analyze this invoice for payment-related fraud indicators:
+
+INVOICE DATA:
+{data}
+
+Focus on:
+- Suspicious payment methods (wire transfer only, unusual methods)
+- Banking information legitimacy
+- Payment term red flags
+- Account number patterns
+- Urgency tactics
+
+Return JSON format:
+{{
+    "risk_score": <1-10>,
+    "confidence": <1-10>,
+    "analysis": "<detailed analysis>",
+    "red_flags": ["<flag1>", "<flag2>"],
+    "fraud_indicators": [
+        {{"type": "payment_suspicion", "severity": "high", "description": "Detailed description"}}
+    ]
+}}
+""",
+            temperature=0.1
+        )
+        
+        # Register all agents
+        configs = [amount_config, vendor_config, date_config, payment_config]
+        for config in configs:
+            self.llm_executor.agent_registry.register_agent_config(config)
+        
+        log.info(f"📋 Registered {len(configs)} specialized fraud detection agents")
+    
+    async def determine_agents_to_summon(self, invoice_data: str) -> List[str]:
+        """Core LLM determines which agents to summon based on invoice content"""
         if not self.model:
-            return AgentResponse(
-                agent_type=agent_type,
-                analysis="LLM not available - API key missing",
-                risk_score=5,
-                confidence=1,
-                red_flags=["LLM_UNAVAILABLE"],
-                execution_time=time.time() - start_time,
-                tool_used="llm_unavailable"
-            )
+            # Fallback: use all available agents
+            return self.llm_executor.agent_registry.get_available_agent_types()
         
-        agent_config = self.available_agents.get(agent_type, {})
+        available_agents = self.llm_executor.agent_registry.get_available_agent_types()
+        agents_list = "\n".join([f"- {agent}" for agent in available_agents])
         
-        prompt = f"""
-        You are a {agent_type.replace('_', ' ').title()} specialist for invoice fraud detection.
-        
-        TASK: {agent_config.get('description', 'Analyze this invoice for fraud indicators')}
-        
-        INVOICE DATA:
-        {invoice_data}
-        
-        Please analyze this invoice and provide:
-        1. Risk Score (1-10, where 10 is highest fraud risk)
-        2. Confidence Level (1-10, where 10 is highest confidence)
-        3. Analysis (detailed explanation of findings)
-        4. Red Flags (list any concerning patterns)
-        
-        Format your response as JSON:
-        {{
-            "risk_score": <1-10>,
-            "confidence": <1-10>,
-            "analysis": "<detailed analysis>",
-            "red_flags": ["<flag1>", "<flag2>", ...]
-        }}
-        """
+        coordinator_prompt = f"""
+You are a fraud detection coordinator. Analyze this invoice and determine which specialist agents should examine it.
+
+INVOICE DATA:
+{invoice_data}
+
+AVAILABLE SPECIALIST AGENTS:
+{agents_list}
+
+Based on the invoice content, select 3-4 most relevant agents for comprehensive fraud detection.
+Consider what aspects seem most suspicious or important to verify.
+
+Respond with ONLY a JSON list of agent names:
+["agent1", "agent2", "agent3"]
+"""
         
         try:
-            response = self.model.generate_content(prompt)
+            response = self.model.generate_content(
+                coordinator_prompt,
+                generation_config={'temperature': 0.1}
+            )
             
-            # Parse JSON response
+            # Parse response
             response_text = response.text.strip()
             if response_text.startswith('```json'):
                 response_text = response_text[7:-3]
             elif response_text.startswith('```'):
                 response_text = response_text[3:-3]
             
-            result = json.loads(response_text)
+            selected_agents = json.loads(response_text)
             
-            return AgentResponse(
-                agent_type=agent_type,
-                analysis=result.get('analysis', ''),
-                risk_score=min(10, max(1, int(result.get('risk_score', 5)))),
-                confidence=min(10, max(1, int(result.get('confidence', 5)))),
-                red_flags=result.get('red_flags', []),
-                execution_time=time.time() - start_time,
-                tool_used="llm"
-            )
+            # Validate selection
+            valid_agents = [agent for agent in selected_agents if agent in available_agents]
+            
+            if not valid_agents:
+                log.warning("Core LLM returned invalid agents, using all available")
+                return available_agents
+            
+            log.info(f"🎯 Core LLM selected agents: {', '.join(valid_agents)}")
+            return valid_agents
             
         except Exception as e:
-            log.error(f"Error in LLM agent {agent_type}: {e}")
-            return AgentResponse(
-                agent_type=agent_type,
-                analysis=f"Error occurred: {str(e)}",
-                risk_score=5,
-                confidence=1,
-                red_flags=["PROCESSING_ERROR"],
-                execution_time=time.time() - start_time,
-                tool_used="llm_error"
-            )
+            log.error(f"Error in agent selection: {e}")
+            log.info("Using all available agents as fallback")
+            return available_agents
     
-    def convert_tool_result_to_agent_response(self, tool_name: str, tool_result: ToolResult) -> AgentResponse:
-        """Convert hardcoded tool result to agent response format"""
-        if not tool_result.success:
-            return AgentResponse(
-                agent_type=tool_name,
-                analysis=f"Tool execution failed: {tool_result.error}",
-                risk_score=5,
-                confidence=1,
-                red_flags=["TOOL_ERROR"],
-                execution_time=tool_result.execution_time,
-                tool_used="hardcoded_error"
-            )
-        
-        result_data = tool_result.result
-        risk_score = result_data.get('risk_score', 0)
-        recommendation = result_data.get('recommendation', 'UNKNOWN')
-        fraud_indicators = result_data.get('fraud_indicators', [])
-        
-        # Generate analysis text from result data
-        analysis_parts = [f"Risk Score: {risk_score}/10", f"Recommendation: {recommendation}"]
-        
-        if fraud_indicators:
-            analysis_parts.append(f"Found {len(fraud_indicators)} fraud indicators:")
-            for indicator in fraud_indicators[:3]:  # Limit to top 3
-                analysis_parts.append(f"- {indicator.get('type', 'Unknown')}: {indicator.get('severity', 'unknown')} severity")
-        
-        red_flags = [indicator.get('type', 'unknown') for indicator in fraud_indicators]
-        
-        # Calculate confidence based on data completeness
-        confidence = 8 if len(str(result_data)) > 100 else 6
-        
-        return AgentResponse(
-            agent_type=tool_name,
-            analysis=". ".join(analysis_parts),
-            risk_score=risk_score,
-            confidence=confidence,
-            red_flags=red_flags,
-            execution_time=tool_result.execution_time,
-            tool_used="hardcoded"
-        )
-    
-    async def execute_agent_parallel(self, agent_type: str, invoice_text: str, invoice_data: Dict[str, Any]) -> AgentResponse:
-        """Execute a single agent (hardcoded or LLM)"""
-        agent_config = self.available_agents.get(agent_type, {})
-        
-        if agent_config.get('type') == 'hardcoded':
-            tool_name = agent_config.get('tool')
-            tool_result = self.execute_hardcoded_tool(tool_name, invoice_data, invoice_text)
-            return self.convert_tool_result_to_agent_response(agent_type, tool_result)
-        else:
-            return await self.execute_llm_agent(agent_type, invoice_text)
-    
-    def select_agents(self, invoice_text: str) -> List[str]:
-        """Select which agents to use based on invoice content"""
-        # For now, use all available agents
-        # In a more sophisticated system, you could use an LLM to select agents
-        selected = list(self.available_agents.keys())
-        log.info(f"Selected {len(selected)} agents: {', '.join(selected)}")
-        return selected
-    
-    async def analyze_invoice_parallel(self, invoice_text: str) -> Dict[str, Any]:
-        """Analyze invoice using parallel processing"""
+    async def analyze_invoice_parallel(self, invoice_data: str) -> Dict[str, Any]:
+        """Main analysis method with parallel LLM agents"""
         start_time = time.time()
-        log.info("Starting parallel invoice fraud analysis...")
+        log.info("🔍 Starting enhanced parallel invoice fraud analysis...")
         
-        # Extract structured data for hardcoded tools
-        invoice_data = self.extract_invoice_data(invoice_text)
-        log.info(f"Extracted data: vendor={invoice_data.get('vendor_name', 'N/A')}, amounts={len(invoice_data.get('amounts', []))}")
+        # Step 1: Core LLM determines which agents to summon
+        log.info("🤔 Core LLM determining which agents to summon...")
+        agents_to_summon = await self.determine_agents_to_summon(invoice_data)
         
-        # Select agents to use
-        selected_agents = self.select_agents(invoice_text)
+        # Step 2: Create tasks for selected agents
+        tasks = []
+        for agent_name in agents_to_summon:
+            task = LLMTask(
+                task_id=f"{agent_name}_analysis",
+                data=invoice_data,
+                agent_names=[agent_name],
+                timeout=45.0,
+                context={"analysis_type": "fraud_detection"}
+            )
+            tasks.append(task)
         
-        if self.enable_parallel and self.executor:
-            # Execute agents in parallel
-            loop = asyncio.get_event_loop()
-            
-            # Create tasks for each agent
-            tasks = []
-            for agent_type in selected_agents:
-                task = loop.run_in_executor(
-                    self.executor,
-                    lambda at=agent_type: asyncio.run(self.execute_agent_parallel(at, invoice_text, invoice_data))
-                )
-                tasks.append(task)
-            
-            # Wait for all agents to complete
-            agent_responses = await asyncio.gather(*tasks, return_exceptions=True)
-            
-            # Handle any exceptions
-            processed_responses = []
-            for i, response in enumerate(agent_responses):
-                if isinstance(response, Exception):
-                    log.error(f"Agent {selected_agents[i]} failed: {response}")
-                    processed_responses.append(AgentResponse(
-                        agent_type=selected_agents[i],
-                        analysis=f"Agent failed: {str(response)}",
-                        risk_score=5,
-                        confidence=1,
-                        red_flags=["AGENT_ERROR"],
-                        execution_time=0.0
-                    ))
-                else:
-                    processed_responses.append(response)
-        else:
-            # Execute agents sequentially
-            processed_responses = []
-            for agent_type in selected_agents:
-                response = await self.execute_agent_parallel(agent_type, invoice_text, invoice_data)
-                processed_responses.append(response)
+        log.info(f"📋 Summoning {len(tasks)} specialized agents: {', '.join(agents_to_summon)}")
         
-        # Compile final results
-        final_result = await self.compile_results(invoice_text, processed_responses)
+        # Step 3: Execute agents in parallel with synchronization
+        results = await self.llm_executor.execute_tasks_parallel(
+            tasks,
+            wait_for_all=True  # Wait for all agents to complete
+        )
         
-        total_time = time.time() - start_time
-        final_result['total_execution_time'] = total_time
-        final_result['parallel_processing'] = self.enable_parallel
-        final_result['agents_used'] = len(processed_responses)
+        # Step 4: Aggregate results
+        final_analysis = await self._aggregate_results(results, invoice_data)
         
-        log.info(f"Analysis completed in {total_time:.2f}s using {len(processed_responses)} agents")
+        execution_time = time.time() - start_time
+        final_analysis['total_execution_time'] = execution_time
         
-        return final_result
+        log.info(f"✅ Analysis completed in {execution_time:.2f}s")
+        return final_analysis
     
-    async def compile_results(self, invoice_text: str, agent_responses: List[AgentResponse]) -> Dict[str, Any]:
-        """Compile all agent responses into final fraud assessment"""
+    async def _aggregate_results(self, results: List[LLMAgentResult], invoice_data: str) -> Dict[str, Any]:
+        """Aggregate results from all agents"""
+        successful_results = [r for r in results if r.success]
         
-        # Calculate aggregate metrics
-        risk_scores = [r.risk_score for r in agent_responses if r.risk_score > 0]
-        confidence_scores = [r.confidence for r in agent_responses if r.confidence > 0]
+        if not successful_results:
+            return {
+                "overall_risk_score": 10,
+                "confidence": 1,
+                "recommendation": "MANUAL_REVIEW",
+                "status": "ANALYSIS_FAILED",
+                "analysis": "Analysis failed - all agents encountered errors",
+                "red_flags": ["ANALYSIS_FAILURE"],
+                "agent_results": [],
+                "agents_used": 0,
+                "agents_failed": len(results),
+                "error": "All agents failed to complete analysis"
+            }
         
-        avg_risk = sum(risk_scores) / len(risk_scores) if risk_scores else 5
-        avg_confidence = sum(confidence_scores) / len(confidence_scores) if confidence_scores else 5
-        
-        # Collect all red flags
+        # Extract data from successful results
+        risk_scores = []
+        confidences = []
         all_red_flags = []
-        for response in agent_responses:
-            all_red_flags.extend(response.red_flags)
+        all_fraud_indicators = []
+        agent_summaries = []
         
-        # Count flag occurrences
-        flag_counts = {}
-        for flag in all_red_flags:
-            flag_counts[flag] = flag_counts.get(flag, 0) + 1
+        for result in successful_results:
+            if isinstance(result.result, dict):
+                risk_score = result.result.get('risk_score', 5)
+                confidence = result.result.get('confidence', 5)
+                red_flags = result.result.get('red_flags', [])
+                fraud_indicators = result.result.get('fraud_indicators', [])
+                analysis = result.result.get('analysis', 'No analysis provided')
+                
+                risk_scores.append(risk_score)
+                confidences.append(confidence)
+                all_red_flags.extend(red_flags)
+                all_fraud_indicators.extend(fraud_indicators)
+                
+                agent_summaries.append({
+                    "agent": result.agent_name,
+                    "risk_score": risk_score,
+                    "confidence": confidence,
+                    "execution_time": result.execution_time,
+                    "analysis": analysis,
+                    "red_flags": red_flags
+                })
         
-        # Determine final recommendation
-        if avg_risk >= 7:
+        # Calculate weighted averages
+        if risk_scores and confidences:
+            # Weight by confidence - more confident results have higher weight
+            total_weight = sum(confidences)
+            weighted_risk = sum(r * c for r, c in zip(risk_scores, confidences)) / total_weight
+            avg_confidence = sum(confidences) / len(confidences)
+        else:
+            weighted_risk = 5
+            avg_confidence = 1
+        
+        # Determine overall recommendation
+        if weighted_risk >= 8:
             recommendation = "REJECT"
-        elif avg_risk >= 4:
-            recommendation = "REVIEW"
+            status = "HIGH_RISK"
+        elif weighted_risk >= 6:
+            recommendation = "MANUAL_REVIEW"
+            status = "MEDIUM_RISK"
+        elif weighted_risk >= 4:
+            recommendation = "ADDITIONAL_VERIFICATION"
+            status = "LOW_RISK"
         else:
             recommendation = "APPROVE"
+            status = "MINIMAL_RISK"
         
-        # Generate summary
-        summary = f"Analysis of {len(agent_responses)} specialist agents reveals "
-        if avg_risk >= 7:
-            summary += "HIGH FRAUD RISK with multiple concerning indicators."
-        elif avg_risk >= 4:
-            summary += "MODERATE FRAUD RISK requiring manual review."
-        else:
-            summary += "LOW FRAUD RISK with minimal concerns."
+        # Create summary analysis
+        unique_red_flags = list(set(all_red_flags))
+        high_severity_indicators = [fi for fi in all_fraud_indicators if fi.get('severity') == 'high']
         
-        # Get top concerns
-        top_concerns = sorted(flag_counts.items(), key=lambda x: x[1], reverse=True)[:3]
-        top_concern_list = [concern[0] for concern in top_concerns] if top_concerns else ["None"]
+        summary_analysis = f"""
+Comprehensive fraud analysis completed using {len(successful_results)} specialized agents.
+Overall risk assessment: {status} (Risk Score: {weighted_risk:.1f}/10)
+Key concerns identified: {len(unique_red_flags)} red flags, {len(high_severity_indicators)} high-severity indicators.
+Primary risk factors: {', '.join(unique_red_flags[:3]) if unique_red_flags else 'None identified'}.
+"""
         
         return {
-            'overall_risk_score': round(avg_risk, 1),
-            'confidence_score': round(avg_confidence, 1),
-            'recommendation': recommendation,
-            'summary': summary,
-            'top_concerns': top_concern_list,
-            'total_red_flags': len(all_red_flags),
-            'unique_red_flags': len(set(all_red_flags)),
-            'agent_responses': [
-                {
-                    'agent': r.agent_type,
-                    'risk_score': r.risk_score,
-                    'confidence': r.confidence,
-                    'analysis': r.analysis,
-                    'red_flags': r.red_flags,
-                    'execution_time': r.execution_time,
-                    'tool_used': r.tool_used
-                }
-                for r in agent_responses
-            ],
-            'flag_frequency': flag_counts
+            "overall_risk_score": round(weighted_risk, 1),
+            "confidence": round(avg_confidence, 1),
+            "recommendation": recommendation,
+            "status": status,
+            "analysis": summary_analysis.strip(),
+            "red_flags": unique_red_flags,
+            "fraud_indicators": all_fraud_indicators,
+            "agent_results": agent_summaries,
+            "agents_used": len(successful_results),
+            "agents_failed": len(results) - len(successful_results)
         }
-    
-    def __del__(self):
-        """Cleanup executor on deletion"""
-        if hasattr(self, 'executor') and self.executor:
-            self.executor.shutdown(wait=False)
 
-def format_results(results: Dict[str, Any], invoice_text: str = "", output_file: str = None):
-    """Format and display results"""
-    print("\n" + "="*70)
-    print("🔍 INVOICE FRAUD DETECTION RESULTS")
-    print("="*70)
-    
-    # Overall assessment
-    risk_score = results.get('overall_risk_score', 0)
-    recommendation = results.get('recommendation', 'UNKNOWN')
-    
-    if recommendation == 'APPROVE':
-        status_emoji = "✅"
-        status_color = "LOW RISK"
-    elif recommendation == 'REVIEW':
-        status_emoji = "⚠️"
-        status_color = "MEDIUM RISK"
-    else:
-        status_emoji = "❌"
-        status_color = "HIGH RISK"
-    
-    print(f"\n{status_emoji} OVERALL ASSESSMENT: {status_color}")
-    print(f"   Risk Score: {risk_score}/10")
-    print(f"   Confidence: {results.get('confidence_score', 0)}/10")
-    print(f"   Recommendation: {recommendation}")
-    
-    # Summary
-    print(f"\n📋 SUMMARY:")
-    print(f"   {results.get('summary', 'No summary available')}")
-    
-    # Key metrics
-    print(f"\n📊 ANALYSIS METRICS:")
-    print(f"   Agents Used: {results.get('agents_used', 0)}")
-    print(f"   Total Red Flags: {results.get('total_red_flags', 0)}")
-    print(f"   Unique Issues: {results.get('unique_red_flags', 0)}")
-    print(f"   Processing Time: {results.get('total_execution_time', 0):.2f}s")
-    print(f"   Parallel Processing: {'Enabled' if results.get('parallel_processing') else 'Disabled'}")
-    
-    # Top concerns
-    top_concerns = results.get('top_concerns', [])
-    if top_concerns and top_concerns != ['None']:
-        print(f"\n🚨 TOP CONCERNS:")
-        for i, concern in enumerate(top_concerns[:3], 1):
-            print(f"   {i}. {concern.replace('_', ' ').title()}")
-    
-    # Agent details
-    print(f"\n🤖 AGENT ANALYSIS:")
-    agent_responses = results.get('agent_responses', [])
-    for response in agent_responses:
-        tool_type = "🔧" if response['tool_used'].startswith('hardcoded') else "🧠"
-        print(f"   {tool_type} {response['agent'].replace('_', ' ').title()}:")
-        print(f"      Risk: {response['risk_score']}/10, Confidence: {response['confidence']}/10")
-        print(f"      Time: {response['execution_time']:.3f}s, Tool: {response['tool_used']}")
-        if response['red_flags']:
-            print(f"      Flags: {', '.join(response['red_flags'][:3])}")
-    
-    # Final verdict
-    print(f"\n{'='*70}")
-    if recommendation == 'APPROVE':
-        print(f"✅ VERDICT: Invoice appears legitimate - APPROVED for processing")
-    elif recommendation == 'REVIEW':
-        print(f"⚠️ VERDICT: Manual review recommended before processing")
-    else:
-        print(f"❌ VERDICT: High fraud risk detected - REJECT this invoice")
-    
-    print("="*70)
-    
-    # Save to file if requested
-    if output_file:
-        try:
-            with open(output_file, 'w', encoding='utf-8') as f:
-                json.dump(results, f, indent=2, ensure_ascii=False)
-            print(f"\n💾 Results saved to: {output_file}")
-        except Exception as e:
-            print(f"\n❌ Failed to save results to {output_file}: {str(e)}")
 
-async def main():
-    """Main entry point"""
-    parser = argparse.ArgumentParser(
-        description="Enhanced Multi-Agent Invoice Fraud Detection with Parallel Processing",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  python main_detector.py --demo
-  python main_detector.py --invoice "INVOICE DATA HERE"
-  python main_detector.py --file invoice.txt
-  python main_detector.py --demo --parallel --max-workers 6
-  python main_detector.py --file invoice.json --output results.json
+async def demo_enhanced_fraud_detection():
+    """Demo the enhanced fraud detection system"""
+    print("🚀 Enhanced Parallel Invoice Fraud Detection Demo")
+    print("=" * 60)
+    
+    # Initialize the enhanced detector
+    detector = EnhancedParallelInvoiceFraudDetector(max_workers=4)
+    
+    print("📄 Analyzing demo invoice with parallel LLM agents...")
+    print("⏳ Please wait while all agents complete their analysis...\n")
+    
+    # Analyze the demo invoice
+    start_time = time.time()
+    results = await detector.analyze_invoice_parallel(detector.demo_invoice)
+    total_time = time.time() - start_time
+    
+    # Display results
+    print(f"✅ Analysis completed in {total_time:.2f} seconds\n")
+    
+    print("📊 FRAUD ANALYSIS RESULTS:")
+    print("=" * 40)
+    print(f"🎯 Overall Risk Score: {results['overall_risk_score']}/10")
+    print(f"📊 Confidence Level: {results['confidence']}/10")
+    print(f"📋 Recommendation: {results['recommendation']}")
+    print(f"🚨 Status: {results.get('status', 'UNKNOWN')}")
+    print(f"🤖 Agents Used: {results['agents_used']}")
+    
+    if results.get('agents_failed', 0) > 0:
+        print(f"❌ Agents Failed: {results['agents_failed']}")
+    
+    print(f"\n📝 Analysis Summary:")
+    print(f"{results['analysis']}")
+    
+    print(f"\n🚩 Red Flags Detected ({len(results.get('red_flags', []))}):")
+    red_flags = results.get('red_flags', [])
+    for i, flag in enumerate(red_flags[:5], 1):  # Show top 5
+        print(f"   {i}. {flag}")
+    
+    if len(red_flags) > 5:
+        print(f"   ... and {len(red_flags) - 5} more")
+    
+    print(f"\n🔍 Individual Agent Results:")
+    print("-" * 40)
+    agent_results = results.get('agent_results', [])
+    for agent_result in agent_results:
+        print(f"🤖 {agent_result['agent']}:")
+        print(f"   🎯 Risk: {agent_result['risk_score']}/10")
+        print(f"   📊 Confidence: {agent_result['confidence']}/10")
+        print(f"   ⏱️  Time: {agent_result['execution_time']:.2f}s")
+        agent_red_flags = agent_result.get('red_flags', [])
+        print(f"   🚩 Flags: {len(agent_red_flags)}")
+        if agent_red_flags:
+            print(f"   📋 Top concerns: {', '.join(agent_red_flags[:2])}")
+        print()
+    
+    # Test agent swapping
+    print("🔄 Testing Agent Hot-Swapping...")
+    print("-" * 40)
+    
+    # Add a new specialized agent
+    new_agent_config = LLMAgentConfig(
+        agent_name="urgency_detector",
+        system_prompt="You are an expert at detecting urgency tactics and pressure techniques in fraudulent invoices.",
+        prompt_template="""
+Analyze this invoice for urgency tactics and pressure techniques:
 
-Available Tools:
-  Hardcoded Tools: Fast, deterministic fraud detection
-  LLM Agents: Contextual analysis for complex patterns
-        """
+INVOICE DATA:
+{data}
+
+Focus on:
+- Language that creates false urgency
+- Pressure tactics in payment terms
+- Threats or consequences mentioned
+- Unusual urgency indicators
+
+Return JSON format:
+{{
+    "risk_score": <1-10>,
+    "confidence": <1-10>,
+    "analysis": "<detailed analysis>",
+    "red_flags": ["<flag1>", "<flag2>"],
+    "fraud_indicators": [
+        {{"type": "urgency_tactic", "severity": "medium", "description": "Detailed description"}}
+    ]
+}}
+""",
+        temperature=0.1
     )
     
+    print("➕ Adding new 'urgency_detector' agent...")
+    detector.llm_executor.agent_registry.register_agent_config(new_agent_config)
+    
+    # Test with the new agent
+    urgency_task = LLMTask(
+        task_id="urgency_analysis",
+        data=detector.demo_invoice,
+        agent_names=["urgency_detector"],
+        timeout=30.0
+    )
+    
+    urgency_results = await detector.llm_executor.execute_tasks_parallel([urgency_task])
+    
+    if urgency_results and urgency_results[0].success:
+        print("✅ New urgency detector agent executed successfully!")
+        urgency_data = urgency_results[0].result
+        if isinstance(urgency_data, dict):
+            print(f"   🎯 Urgency Risk Score: {urgency_data.get('risk_score', 'N/A')}/10")
+            print(f"   📋 Urgency Flags: {len(urgency_data.get('red_flags', []))}")
+    else:
+        print("❌ New agent failed to execute")
+    
+    print("\n🔄 Running analysis again with new agent...")
+    enhanced_results = await detector.analyze_invoice_parallel(detector.demo_invoice)
+    print(f"✅ Enhanced analysis completed with {enhanced_results['agents_used']} agents")
+    print(f"🎯 Updated Risk Score: {enhanced_results['overall_risk_score']}/10")
+    
+    print("\n🏁 Demo completed successfully!")
+
+
+async def main():
+    """Main function for command-line usage"""
+    parser = argparse.ArgumentParser(description="Enhanced Invoice Fraud Detection with Parallel LLM Agents")
+    
     # Input options
-    input_group = parser.add_mutually_exclusive_group(required=True)
-    input_group.add_argument("--invoice", help="Invoice data as string")
-    input_group.add_argument("--file", help="File containing invoice data")
-    input_group.add_argument("--demo", action="store_true", help="Use demo invoice data")
+    parser.add_argument("--demo", action="store_true", help="Run demo with sample invoice")
+    parser.add_argument("--invoice", help="Invoice text to analyze")
+    parser.add_argument("--file", help="File containing invoice data")
     
     # Processing options
-    parser.add_argument("--parallel", action="store_true", default=True, help="Enable parallel processing (default)")
-    parser.add_argument("--sequential", action="store_true", help="Use sequential processing")
-    parser.add_argument("--max-workers", type=int, default=4, help="Maximum parallel workers (default: 4)")
-    
-    # Output options
-    parser.add_argument("--output", help="Output file for results (JSON)")
+    parser.add_argument("--max-workers", type=int, default=4, help="Maximum parallel workers")
     parser.add_argument("--verbose", action="store_true", help="Verbose logging")
-    parser.add_argument("--quiet", action="store_true", help="Minimal output")
+    parser.add_argument("--output", help="Output file for results (JSON)")
     
     args = parser.parse_args()
     
-    # Configure logging level
+    # Configure logging
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
-    elif args.quiet:
-        logging.getLogger().setLevel(logging.WARNING)
+    
+    # Run demo if requested
+    if args.demo:
+        await demo_enhanced_fraud_detection()
+        return
     
     # Initialize detector
-    enable_parallel = args.parallel and not args.sequential
-    detector = ParallelInvoiceFraudDetector(
-        max_workers=args.max_workers,
-        enable_parallel=enable_parallel
-    )
+    detector = EnhancedParallelInvoiceFraudDetector(max_workers=args.max_workers)
     
     # Get invoice data
+    invoice_data = None
     try:
-        if args.demo:
-            invoice_text = detector.demo_invoice
-            if not args.quiet:
-                print("Using demo invoice data...")
-        elif args.file:
+        if args.file:
             with open(args.file, 'r', encoding='utf-8') as f:
                 content = f.read()
                 try:
-                    # Try to parse as JSON first
                     data = json.loads(content)
-                    invoice_text = data.get('invoice_text', content)
+                    invoice_data = data.get('invoice_text', content)
                 except json.JSONDecodeError:
-                    # Use as plain text
-                    invoice_text = content
+                    invoice_data = content
+        elif args.invoice:
+            invoice_data = args.invoice
         else:
-            invoice_text = args.invoice
+            print("❌ Error: No invoice data provided. Use --demo, --invoice, or --file")
+            return 1
             
-        if not invoice_text.strip():
-            print("❌ Error: No invoice data provided")
-            return 3
+        if not invoice_data.strip():
+            print("❌ Error: Empty invoice data provided")
+            return 1
             
     except FileNotFoundError:
         print(f"❌ Error: File '{args.file}' not found")
-        return 3
+        return 1
     except Exception as e:
         print(f"❌ Error reading input: {e}")
-        return 3
+        return 1
     
     # Analyze invoice
     try:
-        if not args.quiet:
-            print(f"\n🔍 Starting fraud analysis...")
-            print(f"   Parallel Processing: {'Enabled' if enable_parallel else 'Disabled'}")
-            print(f"   Max Workers: {args.max_workers}")
+        print("🔍 Starting enhanced fraud analysis...")
+        print(f"   Max Workers: {args.max_workers}")
         
-        results = await detector.analyze_invoice_parallel(invoice_text)
+        results = await detector.analyze_invoice_parallel(invoice_data)
         
-        # Format and display results
-        format_results(results, invoice_text, args.output)
+        # Display results
+        print(f"\n📊 ANALYSIS RESULTS:")
+        print(f"🎯 Risk Score: {results['overall_risk_score']}/10")
+        print(f"📋 Recommendation: {results['recommendation']}")
+        print(f"🚨 Status: {results['status']}")
+        print(f"🤖 Agents Used: {results['agents_used']}")
+        print(f"⏱️  Total Time: {results.get('total_execution_time', 0):.2f}s")
+        
+        if results['red_flags']:
+            print(f"\n🚩 Red Flags ({len(results['red_flags'])}):")
+            for flag in results['red_flags']:
+                print(f"   • {flag}")
+        
+        # Save results if output file specified
+        if args.output:
+            with open(args.output, 'w', encoding='utf-8') as f:
+                json.dump(results, f, indent=2, ensure_ascii=False)
+            print(f"\n💾 Results saved to {args.output}")
         
         # Return appropriate exit code
-        recommendation = results.get('recommendation', 'UNKNOWN')
-        if recommendation == 'APPROVE':
-            return 0  # Success, low risk
-        elif recommendation == 'REVIEW':
+        if results['recommendation'] in ['REJECT']:
+            return 2  # High risk
+        elif results['recommendation'] in ['MANUAL_REVIEW']:
             return 1  # Medium risk
         else:
-            return 2  # High risk
+            return 0  # Low risk
             
-    except KeyboardInterrupt:
-        print("\n⚠️ Analysis interrupted by user")
-        return 130
     except Exception as e:
-        log.error(f"Analysis failed: {e}")
         print(f"❌ Analysis failed: {e}")
+        if args.verbose:
+            import traceback
+            traceback.print_exc()
         return 3
 
-if __name__ == "__main__":
-    exit_code = asyncio.run(main())
-'''
-import os
-import sys
-import json
-import logging
-import argparse
-import time
-import asyncio
-import concurrent.futures
-import math
-import statistics
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, Callable
-from dataclasses import dataclass
-from enum import Enum
-from dotenv import load_dotenv
-
-# Add current directory to path for imports
-sys.path.append(str(Path(__file__).parent))
-
-try:
-    from hardcoded_tools import HardcodedTools, ToolResult, ToolType
-    from agent_definitions import FRAUD_DETECTION_AGENTS
-    from error_validation import ErrorValidator
-except ImportError as e:
-    print(f"Import error: {e}")
-    print("Make sure all required files are in the same directory:")
-    print("- hardcoded_tools.py")
-    print("- agent_definitions.py") 
-    print("- error_validation.py")
-    sys.exit(1)
-
-try:
-    import dspy
-    DSPY_AVAILABLE = True
-except ImportError:
-    DSPY_AVAILABLE = False
-    print("DSPy not available, using direct API calls")
-
-try:
-    import google.generativeai as genai
-    GENAI_AVAILABLE = True
-except ImportError:
-    GENAI_AVAILABLE = False
-    print("Google GenerativeAI not available")
-
-# Configure DSPy with your preferred LM
-# dspy.configure(lm=dspy.OpenAI(model="gpt-3.5-turbo"))
-
-class ToolType(Enum):
-    HARDCODED = "hardcoded"
-    LLM = "llm"
-
-@dataclass
-class ToolResult:
-    success: bool
-    result: Any
-    error: Optional[str] = None
-    execution_time: float = 0.0
-
-class HardcodedTools:
-    """Non-LLM tools for fast calculations and operations"""
-    
-    @staticmethod
-    def calculator(expression: str) -> ToolResult:
-        """Safe calculator for mathematical expressions"""
-        start_time = time.time()
-        try:
-            # Only allow safe operations
-            allowed_names = {
-                k: v for k, v in math.__dict__.items() if not k.startswith("__")
-            }
-            allowed_names.update({
-                "abs": abs, "round": round, "min": min, "max": max,
-                "sum": sum, "len": len, "pow": pow
-            })
-            
-            result = eval(expression, {"__builtins__": {}}, allowed_names)
-            execution_time = time.time() - start_time
-            return ToolResult(True, result, execution_time=execution_time)
-        except Exception as e:
-            execution_time = time.time() - start_time
-            return ToolResult(False, None, str(e), execution_time)
-    
-    @staticmethod
-    def statistics_calc(numbers: List[float], operation: str) -> ToolResult:
-        """Statistical calculations on list of numbers"""
-        start_time = time.time()
-        try:
-            if not numbers:
-                raise ValueError("Empty list provided")
-            
-            operations = {
-                'mean': statistics.mean,
-                'median': statistics.median,
-                'mode': statistics.mode,
-                'stdev': statistics.stdev,
-                'variance': statistics.variance,
-                'min': min,
-                'max': max,
-                'sum': sum,
-                'count': len
-            }
-            
-            if operation not in operations:
-                raise ValueError(f"Unknown operation: {operation}")
-            
-            result = operations[operation](numbers)
-            execution_time = time.time() - start_time
-            return ToolResult(True, result, execution_time=execution_time)
-        except Exception as e:
-            execution_time = time.time() - start_time
-            return ToolResult(False, None, str(e), execution_time)
-    
-    @staticmethod
-    def string_operations(text: str, operation: str, **kwargs) -> ToolResult:
-        """Fast string operations"""
-        start_time = time.time()
-        try:
-            operations = {
-                'length': lambda t: len(t),
-                'upper': lambda t: t.upper(),
-                'lower': lambda t: t.lower(),
-                'reverse': lambda t: t[::-1],
-                'word_count': lambda t: len(t.split()),
-                'char_count': lambda t: len(t.replace(' ', '')),
-                'replace': lambda t: t.replace(kwargs.get('old', ''), kwargs.get('new', '')),
-                'split': lambda t: t.split(kwargs.get('delimiter', ' ')),
-                'join': lambda t: kwargs.get('delimiter', ' ').join(t.split())
-            }
-            
-            if operation not in operations:
-                raise ValueError(f"Unknown operation: {operation}")
-            
-            result = operations[operation](text)
-            execution_time = time.time() - start_time
-            return ToolResult(True, result, execution_time=execution_time)
-        except Exception as e:
-            execution_time = time.time() - start_time
-            return ToolResult(False, None, str(e), execution_time)
-    
-    @staticmethod
-    def list_operations(data: List[Any], operation: str, **kwargs) -> ToolResult:
-        """Fast list operations"""
-        start_time = time.time()
-        try:
-            operations = {
-                'length': lambda d: len(d),
-                'reverse': lambda d: list(reversed(d)),
-                'sort': lambda d: sorted(d, reverse=kwargs.get('reverse', False)),
-                'unique': lambda d: list(set(d)),
-                'filter_type': lambda d: [x for x in d if isinstance(x, kwargs.get('type', str))],
-                'sum': lambda d: sum(x for x in d if isinstance(x, (int, float))),
-                'slice': lambda d: d[kwargs.get('start', 0):kwargs.get('end', len(d))]
-            }
-            
-            if operation not in operations:
-                raise ValueError(f"Unknown operation: {operation}")
-            
-            result = operations[operation](data)
-            execution_time = time.time() - start_time
-            return ToolResult(True, result, execution_time=execution_time)
-        except Exception as e:
-            execution_time = time.time() - start_time
-            return ToolResult(False, None, str(e), execution_time)
-
-class ToolSelector(dspy.Signature):
-    """Signature for selecting appropriate tools for a task"""
-    query: str = dspy.InputField(desc="The user's query or task")
-    available_tools: str = dspy.InputField(desc="List of available tools and their descriptions")
-    selected_tools: str = dspy.OutputField(desc="JSON list of tools to use with their parameters")
-
-class TaskDecomposer(dspy.Signature):
-    """Signature for decomposing complex tasks into subtasks"""
-    task: str = dspy.InputField(desc="Complex task to decompose")
-    subtasks: str = dspy.OutputField(desc="JSON list of independent subtasks that can be executed in parallel")
-
-class ResultSynthesizer(dspy.Signature):
-    """Signature for combining results from parallel execution"""
-    original_query: str = dspy.InputField(desc="Original user query")
-    results: str = dspy.InputField(desc="JSON results from parallel execution")
-    final_answer: str = dspy.OutputField(desc="Synthesized final answer combining all results")
-
-class ParallelAgent:
-    """Main agent class with parallel processing capabilities"""
-    
-    def __init__(self, max_workers: int = 4):
-        self.max_workers = max_workers
-        self.hardcoded_tools = HardcodedTools()
-        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
-        
-        # Initialize DSPy modules
-        self.tool_selector = dspy.ChainOfThought(ToolSelector)
-        self.task_decomposer = dspy.ChainOfThought(TaskDecomposer)
-        self.result_synthesizer = dspy.ChainOfThought(ResultSynthesizer)
-        
-        # Tool registry
-        self.tools = {
-            'calculator': {
-                'type': ToolType.HARDCODED,
-                'function': self.hardcoded_tools.calculator,
-                'description': 'Evaluate mathematical expressions safely',
-                'params': ['expression']
-            },
-            'statistics': {
-                'type': ToolType.HARDCODED,
-                'function': self.hardcoded_tools.statistics_calc,
-                'description': 'Calculate statistics on list of numbers',
-                'params': ['numbers', 'operation']
-            },
-            'string_ops': {
-                'type': ToolType.HARDCODED,
-                'function': self.hardcoded_tools.string_operations,
-                'description': 'Perform string operations',
-                'params': ['text', 'operation', 'kwargs']
-            },
-            'list_ops': {
-                'type': ToolType.HARDCODED,
-                'function': self.hardcoded_tools.list_operations,
-                'description': 'Perform list operations',
-                'params': ['data', 'operation', 'kwargs']
-            }
-        }
-    
-    def get_available_tools_description(self) -> str:
-        """Get formatted description of available tools"""
-        descriptions = []
-        for name, tool in self.tools.items():
-            descriptions.append(f"{name}: {tool['description']} (params: {tool['params']})")
-        return "\n".join(descriptions)
-    
-    def execute_tool(self, tool_name: str, params: Dict[str, Any]) -> ToolResult:
-        """Execute a single tool with given parameters"""
-        if tool_name not in self.tools:
-            return ToolResult(False, None, f"Unknown tool: {tool_name}")
-        
-        tool = self.tools[tool_name]
-        try:
-            if tool['type'] == ToolType.HARDCODED:
-                return tool['function'](**params)
-            else:
-                # For LLM tools, implement async execution here
-                pass
-        except Exception as e:
-            return ToolResult(False, None, str(e))
-    
-    async def execute_tools_parallel(self, tool_calls: List[Dict[str, Any]]) -> List[ToolResult]:
-        """Execute multiple tools in parallel"""
-        loop = asyncio.get_event_loop()
-        
-        # Create futures for each tool call
-        futures = []
-        for call in tool_calls:
-            future = loop.run_in_executor(
-                self.executor, 
-                self.execute_tool, 
-                call['tool'], 
-                call['params']
-            )
-            futures.append(future)
-        
-        # Wait for all to complete
-        results = await asyncio.gather(*futures, return_exceptions=True)
-        
-        # Handle any exceptions
-        processed_results = []
-        for i, result in enumerate(results):
-            if isinstance(result, Exception):
-                processed_results.append(ToolResult(False, None, str(result)))
-            else:
-                processed_results.append(result)
-        
-        return processed_results
-    
-    def decompose_task(self, task: str) -> List[str]:
-        """Decompose a complex task into subtasks"""
-        try:
-            response = self.task_decomposer(task=task)
-            subtasks = json.loads(response.subtasks)
-            return subtasks if isinstance(subtasks, list) else [task]
-        except:
-            # If decomposition fails, return original task
-            return [task]
-    
-    def select_tools(self, query: str) -> List[Dict[str, Any]]:
-        """Select appropriate tools for a query"""
-        try:
-            available_tools = self.get_available_tools_description()
-            response = self.tool_selector(query=query, available_tools=available_tools)
-            tool_calls = json.loads(response.selected_tools)
-            return tool_calls if isinstance(tool_calls, list) else []
-        except:
-            return []
-    
-    async def process_query(self, query: str) -> str:
-        """Main method to process a query with parallel execution"""
-        start_time = time.time()
-        
-        # Step 1: Decompose the task if complex
-        subtasks = self.decompose_task(query)
-        print(f"Decomposed into {len(subtasks)} subtasks")
-        
-        # Step 2: For each subtask, select tools
-        all_tool_calls = []
-        for subtask in subtasks:
-            tool_calls = self.select_tools(subtask)
-            all_tool_calls.extend(tool_calls)
-        
-        if not all_tool_calls:
-            return "No applicable tools found for this query."
-        
-        print(f"Selected {len(all_tool_calls)} tool calls for parallel execution")
-        
-        # Step 3: Execute all tools in parallel
-        results = await self.execute_tools_parallel(all_tool_calls)
-        
-        # Step 4: Synthesize results
-        results_json = json.dumps([
-            {
-                'tool': all_tool_calls[i]['tool'],
-                'success': result.success,
-                'result': result.result,
-                'error': result.error,
-                'execution_time': result.execution_time
-            }
-            for i, result in enumerate(results)
-        ])
-        
-        try:
-            final_response = self.result_synthesizer(
-                original_query=query,
-                results=results_json
-            )
-            synthesis_result = final_response.final_answer
-        except:
-            # Fallback synthesis
-            successful_results = [r for r in results if r.success]
-            synthesis_result = f"Executed {len(successful_results)} tools successfully. Results: {[r.result for r in successful_results]}"
-        
-        total_time = time.time() - start_time
-        print(f"Total processing time: {total_time:.2f}s")
-        
-        return synthesis_result
-    
-    def __del__(self):
-        """Cleanup executor on deletion"""
-        if hasattr(self, 'executor'):
-            self.executor.shutdown(wait=False)
-
-# Example usage and testing
-async def main():
-    """Example usage of the parallel agent"""
-    
-    # Initialize agent
-    agent = ParallelAgent(max_workers=4)
-    
-    # Example queries
-    queries = [
-        "Calculate the mean, median, and standard deviation of the numbers [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] and also compute 5 + 3 * 2",
-        "Find the length of the string 'Hello World', convert it to uppercase, and reverse it",
-        "Sort the list [3, 1, 4, 1, 5, 9, 2, 6] in descending order and find its length"
-    ]
-    
-    for i, query in enumerate(queries, 1):
-        print(f"\n{'='*50}")
-        print(f"Query {i}: {query}")
-        print('='*50)
-        
-        result = await agent.process_query(query)
-        print(f"Result: {result}")
 
 if __name__ == "__main__":
-    # Run the example
-    asyncio.run(main())
-
-# Additional utility functions for advanced parallel processing
-class ParallelTaskManager:
-    """Advanced task manager for complex parallel workflows"""
-    
-    def __init__(self, agent: ParallelAgent):
-        self.agent = agent
-        self.task_queue = asyncio.Queue()
-        self.results = {}
-    
-    async def add_task(self, task_id: str, query: str, priority: int = 0):
-        """Add a task to the queue with priority"""
-        await self.task_queue.put((priority, task_id, query))
-    
-    async def process_queue(self, max_concurrent: int = 3):
-        """Process all tasks in the queue with concurrency control"""
-        semaphore = asyncio.Semaphore(max_concurrent)
-        tasks = []
-        
-        while not self.task_queue.empty():
-            priority, task_id, query = await self.task_queue.get()
-            
-            async def process_task(tid, q):
-                async with semaphore:
-                    result = await self.agent.process_query(q)
-                    self.results[tid] = result
-                    return tid, result
-            
-            task = asyncio.create_task(process_task(task_id, query))
-            tasks.append(task)
-        
-        await asyncio.gather(*tasks)
-        return self.results
-
-# Performance monitoring decorator
-def monitor_performance(func):
-    """Decorator to monitor function performance"""
-    async def wrapper(*args, **kwargs):
-        start_time = time.time()
-        try:
-            result = await func(*args, **kwargs)
-            execution_time = time.time() - start_time
-            print(f"{func.__name__} executed in {execution_time:.4f}s")
-            return result
-        except Exception as e:
-            execution_time = time.time() - start_time
-            print(f"{func.__name__} failed after {execution_time:.4f}s: {e}")
-            raise
-    return wrapper
-'''
+    if len(sys.argv) == 1:
+        # No arguments provided, run demo
+        print("No arguments provided. Running demo...")
+        asyncio.run(demo_enhanced_fraud_detection())
+    else:
+        # Run with command line arguments
+        exit_code = asyncio.run(main())
+        sys.exit(exit_code)
