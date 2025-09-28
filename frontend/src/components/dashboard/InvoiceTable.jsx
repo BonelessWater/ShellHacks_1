@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, X, AlertTriangle, Calendar, DollarSign, Building, TrendingUp, AlertCircle } from 'lucide-react';
+import { Eye, X, AlertTriangle, AlertCircle } from 'lucide-react';
 import { getStatusColor, getStatusIcon } from '../../utils/formatters';
 
 const InvoiceTable = ({ invoices, filteredInvoices }) => {
