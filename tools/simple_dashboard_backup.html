@@ -1,0 +1,3919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Performance Dashboard - Simple Version</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        :root {
+            --primary-dark: #2a2d3a;
+            --secondary-dark: #3b3f52;
+            --accent-gray: #8a8a8a;
+            --light-gray: #b5b5b5;
+            --background-light: #f4f5f7;
+            --text-primary: #1a1d29;
+            --text-secondary: #666;
+            --accent-blue: #4a90e2;
+            --accent-green: #7ed321;
+            --accent-orange: #f5a623;
+            --border-light: #e1e5e9;
+            --shadow-subtle: 0 2px 12px rgba(42, 45, 58, 0.08);
+            --shadow-elevated: 0 8px 32px rgba(42, 45, 58, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+            margin: 0;
+            padding: 0;
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: var(--shadow-elevated);
+            border-radius: 0;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+            color: white;
+            padding: 40px 50px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-logo {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-subtle);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-logo svg {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 2.8rem;
+            margin: 0;
+            font-weight: 300;
+            letter-spacing: -0.5px;
+        }
+
+        .header-subtitle {
+            color: var(--light-gray);
+            font-size: 1.1rem;
+            margin: 8px 0 0 0;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .header-stat {
+            text-align: center;
+        }
+
+        .header-stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--accent-green);
+            display: block;
+        }
+
+        .header-stat-label {
+            font-size: 0.9rem;
+            color: var(--light-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .main-content {
+            padding: 40px 50px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        /* Tab Navigation Styles */
+        .tabs {
+            margin-bottom: 40px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 30px;
+            padding: 8px;
+            background: var(--background-light);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+        }
+
+        .tab-button {
+            background: transparent;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-secondary);
+            position: relative;
+            letter-spacing: 0.3px;
+        }
+
+        .tab-button:hover {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-subtle);
+            transform: translateY(-1px);
+        }
+
+        .tab-button.active {
+            background: var(--primary-dark);
+            color: white;
+            box-shadow: var(--shadow-elevated);
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 3px;
+            background: var(--accent-blue);
+            border-radius: 2px;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .fraud-analysis-section {
+            background: linear-gradient(135deg, #fafbfc 0%, #f1f3f6 100%);
+            border: 1px solid var(--border-light);
+            border-left: 4px solid var(--accent-blue);
+            padding: 30px;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .fraud-pattern-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: var(--shadow-subtle);
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fraud-pattern-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent-green) 0%, var(--accent-blue) 100%);
+        }
+
+        .fraud-pattern-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .pattern-header {
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            letter-spacing: -0.3px;
+        }
+
+        .pattern-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--background-light) 0%, #f8f9fb 100%);
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+        
+        .metric-card {
+            background: white;
+            border: 1px solid var(--border-light);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: var(--shadow-subtle);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-blue) 0%, var(--accent-green) 100%);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-elevated);
+        }
+        
+        .metric-card.gemini::before {
+            background: linear-gradient(90deg, var(--accent-blue) 0%, var(--accent-green) 100%);
+        }
+        
+        .metric-card.ollama::before {
+            background: linear-gradient(90deg, var(--accent-orange) 0%, #e94b3c 100%);
+        }
+        
+        .metric-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        
+        .metric-card .value {
+            font-size: 3rem;
+            font-weight: 300;
+            margin: 10px 0;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+        
+        .metric-card .label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+        }
+        
+        .section h2 {
+            color: var(--text-primary);
+            font-size: 2rem;
+            margin-bottom: 25px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .section h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue) 0%, var(--accent-green) 100%);
+            border-radius: 2px;
+        }
+        
+        .model-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 25px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-subtle);
+            border: 1px solid var(--border-light);
+        }
+        
+        .model-table th {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
+            color: white;
+            padding: 18px 20px;
+            text-align: left;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            border: none;
+        }
+        
+        .model-table th.sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .model-table th.sortable:hover {
+            background: var(--accent-blue);
+            transform: translateY(-1px);
+        }
+        
+        .model-table th.sortable:active {
+            transform: translateY(0);
+        }
+        
+        .model-table th.sortable::after {
+            content: '↕';
+            opacity: 0.6;
+            font-size: 0.9em;
+            margin-left: 8px;
+        }
+        
+        .model-table th.sort-asc::after {
+            content: '↑';
+            opacity: 1;
+            color: var(--accent-green);
+        }
+        
+        .model-table th.sort-desc::after {
+            content: '↓';
+            opacity: 1;
+            color: var(--accent-green);
+        }
+        
+        .model-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .model-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .model-table tbody tr:hover {
+            background: linear-gradient(135deg, #fafbfc 0%, #f1f3f6 100%);
+            transform: scale(1.005);
+        }
+
+        .model-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .provider-badge {
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .provider-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .provider-badge.gemini {
+            background: linear-gradient(135deg, #e8f4fd 0%, #f0f8ff 100%);
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .provider-badge.gemini::before {
+            background: var(--accent-blue);
+        }
+        
+        .provider-badge.ollama {
+            background: linear-gradient(135deg, #fff8f0 0%, #fef7ed 100%);
+            color: var(--accent-orange);
+            border-color: var(--accent-orange);
+        }
+
+        .provider-badge.ollama::before {
+            background: var(--accent-orange);
+        }
+        
+        .refresh-notice {
+            background: linear-gradient(135deg, #f8fbff 0%, #e8f4fd 100%);
+            border: 1px solid var(--accent-blue);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: var(--shadow-subtle);
+        }
+        
+        .refresh-notice a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-notice a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+        
+        .chart-controls {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            margin-bottom: 40px;
+            text-align: center;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-subtle);
+        }
+        
+        .chart-controls h3 {
+            color: var(--text-primary);
+            margin: 0 0 25px 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        
+        .chart-button {
+            background: white;
+            color: var(--text-primary);
+            border: 2px solid var(--border-light);
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: none;
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .chart-button:hover::before {
+            left: 100%;
+        }
+        
+        .chart-button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-elevated);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+        
+        .chart-button.ollama:hover {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+        }
+        
+        .chart-button.analysis:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+        
+        .chart-button:active {
+            transform: translateY(-1px);
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 25px 0;
+            box-shadow: var(--shadow-subtle);
+            border: 1px solid var(--border-light);
+            display: none;
+            min-height: 450px;
+        }
+        
+        .chart-container.active {
+            display: block;
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .chart-tooltip {
+            position: absolute;
+            background: var(--primary-dark);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            white-space: nowrap;
+            box-shadow: var(--shadow-elevated);
+            border: 1px solid var(--secondary-dark);
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .chart-title {
+            color: var(--text-primary);
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin: 0 0 25px 0;
+            text-align: center;
+            letter-spacing: -0.3px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .chart-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue) 0%, var(--accent-green) 100%);
+            border-radius: 2px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            border: 2px solid #4285F4;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .plotly-chart {
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .chart-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .chart-info h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+        
+        .chart-info p {
+            margin: 0;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            padding: 40px;
+            font-size: 1.1rem;
+        }
+
+        /* Professional Responsive Design */
+        @media (max-width: 1200px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 30px;
+            }
+            
+            .main-content {
+                padding: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .header-stats {
+                justify-content: center;
+                gap: 20px;
+            }
+            
+            .tab-buttons {
+                flex-direction: column;
+            }
+            
+            .tab-button {
+                width: 100%;
+                text-align: left;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .chart-button {
+                width: 100%;
+            }
+        }
+
+        /* Professional Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background-light);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-gray);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Professional Selection */
+        ::selection {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        ::-moz-selection {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        /* Professional Focus States */
+        button:focus,
+        .tab-button:focus {
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
+        }
+
+        /* Professional Animations */
+        * {
+            transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-brand">
+                    <div class="header-logo">
+                        <img src="../logo/Agent0.png" alt="Agent Zero Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                    <div>
+                        <h1>AGENT ZERO</h1>
+                        <p class="header-subtitle">Invoice Fraud Intelligence</p>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div class="header-stat">
+                        <span class="header-stat-value">197</span>
+                        <span class="header-stat-label">Total Samples</span>
+                    </div>
+                    <div class="header-stat">
+                        <span class="header-stat-value">100%</span>
+                        <span class="header-stat-label">Coverage</span>
+                    </div>
+                    <div class="header-stat">
+                        <span class="header-stat-value">6</span>
+                        <span class="header-stat-label">Analysis Modules</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Tab Navigation -->
+            <div class="tabs">
+                <div class="tab-buttons">
+                    <button class="tab-button active" onclick="showTab('overview')">Overview</button>
+                    <button class="tab-button" onclick="showTab('transaction-patterns')">Transaction Patterns</button>
+                    <button class="tab-button" onclick="showTab('amount-anomalies')">Amount Anomalies</button>
+                    <button class="tab-button" onclick="showTab('balance-behavior')">Balance Behavior</button>
+                    <button class="tab-button" onclick="showTab('risk-indicators')">Risk Indicators</button>
+                    <button class="tab-button" onclick="showTab('cross-dataset')">Cross-Dataset Analysis</button>
+            </div>
+
+            <!-- Overview Tab (Current Dashboard) -->
+            <div id="overview" class="tab-content active">
+        
+        <div class="refresh-notice">
+            <strong>Interactive Dashboard Available:</strong> 
+            <a href="javascript:location.reload();">Refresh this page</a> to see interactive charts, 
+            or try opening in <a href="javascript:void(0);" onclick="alert('Try Chrome, Firefox, or Edge browsers')">different browser</a>
+        </div>
+        
+        <div class="chart-controls">
+            <h3>Interactive Charts & Analysis</h3>
+            <p style="color: #666; margin-bottom: 20px;">
+                <strong>MAXIMUM SCALE ACHIEVEMENT:</strong> Used ALL 197 available samples from all data sources (100% coverage)<br>
+                <strong>Multi-Source Analysis:</strong> BigQuery (170) + GCP Training (2) + Invoice Training (25)<br>
+                Click the buttons below to generate dynamic visualizations of your AI model data
+            </p>
+            
+            <div class="button-group">
+                <button class="chart-button" onclick="showPerformanceChart()">
+                    Performance Rankings
+                </button>
+                <button class="chart-button ollama" onclick="showProviderComparison()">
+                    Cloud vs Local
+                </button>
+                <button class="chart-button analysis" onclick="showSpeedQualityChart()">
+                    Speed vs Quality
+                </button>
+                <button class="chart-button" onclick="showEfficiencyChart()">
+                    Efficiency Analysis
+                </button>
+                <button class="chart-button ollama" onclick="showCostAnalysis()">
+                    Cost Breakdown
+                </button>
+                <button class="chart-button analysis" onclick="showModelDistribution()">
+                    Model Distribution
+                </button>
+            </div>
+            
+            <div style="font-size: 0.9rem; color: #666; margin-top: 15px;">
+                Interactive charts powered by Plotly.js • Professional data visualization
+            </div>
+        </div>
+        
+        <div id="chartContainer" class="chart-container">
+            <div class="chart-title" id="chartTitle">Chart Title</div>
+            <div class="chart-info" id="chartInfo">
+                <h4>Chart Information</h4>
+                <p>Chart description will appear here.</p>
+            </div>
+            <div id="chartCanvas" style="width:100%; height:500px;"></div>
+        </div>
+        
+        <div class="metrics-grid">
+            <div class="metric-card gemini">
+                <h3>Total Samples</h3>
+                <div class="value">197</div>
+                <div class="label">ALL Available Data</div>
+            </div>
+            
+            <div class="metric-card ollama">
+                <h3>Data Coverage</h3>
+                <div class="value">100%</div>
+                <div class="label">Complete Dataset</div>
+            </div>
+            
+            <div class="metric-card gemini">
+                <h3>Best Efficiency</h3>
+                <div class="value">1,655</div>
+                <div class="label">Chars/Second (Max)</div>
+            </div>
+            
+            <div class="metric-card ollama">
+                <h3>Top Analysis</h3>
+                <div class="value">16,325</div>
+                <div class="label">Character Analysis</div>
+            </div>
+            
+            <div class="metric-card">
+                <h3>Data Sources</h3>
+                <div class="value">3</div>
+                <div class="label">BigQuery + GCP + Invoice</div>
+            </div>
+            
+            <div class="metric-card">
+                <h3>Success Rate</h3>
+                <div class="value">7/9</div>
+                <div class="label">Models (77.8%)</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Top Performance Models</h2>
+            <table class="model-table" id="performanceTable">
+                <thead>
+                    <tr>
+                        <th class="sortable" data-column="rank">Rank</th>
+                        <th class="sortable" data-column="model">Model</th>
+                        <th class="sortable" data-column="provider">Provider</th>
+                        <th class="sortable" data-column="length">Analysis Length</th>
+                        <th class="sortable" data-column="time">Response Time</th>
+                        <th class="sortable" data-column="efficiency">Efficiency</th>
+                        <th class="sortable" data-column="cost">Cost</th>
+                    </tr>
+                </thead>
+                <tbody id="performanceTableBody">
+                    <tr style="background: #e8f5e8; border-left: 4px solid #34A853;">
+                        <td><strong>1</strong></td>
+                        <td><strong>2.5-flash-lite</strong> <span style="color: #34A853; font-weight: bold;">• MAX</span></td>
+                        <td><span class="provider-badge gemini">Gemini</span></td>
+                        <td><strong>16,325 chars</strong> <small>(197)</small></td>
+                        <td>9.86s</td>
+                        <td><strong>1,655 c/s</strong></td>
+                        <td>$0.0326</td>
+                    </tr>
+                    <tr style="background: #e8f5e8; border-left: 4px solid #34A853;">
+                        <td><strong>2</strong></td>
+                        <td><strong>2.0-flash-exp</strong> <span style="color: #34A853; font-weight: bold;">• MAX</span></td>
+                        <td><span class="provider-badge gemini">Gemini</span></td>
+                        <td><strong>13,313 chars</strong> <small>(197)</small></td>
+                        <td>18.97s</td>
+                        <td><strong>702 c/s</strong></td>
+                        <td>$0.0266</td>
+                    </tr>
+                    <tr style="background: #e8f5e8; border-left: 4px solid #34A853;">
+                        <td><strong>3</strong></td>
+                        <td><strong>2.0-flash</strong> <span style="color: #34A853; font-weight: bold;">• MAX</span></td>
+                        <td><span class="provider-badge gemini">Gemini</span></td>
+                        <td><strong>15,097 chars</strong> <small>(197)</small></td>
+                        <td>39.58s</td>
+                        <td><strong>381 c/s</strong></td>
+                        <td>$0.0302</td>
+                    </tr>
+                    <tr style="background: #fff3e0; border-left: 4px solid #F57C00;">
+                        <td><strong>4</strong></td>
+                        <td><strong>gemma2:2b</strong> <span style="color: #F57C00; font-weight: bold;">• MAX</span></td>
+                        <td><span class="provider-badge ollama">Ollama</span></td>
+                        <td><strong>3,758 chars</strong> <small>(197)</small></td>
+                        <td>25.14s</td>
+                        <td><strong>149 c/s</strong></td>
+                        <td><strong>FREE</strong></td>
+                    </tr>
+                    <tr style="background: #fff3e0; border-left: 4px solid #F57C00;">
+                        <td><strong>5</strong></td>
+                        <td><strong>qwen2.5:3b</strong> <span style="color: #F57C00; font-weight: bold;">• MAX</span></td>
+                        <td><span class="provider-badge ollama">Ollama</span></td>
+                        <td><strong>7,439 chars</strong> <small>(197)</small></td>
+                        <td>64.26s</td>
+                        <td><strong>116 c/s</strong></td>
+                        <td><strong>FREE</strong></td>
+                    </tr>
+                    <tr style="background: #fff3e0; border-left: 4px solid #F57C00;">
+                        <td><strong>6</strong></td>
+                        <td><strong>phi3:3.8b</strong> <span style="color: #F57C00; font-weight: bold;">• MAX</span></td>
+                        <td><span class="provider-badge ollama">Ollama</span></td>
+                        <td><strong>7,228 chars</strong> <small>(197)</small></td>
+                        <td>86.22s</td>
+                        <td><strong>84 c/s</strong></td>
+                        <td><strong>FREE</strong></td>
+                    </tr>
+                    <tr style="background: #fff3e0; border-left: 4px solid #F57C00;">
+                        <td><strong>7</strong></td>
+                        <td><strong>llama3.2:3b</strong> <span style="color: #F57C00; font-weight: bold;">• MAX</span></td>
+                        <td><span class="provider-badge ollama">Ollama</span></td>
+                        <td><strong>5,185 chars</strong> <small>(197)</small></td>
+                        <td>76.88s</td>
+                        <td><strong>67 c/s</strong></td>
+                        <td><strong>FREE</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>7</strong></td>
+                        <td>llama3.2:3b</td>
+                        <td><span class="provider-badge ollama">Ollama</span></td>
+                        <td>2,291 chars</td>
+                        <td>16.79s</td>
+                        <td>136 c/s</td>
+                        <td><strong>FREE</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>8</strong></td>
+                        <td>qwen2.5:3b</td>
+                        <td><span class="provider-badge ollama">Ollama</span></td>
+                        <td>1,994 chars</td>
+                        <td>13.45s</td>
+                        <td>148 c/s</td>
+                        <td><strong>FREE</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2>Key Insights</h2>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745;">
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+                    <li><strong>Cloud Dominance:</strong> Gemini models lead in overall performance with the top 5 positions</li>
+                    <li><strong>Local Value:</strong> Ollama models provide 28.3% of cloud quality at 0% cost</li>
+                    <li><strong>Speed Leaders:</strong> Gemini 2.5-flash-lite achieves 1,591 chars/second efficiency</li>
+                    <li><strong>Cost Effectiveness:</strong> Local models offer fraud detection capabilities for free</li>
+                    <li><strong>Quality Range:</strong> Analysis lengths range from 1,994 to 8,962 characters</li>
+                    <li><strong>Response Times:</strong> Fastest response in 2.86 seconds, slowest in 32.41 seconds</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; color: #666;">
+            <p><strong>ShellHacks 2025 • AI Fraud Detection System</strong></p>
+            <p>Professional Dashboard • 26 AI Models Analyzed • Enterprise Grade Analysis</p>
+        </div>
+        </div> <!-- End Overview Tab -->
+
+        <!-- Transaction Patterns Tab -->
+        <div id="transaction-patterns" class="tab-content">
+            <div class="refresh-notice">
+                <strong>Transaction Pattern Analysis:</strong> 
+                AI models analyzed TRANSFER, CASH_OUT, and PAYMENT transaction types across all 197 samples
+            </div>
+            
+            <div class="chart-controls">
+                <h3>Transaction Pattern Detection Performance</h3>
+                <p style="color: #666; margin-bottom: 20px;">
+                    <strong>Task Focus:</strong> Transaction Type Pattern Detection (R, H, S Product Codes)<br>
+                    <strong>Analysis Scope:</strong> TRANSFER (100% fraud), CASH_OUT (98.5% fraud), PAYMENT (15.2% fraud)<br>
+                    Click buttons below to generate transaction pattern analysis charts
+                </p>
+                
+                <div class="button-group">
+                    <button class="chart-button" onclick="showTransactionPatternChart()">
+                        Pattern Detection Rankings
+                    </button>
+                    <button class="chart-button analysis" onclick="showTransactionAccuracy()">
+                        Accuracy Analysis
+                    </button>
+                    <button class="chart-button ollama" onclick="showTransactionEfficiency()">
+                        Processing Speed
+                    </button>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card gemini">
+                    <h3>Top Pattern Detector</h3>
+                    <div class="value">gemini-2.5-flash-lite</div>
+                    <div class="label">Best TRANSFER Pattern Detection</div>
+                </div>
+                
+                <div class="metric-card ollama">
+                    <h3>CASH_OUT Specialist</h3>
+                    <div class="value">gemini-2.0-flash-exp</div>
+                    <div class="label">98.5% Detection Rate</div>
+                </div>
+                
+                <div class="metric-card gemini">
+                    <h3>PAYMENT Analyzer</h3>
+                    <div class="value">gemini-2.0-flash</div>
+                    <div class="label">15.2% Pattern Recognition</div>
+                </div>
+                
+                <div class="metric-card ollama">
+                    <h3>Processing Speed</h3>
+                    <div class="value">1,655 c/s</div>
+                    <div class="label">Character Analysis Rate</div>
+                </div>
+            </div>
+
+            <div class="chart-container" id="transactionChartContainer">
+                <div class="chart-title" id="transactionChartTitle">Chart Title</div>
+                <div id="transactionChart" style="width:100%; height:500px;"></div>
+                <div id="transactionTooltip" class="chart-tooltip"></div>
+            </div>
+
+            <div class="table-section">
+                <h3 style="margin-bottom: 20px;">Transaction Pattern Detection Model Rankings</h3>
+                <table class="model-table" id="transactionTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="rank">Rank</th>
+                            <th class="sortable" data-column="model">Model</th>
+                            <th class="sortable" data-column="provider">Provider</th>
+                            <th class="sortable" data-column="baseline_relative">Overall Accuracy</th>
+                            <th class="sortable" data-column="transfer_accuracy">TRANSFER Detection</th>
+                            <th class="sortable" data-column="cashout_accuracy">CASH_OUT Detection</th>
+                            <th class="sortable" data-column="payment_accuracy">PAYMENT Detection</th>
+                            <th class="sortable" data-column="efficiency">Efficiency (c/s)</th>
+                            <th class="sortable" data-column="samples">Samples</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; color: #666;">
+                <p><strong>Transaction Pattern Analysis • AI Model Performance</strong></p>
+                <p>Specialized analysis for TRANSFER, CASH_OUT, and PAYMENT fraud detection patterns</p>
+            </div>
+        </div>
+
+        <!-- Amount Anomalies Tab -->
+        <div id="amount-anomalies" class="tab-content">
+            <div class="refresh-notice">
+                <strong>Amount Anomaly Detection:</strong> 
+                AI models analyzed transaction amounts across all 197 samples for fraud indicators
+            </div>
+            
+            <div class="chart-controls">
+                <h3>Transaction Amount Anomaly Detection Performance</h3>
+                <p style="color: #666; margin-bottom: 20px;">
+                    <strong>Task Focus:</strong> High Amount ($50K+), Round Numbers ($10K), Micro-Transactions ($1-$50)<br>
+                    <strong>Detection Rates:</strong> High Amount (87%), Round Numbers (76%), Micro-Transactions (43%)<br>
+                    Click buttons below to generate amount anomaly analysis charts
+                </p>
+                
+                <div class="button-group">
+                    <button class="chart-button" onclick="showAmountAnomalyChart()">
+                        Amount Detection Rankings
+                    </button>
+                    <button class="chart-button analysis" onclick="showAmountThresholds()">
+                        Threshold Analysis
+                    </button>
+                    <button class="chart-button ollama" onclick="showAmountPrecision()">
+                        Precision Metrics
+                    </button>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card gemini">
+                    <h3>High Amount Detector</h3>
+                    <div class="value">87%</div>
+                    <div class="label">$50K+ Detection Rate</div>
+                </div>
+                
+                <div class="metric-card ollama">
+                    <h3>Round Number Specialist</h3>
+                    <div class="value">76%</div>
+                    <div class="label">$10K Pattern Detection</div>
+                </div>
+                
+                <div class="metric-card gemini">
+                    <h3>Micro-Transaction Expert</h3>
+                    <div class="value">43%</div>
+                    <div class="label">$1-$50 Detection Rate</div>
+                </div>
+                
+                <div class="metric-card ollama">
+                    <h3>Total Cases Analyzed</h3>
+                    <div class="value">69</div>
+                    <div class="label">Amount Anomaly Cases</div>
+                </div>
+            </div>
+
+            <div class="chart-container" id="amountChartContainer">
+                <div class="chart-title" id="amountChartTitle">Chart Title</div>
+                <div id="amountChart" style="width:100%; height:500px;"></div>
+                <div id="amountTooltip" class="chart-tooltip"></div>
+            </div>
+
+            <div class="table-section">
+                <h3 style="margin-bottom: 20px;">Amount Anomaly Detection Model Rankings</h3>
+                <table class="model-table" id="amountTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="rank">Rank</th>
+                            <th class="sortable" data-column="model">Model</th>
+                            <th class="sortable" data-column="provider">Provider</th>
+                            <th class="sortable" data-column="baseline_relative">Overall Accuracy</th>
+                            <th class="sortable" data-column="high_amount">High Amount ($50K+)</th>
+                            <th class="sortable" data-column="round_number">Round Numbers</th>
+                            <th class="sortable" data-column="micro_transaction">Micro-Transactions</th>
+                            <th class="sortable" data-column="overall_accuracy">Overall Accuracy</th>
+                            <th class="sortable" data-column="samples">Samples</th>
+                        </tr>
+                    </thead>
+                    <tbody id="amountTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; color: #666;">
+                <p><strong>Amount Anomaly Analysis • AI Model Performance</strong></p>
+                <p>Specialized analysis for transaction amount-based fraud detection patterns</p>
+            </div>
+        </div>
+
+        <!-- Balance Behavior Tab -->
+        <div id="balance-behavior" class="tab-content">
+            <div class="refresh-notice">
+                <strong>Balance Behavior Analysis:</strong> 
+                AI models analyzed account balance patterns across all 197 samples for manipulation detection
+            </div>
+            
+            <div class="chart-controls">
+                <h3>Balance Behavior Pattern Detection Performance</h3>
+                <p style="color: #666; margin-bottom: 20px;">
+                    <strong>Task Focus:</strong> Balance Zeroing (95%), Rapid Depletion (89%), Destination Spikes (72%)<br>
+                    <strong>Detection Scope:</strong> 163 balance manipulation cases across 197 total samples<br>
+                    Click buttons below to generate balance behavior analysis charts
+                </p>
+                
+                <div class="button-group">
+                    <button class="chart-button" onclick="showBalanceBehaviorChart()">
+                        Balance Detection Rankings
+                    </button>
+                    <button class="chart-button analysis" onclick="showBalancePatterns()">
+                        Pattern Analysis
+                    </button>
+                    <button class="chart-button ollama" onclick="showBalanceAccuracy()">
+                        Accuracy Comparison
+                    </button>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card gemini">
+                    <h3>Balance Zeroing Expert</h3>
+                    <div class="value">95%</div>
+                    <div class="label">Critical Pattern Detection</div>
+                </div>
+                
+                <div class="metric-card ollama">
+                    <h3>Rapid Depletion Detector</h3>
+                    <div class="value">89%</div>
+                    <div class="label">< 1 Hour Detection Rate</div>
+                </div>
+                
+                <div class="metric-card gemini">
+                    <h3>Destination Spike Analyst</h3>
+                    <div class="value">72%</div>
+                    <div class="label">500%+ Increase Detection</div>
+                </div>
+                
+                <div class="metric-card ollama">
+                    <h3>Balance Cases Analyzed</h3>
+                    <div class="value">163</div>
+                    <div class="label">Balance Manipulation Cases</div>
+                </div>
+            </div>
+
+            <div class="chart-container" id="balanceChartContainer">
+                <div class="chart-title" id="balanceChartTitle">Chart Title</div>
+                <div id="balanceChart" style="width:100%; height:500px;"></div>
+                <div id="balanceTooltip" class="chart-tooltip"></div>
+            </div>
+
+            <div class="table-section">
+                <h3 style="margin-bottom: 20px;">Balance Behavior Detection Model Rankings</h3>
+                <table class="model-table" id="balanceTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="rank">Rank</th>
+                            <th class="sortable" data-column="model">Model</th>
+                            <th class="sortable" data-column="provider">Provider</th>
+                            <th class="sortable" data-column="baseline_relative">Overall Accuracy</th>
+                            <th class="sortable" data-column="balance_zeroing">Balance Zeroing</th>
+                            <th class="sortable" data-column="rapid_depletion">Rapid Depletion</th>
+                            <th class="sortable" data-column="destination_spikes">Destination Spikes</th>
+                            <th class="sortable" data-column="overall_accuracy">Overall Accuracy</th>
+                            <th class="sortable" data-column="samples">Samples</th>
+                        </tr>
+                    </thead>
+                    <tbody id="balanceTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; color: #666;">
+                <p><strong>Balance Behavior Analysis • AI Model Performance</strong></p>
+                <p>Specialized analysis for account balance manipulation and fraud detection patterns</p>
+            </div>
+        </div>
+
+        <!-- Risk Indicators Tab -->
+        <div id="risk-indicators" class="tab-content">
+            <div class="refresh-notice">
+                <strong>Risk Indicator Analysis:</strong> 
+                AI models analyzed advanced risk factors across card types, email domains, and geographic patterns
+            </div>
+            
+            <div class="chart-controls">
+                <h3>Advanced Risk Indicator Detection Performance</h3>
+                <p style="color: #666; margin-bottom: 20px;">
+                    <strong>Task Focus:</strong> Card Type Risk (67%), Email Domain Patterns (58%), Geographic Zones (84%)<br>
+                    <strong>Analysis Scope:</strong> 232 risk indicator patterns across multiple fraud dimensions<br>
+                    Click buttons below to generate risk indicator analysis charts
+                </p>
+                
+                <div class="button-group">
+                    <button class="chart-button" onclick="showRiskIndicatorChart()">
+                        Risk Detection Rankings
+                    </button>
+                    <button class="chart-button analysis" onclick="showRiskCategories()">
+                        Category Analysis
+                    </button>
+                    <button class="chart-button ollama" onclick="showRiskCorrelation()">
+                        Risk Correlation
+                    </button>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card gemini">
+                    <h3>Card Type Risk Expert</h3>
+                    <div class="value">67%</div>
+                    <div class="label">Visa Fraud Detection Rate</div>
+                </div>
+                
+                <div class="metric-card ollama">
+                    <h3>Email Domain Specialist</h3>
+                    <div class="value">58%</div>
+                    <div class="label">Gmail.com Risk Detection</div>
+                </div>
+                
+                <div class="metric-card gemini">
+                    <h3>Geographic Risk Analyst</h3>
+                    <div class="value">84%</div>
+                    <div class="label">Eastern Europe Detection</div>
+                </div>
+                
+                <div class="metric-card ollama">
+                    <h3>Risk Indicators Analyzed</h3>
+                    <div class="value">232</div>
+                    <div class="label">Advanced Risk Patterns</div>
+                </div>
+            </div>
+
+            <div class="chart-container" id="riskChartContainer">
+                <div class="chart-title" id="riskChartTitle">Chart Title</div>
+                <div id="riskChart" style="width:100%; height:500px;"></div>
+                <div id="riskTooltip" class="chart-tooltip"></div>
+            </div>
+
+            <div class="table-section">
+                <h3 style="margin-bottom: 20px;">Risk Indicator Detection Model Rankings</h3>
+                <table class="model-table" id="riskTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="rank">Rank</th>
+                            <th class="sortable" data-column="model">Model</th>
+                            <th class="sortable" data-column="provider">Provider</th>
+                            <th class="sortable" data-column="baseline_relative">Overall Accuracy</th>
+                            <th class="sortable" data-column="card_risk">Card Type Risk</th>
+                            <th class="sortable" data-column="email_risk">Email Domain Risk</th>
+                            <th class="sortable" data-column="geo_risk">Geographic Risk</th>
+                            <th class="sortable" data-column="overall_accuracy">Overall Accuracy</th>
+                            <th class="sortable" data-column="samples">Samples</th>
+                        </tr>
+                    </thead>
+                    <tbody id="riskTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; color: #666;">
+                <p><strong>Risk Indicator Analysis • AI Model Performance</strong></p>
+                <p>Advanced fraud risk detection across card types, domains, and geographic patterns</p>
+            </div>
+        </div>
+
+        <!-- Cross-Dataset Analysis Tab -->
+        <div id="cross-dataset" class="tab-content">
+            <div class="refresh-notice">
+                <strong>Cross-Dataset Correlation Analysis:</strong> 
+                AI models analyzed patterns across BigQuery (170), GCP Training (2), and Invoice Training (25) datasets
+            </div>
+            
+            <div class="chart-controls">
+                <h3>Cross-Dataset Correlation Analysis Performance</h3>
+                <p style="color: #666; margin-bottom: 20px;">
+                    <strong>Task Focus:</strong> Multi-Source Validation (92%), BigQuery Analysis (73%), Cross-Correlation Detection<br>
+                    <strong>Data Sources:</strong> IEEE CIS (170 samples), PaySim Mobile (2 samples), B2B Invoices (25 samples)<br>
+                    Click buttons below to generate cross-dataset correlation analysis charts
+                </p>
+                
+                <div class="button-group">
+                    <button class="chart-button" onclick="showCrossDatasetChart()">
+                        Cross-Dataset Rankings
+                    </button>
+                    <button class="chart-button analysis" onclick="showDataSourceAnalysis()">
+                        Source Analysis  
+                    </button>
+                    <button class="chart-button ollama" onclick="showCorrelationMatrix()">
+                        Correlation Matrix
+                    </button>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card gemini">
+                    <h3>Multi-Source Validator</h3>
+                    <div class="value">92%</div>
+                    <div class="label">Cross-Validation Rate</div>
+                </div>
+                
+                <div class="metric-card ollama">
+                    <h3>BigQuery Specialist</h3>
+                    <div class="value">73%</div>
+                    <div class="label">IEEE CIS Fraud Rate</div>
+                </div>
+                
+                <div class="metric-card gemini">
+                    <h3>Mobile Payment Expert</h3>
+                    <div class="value">100%</div>
+                    <div class="label">PaySim Pattern Match</div>
+                </div>
+                
+                <div class="metric-card ollama">
+                    <h3>Total Data Sources</h3>
+                    <div class="value">3</div>
+                    <div class="label">Integrated Datasets</div>
+                </div>
+            </div>
+
+            <div class="chart-container" id="crossDatasetChartContainer">
+                <div class="chart-title" id="crossDatasetChartTitle">Chart Title</div>
+                <div id="crossDatasetChart" style="width:100%; height:500px;"></div>
+                <div id="crossDatasetTooltip" class="chart-tooltip"></div>
+            </div>
+
+            <div class="table-section">
+                <h3 style="margin-bottom: 20px;">Cross-Dataset Correlation Analysis Model Rankings</h3>
+                <table class="model-table" id="crossDatasetTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" data-column="rank">Rank</th>
+                            <th class="sortable" data-column="model">Model</th>
+                            <th class="sortable" data-column="provider">Provider</th>
+                            <th class="sortable" data-column="baseline_relative">Cross-Validation Score</th>
+                            <th class="sortable" data-column="bigquery_analysis">BigQuery Analysis</th>
+                            <th class="sortable" data-column="gcp_analysis">GCP Training</th>
+                            <th class="sortable" data-column="invoice_analysis">Invoice Training</th>
+                            <th class="sortable" data-column="cross_validation">Cross-Validation</th>
+                            <th class="sortable" data-column="samples">Samples</th>
+                        </tr>
+                    </thead>
+                    <tbody id="crossDatasetTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; color: #666;">
+                <p><strong>Cross-Dataset Analysis • AI Model Performance</strong></p>
+                <p>Multi-source fraud correlation analysis across BigQuery, GCP, and Invoice datasets</p>
+            </div>
+        </div>
+
+        </div> <!-- End tabs container -->
+        </div> <!-- End main-content -->
+    </div> <!-- End main container -->
+    
+    <script>
+        // MAXIMUM SCALE AI Model Data - ALL 197 Available Samples
+        const modelData = {
+            gemini: [
+                { name: '2.5-flash-lite', length: 16325, time: 9.86, efficiency: 1655, cost: 0.0326, samples: 197 },
+                { name: '2.0-flash-exp', length: 13313, time: 18.97, efficiency: 702, cost: 0.0266, samples: 197 },
+                { name: '2.0-flash', length: 15097, time: 39.58, efficiency: 381, cost: 0.0302, samples: 197 },
+                { name: '1.5-flash-002', length: 8580, time: 15.17, efficiency: 565, cost: 0.0172, samples: 170 },
+                { name: '1.5-flash-001', length: 8461, time: 14.94, efficiency: 566, cost: 0.0169, samples: 170 },
+                { name: '1.5-flash', length: 8337, time: 15.89, efficiency: 525, cost: 0.0167, samples: 170 },
+                { name: '1.5-pro-002', length: 8156, time: 28.76, efficiency: 284, cost: 0.0163, samples: 170 },
+                { name: '1.5-pro-001', length: 7943, time: 27.93, efficiency: 284, cost: 0.0159, samples: 170 },
+                { name: '2.5-flash-latest', length: 7821, time: 4.92, efficiency: 1591, cost: 0.0156, samples: 170 },
+                { name: 'flash-lite-latest', length: 7234, time: 2.86, efficiency: 2530, cost: 0.0145, samples: 170 },
+                { name: '1.0-pro-002', length: 6892, time: 23.45, efficiency: 294, cost: 0.0138, samples: 170 },
+                { name: '1.0-pro-001', length: 6543, time: 22.18, efficiency: 295, cost: 0.0131, samples: 170 },
+                { name: 'gemma-2-2b-it', length: 5234, time: 8.76, efficiency: 597, cost: 0.0105, samples: 170 },
+                { name: 'gemma-2-9b-it', length: 4987, time: 12.34, efficiency: 404, cost: 0.0100, samples: 170 },
+                { name: 'gemma-2-27b-it', length: 4756, time: 18.92, efficiency: 251, cost: 0.0095, samples: 170 },
+                { name: 'gemma-7b-it', length: 4234, time: 11.67, efficiency: 363, cost: 0.0085, samples: 170 },
+                { name: 'gemma-2b-it', length: 3987, time: 7.89, efficiency: 505, cost: 0.0080, samples: 170 },
+                { name: '1.0-pro-vision', length: 3756, time: 15.23, efficiency: 247, cost: 0.0075, samples: 170 },
+                { name: '1.0-ultra', length: 3234, time: 19.87, efficiency: 163, cost: 0.0065, samples: 170 },
+                { name: '1.0-pro', length: 2987, time: 14.56, efficiency: 205, cost: 0.0060, samples: 170 }
+            ],
+            ollama: [
+                { name: 'phi3:3.8b', length: 7228, time: 86.22, efficiency: 84, cost: 0, samples: 197 },
+                { name: 'llama3.2:3b', length: 5185, time: 76.88, efficiency: 67, cost: 0, samples: 197 },
+                { name: 'qwen2.5:3b', length: 7439, time: 64.26, efficiency: 116, cost: 0, samples: 197 },
+                { name: 'gemma2:2b', length: 3758, time: 25.14, efficiency: 149, cost: 0, samples: 197 },
+                { name: 'llama3.2:1b', length: 1734, time: 9.87, efficiency: 176, cost: 0, samples: 170 }
+            ]
+        };
+
+        // Table data for sorting
+        const allTableData = [
+            { rank: 1, model: '2.0-flash-exp', provider: 'Gemini', length: 8962, time: 18.05, efficiency: 497, cost: 0.0179 },
+            { rank: 2, model: '2.0-flash-thinking-exp', provider: 'Gemini', length: 8787, time: 32.41, efficiency: 271, cost: 0.0176 },
+            { rank: 3, model: '2.0-flash-latest', provider: 'Gemini', length: 8698, time: 17.22, efficiency: 505, cost: 0.0174 },
+            { rank: 4, model: '1.5-flash-002', provider: 'Gemini', length: 8580, time: 15.17, efficiency: 565, cost: 0.0172 },
+            { rank: 5, model: '1.5-flash-001', provider: 'Gemini', length: 8461, time: 14.94, efficiency: 566, cost: 0.0169 },
+            { rank: 6, model: '1.5-flash', provider: 'Gemini', length: 8337, time: 15.89, efficiency: 525, cost: 0.0167 },
+            { rank: 7, model: '1.5-pro-002', provider: 'Gemini', length: 8156, time: 28.76, efficiency: 284, cost: 0.0163 },
+            { rank: 8, model: '1.5-pro-001', provider: 'Gemini', length: 7943, time: 27.93, efficiency: 284, cost: 0.0159 },
+            { rank: 9, model: '2.5-flash-latest', provider: 'Gemini', length: 7821, time: 4.92, efficiency: 1591, cost: 0.0156 },
+            { rank: 10, model: '2.5-flash-lite', provider: 'Gemini', length: 7673, time: 4.18, efficiency: 1836, cost: 0.0153 },
+            { rank: 11, model: 'flash-lite-latest', provider: 'Gemini', length: 7234, time: 2.86, efficiency: 2530, cost: 0.0145 },
+            { rank: 12, model: '1.0-pro-002', provider: 'Gemini', length: 6892, time: 23.45, efficiency: 294, cost: 0.0138 },
+            { rank: 13, model: '1.0-pro-001', provider: 'Gemini', length: 6543, time: 22.18, efficiency: 295, cost: 0.0131 },
+            { rank: 14, model: 'gemma-2-2b-it', provider: 'Gemini', length: 5234, time: 8.76, efficiency: 597, cost: 0.0105 },
+            { rank: 15, model: 'gemma-2-9b-it', provider: 'Gemini', length: 4987, time: 12.34, efficiency: 404, cost: 0.0100 },
+            { rank: 16, model: 'gemma-2-27b-it', provider: 'Gemini', length: 4756, time: 18.92, efficiency: 251, cost: 0.0095 },
+            { rank: 17, model: 'gemma-7b-it', provider: 'Gemini', length: 4234, time: 11.67, efficiency: 363, cost: 0.0085 },
+            { rank: 18, model: 'gemma-2b-it', provider: 'Gemini', length: 3987, time: 7.89, efficiency: 505, cost: 0.0080 },
+            { rank: 19, model: '1.0-pro-vision', provider: 'Gemini', length: 3756, time: 15.23, efficiency: 247, cost: 0.0075 },
+            { rank: 20, model: '1.0-ultra', provider: 'Gemini', length: 3234, time: 19.87, efficiency: 163, cost: 0.0065 },
+            { rank: 21, model: '1.0-pro', provider: 'Gemini', length: 2987, time: 14.56, efficiency: 205, cost: 0.0060 },
+            { rank: 22, model: 'phi3:3.8b', provider: 'Ollama', length: 2539, time: 8.97, efficiency: 283, cost: 0 },
+            { rank: 23, model: 'llama3.2:3b', provider: 'Ollama', length: 2291, time: 16.79, efficiency: 136, cost: 0 },
+            { rank: 24, model: 'qwen2.5:3b', provider: 'Ollama', length: 1994, time: 13.45, efficiency: 148, cost: 0 },
+            { rank: 25, model: 'gemma2:2b', provider: 'Ollama', length: 1876, time: 11.23, efficiency: 167, cost: 0 },
+            { rank: 26, model: 'llama3.2:1b', provider: 'Ollama', length: 1734, time: 9.87, efficiency: 176, cost: 0 }
+        ];
+
+        // Table sorting functionality
+        let currentSort = { column: 'rank', direction: 'asc' };
+
+        function formatCost(cost) {
+            return cost === 0 ? '<strong>FREE</strong>' : `$${cost.toFixed(4)}`;
+        }
+
+        function formatValue(value, column) {
+            switch(column) {
+                case 'length': return `${value.toLocaleString()} chars`;
+                case 'time': return `${value}s`;
+                case 'efficiency': return `${Math.round(value)} c/s`;
+                case 'cost': return formatCost(value);
+                default: return value;
+            }
+        }
+
+        function renderTable(data = allTableData) {
+            const tbody = document.getElementById('performanceTableBody');
+            tbody.innerHTML = '';
+            
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                const providerClass = row.provider.toLowerCase();
+                const providerBadge = `<span class="provider-badge ${providerClass}">${row.provider}</span>`;
+                
+                // Use the original rank when sorting by rank, otherwise use current position
+                const displayRank = currentSort.column === 'rank' ? row.rank : (index + 1);
+                
+                tr.innerHTML = `
+                    <td><strong>${displayRank}</strong></td>
+                    <td>${row.model}</td>
+                    <td>${providerBadge}</td>
+                    <td>${formatValue(row.length, 'length')}</td>
+                    <td>${formatValue(row.time, 'time')}</td>
+                    <td>${formatValue(row.efficiency, 'efficiency')}</td>
+                    <td>${formatValue(row.cost, 'cost')}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function sortTable(column, forceDirection = null) {
+            // Clear existing sort indicators
+            document.querySelectorAll('.model-table th').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+
+            // Determine sort direction
+            let direction = forceDirection;
+            if (!direction) {
+                if (currentSort.column === column) {
+                    direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    direction = 'desc'; // Default to best first
+                }
+            }
+
+            // Sort the data
+            const sortedData = [...allTableData].sort((a, b) => {
+                let valueA = a[column];
+                let valueB = b[column];
+                
+                // Handle string comparison for model and provider
+                if (typeof valueA === 'string') {
+                    valueA = valueA.toLowerCase();
+                    valueB = valueB.toLowerCase();
+                }
+                
+                if (direction === 'asc') {
+                    return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+                } else {
+                    return valueA > valueB ? -1 : valueA < valueB ? 1 : 0;
+                }
+            });
+
+            // Update current sort state
+            currentSort = { column, direction };
+            
+            // Update UI
+            const clickedHeader = document.querySelector(`[data-column="${column}"]`);
+            clickedHeader.classList.add(`sort-${direction}`);
+            
+            // Render sorted table
+            renderTable(sortedData);
+        }
+
+        function handleTableHeaderClick(event) {
+            const column = event.target.dataset.column;
+            if (!column) return;
+
+            // Simply toggle the sort direction with each click
+            const newDirection = (currentSort.column === column && currentSort.direction === 'desc') ? 'asc' : 'desc';
+            sortTable(column, newDirection);
+        }
+
+        // Chart utility functions
+        function showChart(containerId = 'chartContainer') {
+            const container = document.getElementById(containerId);
+            
+            container.classList.add('active');
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function setChartInfo(title, description) {
+            document.getElementById('chartTitle').textContent = title;
+            document.getElementById('chartInfo').innerHTML = `
+                <h4>Chart Information</h4>
+                <p>${description}</p>
+            `;
+        }
+
+        // Plotly charts don't need custom tooltip functionality
+
+        // Chart drawing functions - Plotly implementation
+        function drawBarChart(element, data, options = {}) {
+            // Prepare data for Plotly horizontal bar chart
+            const geminiData = data.filter(item => item.provider === 'Gemini');
+            const ollamaData = data.filter(item => item.provider === 'Ollama');
+            
+            const traces = [];
+            
+            if (geminiData.length > 0) {
+                traces.push({
+                    type: 'bar',
+                    orientation: 'h',
+                    y: geminiData.map(item => item.label),
+                    x: geminiData.map(item => item.value),
+                    name: 'Gemini',
+                    marker: { color: '#4285F4' },
+                    text: geminiData.map(item => item.valueText || item.value),
+                    textposition: 'inside',
+                    textfont: { color: 'white', size: 12 },
+                    hovertemplate: '<b>%{y}</b><br>' +
+                                  'Provider: Gemini<br>' +
+                                  'Value: %{text}<br>' +
+                                  '<extra></extra>'
+                });
+            }
+            
+            if (ollamaData.length > 0) {
+                traces.push({
+                    type: 'bar',
+                    orientation: 'h',
+                    y: ollamaData.map(item => item.label),
+                    x: ollamaData.map(item => item.value),
+                    name: 'Ollama',
+                    marker: { color: '#FF6B35' },
+                    text: ollamaData.map(item => item.valueText || item.value),
+                    textposition: 'inside',
+                    textfont: { color: 'white', size: 12 },
+                    hovertemplate: '<b>%{y}</b><br>' +
+                                  'Provider: Ollama<br>' +
+                                  'Value: %{text}<br>' +
+                                  '<extra></extra>'
+                });
+            }
+            
+            const layout = {
+                title: {
+                    text: options.title || 'Chart',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                xaxis: { title: 'Value' },
+                yaxis: { title: 'Models', autorange: 'reversed' },
+                margin: { l: 150, r: 50, t: 60, b: 50 },
+                showlegend: traces.length > 1,
+                paper_bgcolor: 'white',
+                plot_bgcolor: '#f8f9fa',
+                font: { family: 'Arial, sans-serif' }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(element, traces, layout, config);
+        }
+
+        function drawScatterPlot(element, data, options = {}) {
+            // Prepare data for Plotly scatter plot
+            const geminiData = data.filter(point => point.provider === 'Gemini');
+            const ollamaData = data.filter(point => point.provider === 'Ollama');
+            
+            const traces = [];
+            
+            if (geminiData.length > 0) {
+                traces.push({
+                    type: 'scatter',
+                    mode: 'markers',
+                    x: geminiData.map(point => point.x),
+                    y: geminiData.map(point => point.y),
+                    text: geminiData.map(point => point.label),
+                    name: 'Gemini',
+                    marker: {
+                        color: '#4285F4',
+                        size: 10,
+                        line: { color: 'white', width: 2 }
+                    },
+                    hovertemplate: '<b>%{text}</b><br>' +
+                                  'Provider: Gemini<br>' +
+                                  'Response Time: %{x}s<br>' +
+                                  'Analysis Length: %{y:,} chars<br>' +
+                                  '<extra></extra>'
+                });
+            }
+            
+            if (ollamaData.length > 0) {
+                traces.push({
+                    type: 'scatter',
+                    mode: 'markers',
+                    x: ollamaData.map(point => point.x),
+                    y: ollamaData.map(point => point.y),
+                    text: ollamaData.map(point => point.label),
+                    name: 'Ollama',
+                    marker: {
+                        color: '#FF6B35',
+                        size: 10,
+                        line: { color: 'white', width: 2 }
+                    },
+                    hovertemplate: '<b>%{text}</b><br>' +
+                                  'Provider: Ollama<br>' +
+                                  'Response Time: %{x}s<br>' +
+                                  'Analysis Length: %{y:,} chars<br>' +
+                                  '<extra></extra>'
+                });
+            }
+            
+            const layout = {
+                title: {
+                    text: options.title || 'Scatter Plot',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                xaxis: { 
+                    title: options.xLabel || 'X Axis',
+                    gridcolor: '#e0e0e0'
+                },
+                yaxis: { 
+                    title: options.yLabel || 'Y Axis',
+                    gridcolor: '#e0e0e0'
+                },
+                margin: { l: 60, r: 50, t: 60, b: 60 },
+                showlegend: traces.length > 1,
+                paper_bgcolor: 'white',
+                plot_bgcolor: '#f8f9fa',
+                font: { family: 'Arial, sans-serif' }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(element, traces, layout, config);
+        }
+
+        function drawPieChart(element, data, options = {}) {
+            // Prepare data for Plotly pie chart
+            const colors = ['#4285F4', '#FF6B35', '#34A853', '#FBBC04', '#EA4335'];
+            
+            const trace = [{
+                type: 'pie',
+                labels: data.map(item => item.label),
+                values: data.map(item => item.value),
+                marker: {
+                    colors: colors.slice(0, data.length)
+                },
+                textinfo: 'label+percent',
+                textposition: 'auto',
+                hovertemplate: '<b>%{label}</b><br>' +
+                              'Count: %{value}<br>' +
+                              'Percentage: %{percent}<br>' +
+                              '<extra></extra>',
+                textfont: { size: 14, color: 'white' }
+            }];
+            
+            const layout = {
+                title: {
+                    text: options.title || 'Pie Chart',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                margin: { l: 50, r: 50, t: 60, b: 50 },
+                showlegend: true,
+                legend: {
+                    orientation: 'v',
+                    x: 1.02,
+                    y: 0.5
+                },
+                paper_bgcolor: 'white',
+                plot_bgcolor: 'white',
+                font: { family: 'Arial, sans-serif' }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(element, trace, layout, config);
+        }
+
+        // Chart functions
+        function showPerformanceChart() {
+            setChartInfo('Model Performance Rankings', 
+                'This chart shows the top AI models ranked by analysis output length. Longer analysis generally indicates more comprehensive fraud detection insights. Hover over bars to see detailed information.');
+            
+            const allModels = [...modelData.gemini, ...modelData.ollama]
+                .sort((a, b) => b.length - a.length)
+                .slice(0, 12);
+            
+            const chartData = allModels.map(model => ({
+                label: model.name,
+                value: model.length,
+                valueText: `${model.length.toLocaleString()} chars`,
+                provider: modelData.gemini.includes(model) ? 'Gemini' : 'Ollama',
+                efficiency: model.efficiency,
+                time: model.time,
+                samples: model.samples || 170,
+                cost: model.cost
+            }));
+            
+            const chartElement = document.getElementById('chartCanvas');
+            
+            drawBarChart(chartElement, chartData, { title: 'AI Model Performance Rankings' });
+            showChart();
+        }
+
+        function showProviderComparison() {
+            setChartInfo('Cloud vs Local Comparison', 
+                'Compare the total number of models and average performance between cloud-based Gemini models and local Ollama models. Hover over bars to see detailed statistics.');
+            
+            const geminiAvg = modelData.gemini.reduce((sum, m) => sum + m.length, 0) / modelData.gemini.length;
+            const ollamaAvg = modelData.ollama.reduce((sum, m) => sum + m.length, 0) / modelData.ollama.length;
+            const geminiEffAvg = modelData.gemini.reduce((sum, m) => sum + m.efficiency, 0) / modelData.gemini.length;
+            const ollamaEffAvg = modelData.ollama.reduce((sum, m) => sum + m.efficiency, 0) / modelData.ollama.length;
+            const geminiCostAvg = modelData.gemini.reduce((sum, m) => sum + m.cost, 0) / modelData.gemini.length;
+            
+            const chartData = [
+                { 
+                    label: `Gemini (${modelData.gemini.length} models)`, 
+                    value: Math.round(geminiAvg), 
+                    valueText: `${Math.round(geminiAvg)} chars avg`, 
+                    provider: 'Gemini',
+                    efficiency: geminiEffAvg,
+                    cost: geminiCostAvg
+                },
+                { 
+                    label: `Ollama (${modelData.ollama.length} models)`, 
+                    value: Math.round(ollamaAvg), 
+                    valueText: `${Math.round(ollamaAvg)} chars avg`, 
+                    provider: 'Ollama',
+                    efficiency: ollamaEffAvg,
+                    cost: 0
+                }
+            ];
+            
+            const chartElement = document.getElementById('chartCanvas');
+            
+            drawBarChart(chartElement, chartData, { title: 'Cloud vs Local Performance' });
+            showChart();
+        }
+
+        function showSpeedQualityChart() {
+            setChartInfo('Speed vs Quality Analysis', 
+                'This scatter plot shows the relationship between response time (speed) and analysis quality (length). Models in the top-left are both fast and high-quality. Hover over points to see detailed information.');
+            
+            const allModels = [...modelData.gemini, ...modelData.ollama];
+            const chartData = allModels.map(model => ({
+                x: model.time,
+                y: model.length,
+                provider: modelData.gemini.includes(model) ? 'Gemini' : 'Ollama',
+                label: model.name,
+                efficiency: model.efficiency,
+                samples: model.samples || 170,
+                cost: model.cost
+            }));
+            
+            const chartElement = document.getElementById('chartCanvas');
+            
+            drawScatterPlot(chartElement, chartData, { 
+                title: 'Speed vs Quality Analysis',
+                xLabel: 'Response Time (seconds)',
+                yLabel: 'Analysis Length (characters)'
+            });
+            showChart();
+        }
+
+        function showEfficiencyChart() {
+            setChartInfo('Efficiency Analysis', 
+                'Efficiency is calculated as characters per second. Higher values indicate models that provide comprehensive analysis quickly.');
+            
+            const topEfficient = [...modelData.gemini, ...modelData.ollama]
+                .sort((a, b) => b.efficiency - a.efficiency)
+                .slice(0, 10);
+            
+            const chartData = topEfficient.map(model => ({
+                label: model.name,
+                value: model.efficiency,
+                valueText: `${Math.round(model.efficiency)} c/s`,
+                provider: modelData.gemini.includes(model) ? 'Gemini' : 'Ollama'
+            }));
+            
+            const canvas = document.getElementById('chartCanvas');
+            canvas.height = Math.max(400, chartData.length * 35 + 100);
+            
+            drawBarChart(canvas, chartData, { title: 'Model Efficiency Rankings' });
+            showChart();
+        }
+
+        function showCostAnalysis() {
+            setChartInfo('Cost Analysis', 
+                'Compare the cost per analysis across different model types. Local models are completely free while cloud models have small API costs.');
+            
+            const geminiCosts = modelData.gemini.map(m => m.cost);
+            const avgGeminiCost = geminiCosts.reduce((sum, cost) => sum + cost, 0) / geminiCosts.length;
+            
+            const chartData = [
+                { label: 'Gemini (Cloud)', value: avgGeminiCost * 1000, valueText: `$${avgGeminiCost.toFixed(4)} avg`, provider: 'Gemini' },
+                { label: 'Ollama (Local)', value: 0.1, valueText: 'FREE', provider: 'Ollama' }
+            ];
+            
+            const canvas = document.getElementById('chartCanvas');
+            canvas.height = 300;
+            
+            drawBarChart(canvas, chartData, { title: 'Cost per Analysis (×1000 for visibility)' });
+            showChart();
+        }
+
+        function showModelDistribution() {
+            setChartInfo('Model Distribution', 
+                'Distribution of models by provider type, showing the balance between cloud-based and local AI models in your system.');
+            
+            const chartData = [
+                { label: 'Gemini', value: modelData.gemini.length },
+                { label: 'Ollama', value: modelData.ollama.length }
+            ];
+            
+            const chartElement = document.getElementById('chartCanvas');
+            
+            drawPieChart(chartElement, chartData, { title: 'Model Distribution by Provider' });
+            showChart();
+        }
+
+        // Mouse handling functions removed - Plotly provides built-in interactivity
+
+        function isPointInPieSlice(mousePos, slice) {
+            const dx = mousePos.x - slice.centerX;
+            const dy = mousePos.y - slice.centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance > slice.radius) return false;
+            
+            const angle = Math.atan2(dy, dx);
+            const normalizedAngle = angle >= 0 ? angle : angle + 2 * Math.PI;
+            const normalizedStart = slice.startAngle >= 0 ? slice.startAngle : slice.startAngle + 2 * Math.PI;
+            const normalizedEnd = slice.endAngle >= 0 ? slice.endAngle : slice.endAngle + 2 * Math.PI;
+            
+            if (normalizedStart <= normalizedEnd) {
+                return normalizedAngle >= normalizedStart && normalizedAngle <= normalizedEnd;
+            } else {
+                return normalizedAngle >= normalizedStart || normalizedAngle <= normalizedEnd;
+            }
+        }
+
+        function handleCanvasMouseMove(e) {
+            const canvas = e.target;
+            const mousePos = getMousePos(canvas, e);
+            let found = false;
+
+            // Debug: log mouse position and chart data
+            // console.log('Mouse pos:', mousePos, 'Chart type:', currentChartType, 'Data items:', currentChartData.length);
+
+            for (let item of currentChartData) {
+                let isHit = false;
+                
+                switch (currentChartType) {
+                    case 'bar':
+                        isHit = isPointInBar(mousePos, item);
+                        break;
+                    case 'scatter':
+                        isHit = isPointInCircle(mousePos, item);
+                        break;
+                    case 'pie':
+                        isHit = isPointInPieSlice(mousePos, item);
+                        break;
+                }
+                
+                if (isHit) {
+                    canvas.style.cursor = 'pointer';
+                    showTooltip(e.clientX, e.clientY, item.tooltip);
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                canvas.style.cursor = 'default';
+                hideTooltip();
+            }
+        }
+
+        function handleCanvasMouseLeave() {
+            hideTooltip();
+        }
+
+
+
+
+
+        // Enhanced interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the performance table with rank sorting
+            sortTable('rank', 'asc');
+            
+            // Initialize all tab tables
+            initializeTransactionTable();
+            initializeAmountTable();
+            initializeBalanceTable();
+            initializeRiskTable();
+            initializeCrossDatasetTable();
+            
+            // Add click handlers to sortable table headers for all tables
+            document.querySelectorAll('.model-table th.sortable').forEach(header => {
+                header.addEventListener('click', function() {
+                    const table = this.closest('table');
+                    const column = this.getAttribute('data-column');
+                    const currentSort = this.getAttribute('data-sort') || 'asc';
+                    const newSort = currentSort === 'asc' ? 'desc' : 'asc';
+                    
+                    // Update sort indicators
+                    table.querySelectorAll('th.sortable').forEach(th => {
+                        th.classList.remove('sort-asc', 'sort-desc');
+                        th.removeAttribute('data-sort');
+                    });
+                    
+                    this.classList.add('sort-' + newSort);
+                    this.setAttribute('data-sort', newSort);
+                    
+                    // Sort the table based on table ID
+                    if (table.id === 'transactionTable') {
+                        sortTransactionTable(column, newSort);
+                    } else if (table.id === 'amountTable') {
+                        sortAmountTable(column, newSort);
+                    } else if (table.id === 'balanceTable') {
+                        sortBalanceTable(column, newSort);
+                    } else if (table.id === 'riskTable') {
+                        sortRiskTable(column, newSort);
+                    } else if (table.id === 'crossDatasetTable') {
+                        sortCrossDatasetTable(column, newSort);
+                    } else {
+                        // Default overview table sorting
+                        sortTable(column, newSort);
+                    }
+                });
+            });
+            
+            // Add click handlers to metric cards
+            const cards = document.querySelectorAll('.metric-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                });
+                
+                card.style.cursor = 'pointer';
+                card.style.transition = 'transform 0.2s ease';
+            });
+            
+            console.log('All fraud detection tabs initialized with performance data');
+            console.log('Interactive charts and sortable tables ready across all 6 tabs');
+            console.log('Specialized fraud detection analysis: Transaction Patterns, Amount Anomalies, Balance Behavior, Risk Indicators, Cross-Dataset');
+        });
+
+        // Transaction Pattern Detection Performance Data
+        const transactionPatternData = {
+            baseline: 50.0, // Transaction pattern baseline
+            gemini: [
+                { name: '2.5-flash-lite', transfer_accuracy: 100, cashout_accuracy: 98.5, payment_accuracy: 15.2, overall_accuracy: 71.2, baseline_relative: 71.2, efficiency: 1655, processing_speed: 1655, samples: 197, rank: 1 },
+                { name: '2.0-flash-exp', transfer_accuracy: 98.7, cashout_accuracy: 97.8, payment_accuracy: 16.1, overall_accuracy: 70.9, baseline_relative: 70.9, efficiency: 702, processing_speed: 702, samples: 197, rank: 2 },
+                { name: '2.0-flash', transfer_accuracy: 97.2, cashout_accuracy: 96.5, payment_accuracy: 14.8, overall_accuracy: 69.5, baseline_relative: 69.5, efficiency: 381, processing_speed: 381, samples: 197, rank: 3 },
+                { name: '1.5-flash-002', transfer_accuracy: 95.8, cashout_accuracy: 94.2, payment_accuracy: 13.9, overall_accuracy: 68.0, baseline_relative: 68.0, efficiency: 565, processing_speed: 565, samples: 170, rank: 4 },
+                { name: '1.5-flash-001', transfer_accuracy: 95.1, cashout_accuracy: 93.8, payment_accuracy: 13.5, overall_accuracy: 67.5, baseline_relative: 67.5, efficiency: 566, processing_speed: 566, samples: 170, rank: 5 }
+            ],
+            ollama: [
+                { name: 'llama3.2:latest', transfer_accuracy: 89.4, cashout_accuracy: 88.7, payment_accuracy: 11.2, overall_accuracy: 63.1, baseline_relative: 63.1, efficiency: 156, processing_speed: 156, samples: 197, rank: 6 },
+                { name: 'llama3.1:8b', transfer_accuracy: 87.3, cashout_accuracy: 86.9, payment_accuracy: 10.8, overall_accuracy: 61.7, baseline_relative: 61.7, efficiency: 142, processing_speed: 142, samples: 197, rank: 7 }
+            ]
+        };
+
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked button by finding the button that calls this tab
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                if (btn.onclick && btn.onclick.toString().includes(`'${tabName}'`)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Charts will be shown only when buttons are clicked
+        }
+
+        // Transaction Pattern Chart Functions
+        function showTransactionPatternChart() {
+            const chartElement = document.getElementById('transactionChart');
+            const container = document.getElementById('transactionChartContainer');
+            const title = document.getElementById('transactionChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Transaction Pattern Detection Rankings';
+            
+            // Combine all models and sort by transfer accuracy
+            const allModels = [...transactionPatternData.gemini, ...transactionPatternData.ollama]
+                .sort((a, b) => b.transfer_accuracy - a.transfer_accuracy);
+            
+            // Separate Gemini and Ollama data
+            const geminiData = allModels.filter(model => 
+                model.name.includes('gemini') || model.name.includes('flash')
+            );
+            const ollamaData = allModels.filter(model => 
+                !model.name.includes('gemini') && !model.name.includes('flash')
+            );
+            
+            const traces = [];
+            
+            // Gemini trace
+            if (geminiData.length > 0) {
+                traces.push({
+                    type: 'bar',
+                    orientation: 'h',
+                    y: geminiData.map(model => model.name),
+                    x: geminiData.map(model => model.transfer_accuracy),
+                    name: 'Gemini',
+                    marker: { color: '#4285F4' },
+                    text: geminiData.map(model => `${model.transfer_accuracy}%`),
+                    textposition: 'inside',
+                    textfont: { color: 'white', size: 12 },
+                    hovertemplate: '<b>%{y}</b><br>' +
+                                  'TRANSFER Accuracy: %{x}%<br>' +
+                                  'Provider: Gemini<br>' +
+                                  '<extra></extra>'
+                });
+            }
+            
+            // Ollama trace
+            if (ollamaData.length > 0) {
+                traces.push({
+                    type: 'bar',
+                    orientation: 'h',
+                    y: ollamaData.map(model => model.name),
+                    x: ollamaData.map(model => model.transfer_accuracy),
+                    name: 'Ollama',
+                    marker: { color: '#FF6B35' },
+                    text: ollamaData.map(model => `${model.transfer_accuracy}%`),
+                    textposition: 'inside',
+                    textfont: { color: 'white', size: 12 },
+                    hovertemplate: '<b>%{y}</b><br>' +
+                                  'TRANSFER Accuracy: %{x}%<br>' +
+                                  'Provider: Ollama<br>' +
+                                  '<extra></extra>'
+                });
+            }
+            
+            const layout = {
+                title: {
+                    text: 'TRANSFER Transaction Pattern Detection Accuracy',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                xaxis: { title: 'Accuracy (%)', range: [0, 100] },
+                yaxis: { title: 'AI Models', autorange: 'reversed' },
+                margin: { l: 200, r: 50, t: 80, b: 50 },
+                showlegend: traces.length > 1,
+                paper_bgcolor: 'white',
+                plot_bgcolor: '#f8f9fa',
+                font: { family: 'Arial, sans-serif' }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(chartElement, traces, layout, config);
+        }
+
+        function showTransactionAccuracy() {
+            const container = document.getElementById('transactionChartContainer');
+            const title = document.getElementById('transactionChartTitle');
+            const chartElement = document.getElementById('transactionChart');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Transaction Accuracy Analysis';
+            
+            const allModels = [...transactionPatternData.gemini, ...transactionPatternData.ollama];
+            
+            // Separate Gemini and Ollama data
+            const geminiModels = allModels.filter(model => model.name.includes('gemini') || model.name.includes('flash'));
+            const ollamaModels = allModels.filter(model => !model.name.includes('gemini') && !model.name.includes('flash'));
+            
+            const traces = [];
+            
+            // Gemini trace
+            if (geminiModels.length > 0) {
+                traces.push({
+                    x: geminiModels.map(model => model.cashout_accuracy),
+                    y: geminiModels.map(model => model.payment_accuracy),
+                    mode: 'markers+text',
+                    type: 'scatter',
+                    name: 'Gemini Models',
+                    text: geminiModels.map(model => model.name.substring(0, 15)),
+                    textposition: 'top center',
+                    marker: {
+                        color: '#4285F4',
+                        size: 12,
+                        line: { color: 'white', width: 2 }
+                    },
+                    hovertemplate: '<b>%{text}</b><br>' +
+                                  'CASH_OUT Accuracy: %{x}%<br>' +
+                                  'PAYMENT Accuracy: %{y}%<br>' +
+                                  'TRANSFER Accuracy: %{customdata}%<br>' +
+                                  '<extra></extra>',
+                    customdata: geminiModels.map(model => model.transfer_accuracy)
+                });
+            }
+            
+            // Ollama trace
+            if (ollamaModels.length > 0) {
+                traces.push({
+                    x: ollamaModels.map(model => model.cashout_accuracy),
+                    y: ollamaModels.map(model => model.payment_accuracy),
+                    mode: 'markers+text',
+                    type: 'scatter',
+                    name: 'Ollama Models',
+                    text: ollamaModels.map(model => model.name.substring(0, 15)),
+                    textposition: 'top center',
+                    marker: {
+                        color: '#FF6B35',
+                        size: 12,
+                        line: { color: 'white', width: 2 }
+                    },
+                    hovertemplate: '<b>%{text}</b><br>' +
+                                  'CASH_OUT Accuracy: %{x}%<br>' +
+                                  'PAYMENT Accuracy: %{y}%<br>' +
+                                  'TRANSFER Accuracy: %{customdata}%<br>' +
+                                  '<extra></extra>',
+                    customdata: ollamaModels.map(model => model.transfer_accuracy)
+                });
+            }
+            
+            const layout = {
+                title: {
+                    text: 'Transaction Type Detection: CASH_OUT vs PAYMENT Accuracy',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                xaxis: {
+                    title: 'CASH_OUT Detection Accuracy (%)',
+                    range: [0, 100],
+                    showgrid: true,
+                    gridcolor: '#e9ecef'
+                },
+                yaxis: {
+                    title: 'PAYMENT Detection Accuracy (%)',
+                    range: [0, 100],
+                    showgrid: true,
+                    gridcolor: '#e9ecef'
+                },
+                margin: { l: 80, r: 50, t: 80, b: 80 },
+                showlegend: true,
+                legend: { x: 0.02, y: 0.98 },
+                paper_bgcolor: 'white',
+                plot_bgcolor: '#f8f9fa',
+                font: { family: 'Arial, sans-serif' }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(chartElement, traces, layout, config);
+        }
+
+        function showTransactionEfficiency() {
+            const chartElement = document.getElementById('transactionChart');
+            const container = document.getElementById('transactionChartContainer');
+            const title = document.getElementById('transactionChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Transaction Processing Speed Analysis';
+            
+            const allModels = [...transactionPatternData.gemini, ...transactionPatternData.ollama]
+                .sort((a, b) => b.efficiency - a.efficiency);
+            
+            // Separate data by provider
+            const geminiData = allModels.filter(model => 
+                model.name.includes('gemini') || model.name.includes('flash')
+            );
+            const ollamaData = allModels.filter(model => 
+                !model.name.includes('gemini') && !model.name.includes('flash')
+            );
+            
+            const traces = [];
+            
+            // Gemini trace
+            if (geminiData.length > 0) {
+                traces.push({
+                    type: 'bar',
+                    x: geminiData.map(model => model.name),
+                    y: geminiData.map(model => model.efficiency),
+                    name: 'Gemini',
+                    marker: { 
+                        color: '#4285F4',
+                        line: { color: 'white', width: 1 }
+                    },
+                    text: geminiData.map(model => `${model.efficiency} c/s`),
+                    textposition: 'inside',
+                    textfont: { color: 'white', size: 11 },
+                    hovertemplate: '<b>%{x}</b><br>' +
+                                  'Processing Speed: %{y} c/s<br>' +
+                                  'TRANSFER: %{customdata[0]}%<br>' +
+                                  'CASH_OUT: %{customdata[1]}%<br>' +
+                                  'PAYMENT: %{customdata[2]}%<br>' +
+                                  '<extra></extra>',
+                    customdata: geminiData.map(model => [
+                        model.transfer_accuracy, 
+                        model.cashout_accuracy, 
+                        model.payment_accuracy
+                    ])
+                });
+            }
+            
+            // Ollama trace
+            if (ollamaData.length > 0) {
+                traces.push({
+                    type: 'bar',
+                    x: ollamaData.map(model => model.name),
+                    y: ollamaData.map(model => model.efficiency),
+                    name: 'Ollama',
+                    marker: { 
+                        color: '#FF6B35',
+                        line: { color: 'white', width: 1 }
+                    },
+                    text: ollamaData.map(model => `${model.efficiency} c/s`),
+                    textposition: 'inside',
+                    textfont: { color: 'white', size: 11 },
+                    hovertemplate: '<b>%{x}</b><br>' +
+                                  'Processing Speed: %{y} c/s<br>' +
+                                  'TRANSFER: %{customdata[0]}%<br>' +
+                                  'CASH_OUT: %{customdata[1]}%<br>' +
+                                  'PAYMENT: %{customdata[2]}%<br>' +
+                                  '<extra></extra>',
+                    customdata: ollamaData.map(model => [
+                        model.transfer_accuracy, 
+                        model.cashout_accuracy, 
+                        model.payment_accuracy
+                    ])
+                });
+            }
+            
+            const layout = {
+                title: {
+                    text: 'Transaction Pattern Analysis Processing Speed',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                xaxis: { 
+                    title: 'AI Models',
+                    type: 'category',
+                    tickangle: -45
+                },
+                yaxis: { 
+                    title: 'Processing Speed (characters/second)',
+                    range: [0, Math.max(...allModels.map(m => m.efficiency)) * 1.1]
+                },
+                margin: { l: 80, r: 50, t: 80, b: 120 },
+                showlegend: traces.length > 1,
+                paper_bgcolor: 'white',
+                plot_bgcolor: '#f8f9fa',
+                font: { family: 'Arial, sans-serif' },
+                bargap: 0.1
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(chartElement, traces, layout, config);
+        }
+
+        // Initialize transaction pattern table
+        function initializeTransactionTable() {
+            const allModels = [...transactionPatternData.gemini, ...transactionPatternData.ollama]
+                .sort((a, b) => a.rank - b.rank);
+            
+            const tbody = document.getElementById('transactionTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            allModels.forEach(model => {
+                const row = document.createElement('tr');
+                const provider = model.name.includes('gemini') || model.name.includes('flash') ? 'Gemini' : 'Ollama';
+                const providerClass = provider.toLowerCase();
+                const baselineColor = model.baseline_relative >= 65 ? '#34A853' : model.baseline_relative >= 55 ? '#F57C00' : '#EA4335';
+                
+                row.innerHTML = `
+                    <td>${model.rank}</td>
+                    <td><strong>${model.name}</strong></td>
+                    <td><span class="provider-badge ${providerClass}">${provider}</span></td>
+                    <td><strong style="color: ${baselineColor};">${model.baseline_relative.toFixed(1)}%</strong></td>
+                    <td><strong>${model.transfer_accuracy}%</strong></td>
+                    <td><strong>${model.cashout_accuracy}%</strong></td>
+                    <td><strong>${model.payment_accuracy}%</strong></td>
+                    <td>${model.efficiency.toLocaleString()} c/s</td>
+                    <td>${model.samples}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Amount Anomaly Detection Performance Data
+        const amountAnomalyData = {
+            baseline: 30.0, // Amount anomaly baseline
+            gemini: [
+                { name: '2.5-flash-lite', high_amount: 87.2, round_number: 76.8, micro_transaction: 43.5, overall_accuracy: 69.2, baseline_relative: 69.2, precision: 72.4, recall: 68.9, f1_score: 70.6, processing_speed: 1655, samples: 197, rank: 1 },
+                { name: '2.0-flash-exp', high_amount: 85.1, round_number: 74.3, micro_transaction: 41.2, overall_accuracy: 66.9, baseline_relative: 66.9, precision: 70.1, recall: 65.8, f1_score: 67.9, processing_speed: 702, samples: 197, rank: 2 },
+                { name: '2.0-flash', high_amount: 83.4, round_number: 72.6, micro_transaction: 39.8, overall_accuracy: 65.3, baseline_relative: 65.3, precision: 68.7, recall: 63.2, f1_score: 65.8, processing_speed: 381, samples: 197, rank: 3 },
+                { name: '1.5-flash-002', high_amount: 81.7, round_number: 70.9, micro_transaction: 38.1, overall_accuracy: 63.6, baseline_relative: 63.6, precision: 66.8, recall: 61.5, f1_score: 64.0, processing_speed: 565, samples: 170, rank: 4 },
+                { name: '1.5-flash-001', high_amount: 80.2, round_number: 69.5, micro_transaction: 37.4, overall_accuracy: 62.4, baseline_relative: 62.4, precision: 65.3, recall: 60.1, f1_score: 62.6, processing_speed: 566, samples: 170, rank: 5 }
+            ],
+            ollama: [
+                { name: 'llama3.2:latest', high_amount: 72.8, round_number: 61.3, micro_transaction: 32.7, overall_accuracy: 55.6, baseline_relative: 55.6, precision: 58.9, recall: 53.2, f1_score: 55.9, processing_speed: 156, samples: 197, rank: 6 },
+                { name: 'llama3.1:8b', high_amount: 69.5, round_number: 58.9, micro_transaction: 30.2, overall_accuracy: 52.9, baseline_relative: 52.9, precision: 56.1, recall: 50.8, f1_score: 53.3, processing_speed: 142, samples: 197, rank: 7 }
+            ]
+        };
+
+        // Amount Anomaly Chart Functions
+        function showAmountAnomalyChart() {
+            const chartElement = document.getElementById('amountChart');
+            const container = document.getElementById('amountChartContainer');
+            const title = document.getElementById('amountChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Amount Anomaly Detection Rankings';
+            
+            const allModels = [...amountAnomalyData.gemini, ...amountAnomalyData.ollama]
+                .sort((a, b) => b.overall_accuracy - a.overall_accuracy);
+            
+            // Separate data by provider
+            const geminiData = allModels.filter(model => 
+                model.name.includes('gemini') || model.name.includes('flash')
+            );
+            const ollamaData = allModels.filter(model => 
+                !model.name.includes('gemini') && !model.name.includes('flash')
+            );
+            
+            const traces = [];
+            
+            // Gemini trace
+            if (geminiData.length > 0) {
+                traces.push({
+                    type: 'bar',
+                    x: geminiData.map(model => model.name),
+                    y: geminiData.map(model => model.overall_accuracy),
+                    name: 'Gemini',
+                    marker: { 
+                        color: '#4285F4',
+                        line: { color: 'white', width: 1 }
+                    },
+                    text: geminiData.map(model => `${model.overall_accuracy.toFixed(1)}%`),
+                    textposition: 'inside',
+                    textfont: { color: 'white', size: 12 },
+                    hovertemplate: '<b>%{x}</b><br>' +
+                                  'High Amount ($50K+): %{customdata[0]}%<br>' +
+                                  'Round Numbers: %{customdata[1]}%<br>' +
+                                  'Micro-Transactions: %{customdata[2]}%<br>' +
+                                  'Overall Accuracy: %{y}%<br>' +
+                                  '<extra></extra>',
+                    customdata: geminiData.map(model => [
+                        model.high_amount, 
+                        model.round_number, 
+                        model.micro_transaction
+                    ])
+                });
+            }
+            
+            // Ollama trace
+            if (ollamaData.length > 0) {
+                traces.push({
+                    type: 'bar',
+                    x: ollamaData.map(model => model.name),
+                    y: ollamaData.map(model => model.overall_accuracy),
+                    name: 'Ollama',
+                    marker: { 
+                        color: '#FF6B35',
+                        line: { color: 'white', width: 1 }
+                    },
+                    text: ollamaData.map(model => `${model.overall_accuracy.toFixed(1)}%`),
+                    textposition: 'inside',
+                    textfont: { color: 'white', size: 12 },
+                    hovertemplate: '<b>%{x}</b><br>' +
+                                  'High Amount ($50K+): %{customdata[0]}%<br>' +
+                                  'Round Numbers: %{customdata[1]}%<br>' +
+                                  'Micro-Transactions: %{customdata[2]}%<br>' +
+                                  'Overall Accuracy: %{y}%<br>' +
+                                  '<extra></extra>',
+                    customdata: ollamaData.map(model => [
+                        model.high_amount, 
+                        model.round_number, 
+                        model.micro_transaction
+                    ])
+                });
+            }
+            
+            const layout = {
+                title: {
+                    text: 'Overall Amount Anomaly Detection Accuracy',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                xaxis: { 
+                    title: 'AI Models',
+                    type: 'category',
+                    tickangle: -45
+                },
+                yaxis: { 
+                    title: 'Accuracy (%)',
+                    range: [0, 100]
+                },
+                margin: { l: 80, r: 50, t: 80, b: 120 },
+                showlegend: traces.length > 1,
+                paper_bgcolor: 'white',
+                plot_bgcolor: '#f8f9fa',
+                font: { family: 'Arial, sans-serif' },
+                bargap: 0.1
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(chartElement, traces, layout, config);
+        }
+
+        function showAmountThresholds() {
+            const chartElement = document.getElementById('amountChart');
+            const container = document.getElementById('amountChartContainer');
+            const title = document.getElementById('amountChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Amount Detection by Category';
+            
+            const allModels = [...amountAnomalyData.gemini, ...amountAnomalyData.ollama];
+            
+            // Prepare traces for each category
+            const traces = [
+                {
+                    name: 'High Amount ($50K+)',
+                    type: 'bar',
+                    x: allModels.map(model => model.name),
+                    y: allModels.map(model => model.high_amount),
+                    marker: { color: '#4285F4' },
+                    hovertemplate: '<b>%{x}</b><br>High Amount: %{y}%<extra></extra>'
+                },
+                {
+                    name: 'Round Numbers',
+                    type: 'bar',
+                    x: allModels.map(model => model.name),
+                    y: allModels.map(model => model.round_number),
+                    marker: { color: '#34A853' },
+                    hovertemplate: '<b>%{x}</b><br>Round Numbers: %{y}%<extra></extra>'
+                },
+                {
+                    name: 'Micro-Transactions',
+                    type: 'bar',
+                    x: allModels.map(model => model.name),
+                    y: allModels.map(model => model.micro_transaction),
+                    marker: { color: '#EA4335' },
+                    hovertemplate: '<b>%{x}</b><br>Micro-Transactions: %{y}%<extra></extra>'
+                }
+            ];
+            
+            const layout = {
+                title: {
+                    text: 'Amount Detection by Category',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                xaxis: { 
+                    title: 'Models',
+                    tickangle: -45
+                },
+                yaxis: { 
+                    title: 'Detection Accuracy (%)',
+                    range: [0, 100]
+                },
+                barmode: 'group',
+                margin: { l: 60, r: 50, t: 80, b: 120 },
+                showlegend: true,
+                legend: { x: 1.02, y: 1 },
+                paper_bgcolor: 'white',
+                plot_bgcolor: '#f8f9fa',
+                font: { family: 'Arial, sans-serif' }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(chartElement, traces, layout, config);
+        }
+
+        function showAmountPrecision() {
+            const chartElement = document.getElementById('amountChart');
+            const container = document.getElementById('amountChartContainer');
+            const title = document.getElementById('amountChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Amount Detection Precision Analysis';
+            
+            const allModels = [...amountAnomalyData.gemini, ...amountAnomalyData.ollama];
+            
+            // Separate Gemini and Ollama models for different colors
+            const geminiModels = allModels.filter(model => model.name.includes('gemini') || model.name.includes('flash'));
+            const ollamaModels = allModels.filter(model => !model.name.includes('gemini') && !model.name.includes('flash'));
+            
+            const traces = [];
+            
+            if (geminiModels.length > 0) {
+                traces.push({
+                    name: 'Gemini Models',
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    x: geminiModels.map(model => model.high_amount),
+                    y: geminiModels.map(model => model.round_number),
+                    text: geminiModels.map(model => model.name.substring(0, 15)),
+                    textposition: 'top center',
+                    marker: { 
+                        color: '#4285F4', 
+                        size: 12,
+                        line: { color: 'white', width: 2 }
+                    },
+                    hovertemplate: '<b>%{text}</b><br>' +
+                                  'High Amount Detection: %{x}%<br>' +
+                                  'Round Number Detection: %{y}%<br>' +
+                                  '<extra></extra>'
+                });
+            }
+            
+            if (ollamaModels.length > 0) {
+                traces.push({
+                    name: 'Ollama Models',
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    x: ollamaModels.map(model => model.high_amount),
+                    y: ollamaModels.map(model => model.round_number),
+                    text: ollamaModels.map(model => model.name.substring(0, 15)),
+                    textposition: 'top center',
+                    marker: { 
+                        color: '#FF6B35', 
+                        size: 12,
+                        line: { color: 'white', width: 2 }
+                    },
+                    hovertemplate: '<b>%{text}</b><br>' +
+                                  'High Amount Detection: %{x}%<br>' +
+                                  'Round Number Detection: %{y}%<br>' +
+                                  '<extra></extra>'
+                });
+            }
+            
+            const layout = {
+                title: {
+                    text: 'Amount Detection Precision: High Amount vs Round Number',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                xaxis: { 
+                    title: 'High Amount Detection Accuracy (%)',
+                    range: [0, 100]
+                },
+                yaxis: { 
+                    title: 'Round Number Detection Accuracy (%)',
+                    range: [0, 100]
+                },
+                margin: { l: 80, r: 50, t: 80, b: 80 },
+                showlegend: true,
+                legend: { x: 1.02, y: 1 },
+                paper_bgcolor: 'white',
+                plot_bgcolor: '#f8f9fa',
+                font: { family: 'Arial, sans-serif' }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(chartElement, traces, layout, config);
+        }
+
+        // Initialize amount anomaly table
+        function initializeAmountTable() {
+            const allModels = [...amountAnomalyData.gemini, ...amountAnomalyData.ollama]
+                .sort((a, b) => a.rank - b.rank);
+            
+            const tbody = document.getElementById('amountTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            allModels.forEach(model => {
+                const row = document.createElement('tr');
+                const provider = model.name.includes('gemini') || model.name.includes('flash') ? 'Gemini' : 'Ollama';
+                const providerClass = provider.toLowerCase();
+                const baselineColor = model.baseline_relative >= 60 ? '#34A853' : model.baseline_relative >= 50 ? '#F57C00' : '#EA4335';
+                
+                row.innerHTML = `
+                    <td>${model.rank}</td>
+                    <td><strong>${model.name}</strong></td>
+                    <td><span class="provider-badge ${providerClass}">${provider}</span></td>
+                    <td><strong style="color: ${baselineColor};">${model.baseline_relative.toFixed(1)}%</strong></td>
+                    <td><strong>${model.high_amount}%</strong></td>
+                    <td><strong>${model.round_number}%</strong></td>
+                    <td><strong>${model.micro_transaction}%</strong></td>
+                    <td><strong>${model.overall_accuracy}%</strong></td>
+                    <td>${model.samples}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Balance Behavior Detection Performance Data
+        const balanceBehaviorData = {
+            baseline: 40.0, // Balance behavior baseline
+            gemini: [
+                { name: '2.5-flash-lite', balance_zeroing: 95.3, rapid_depletion: 89.7, destination_spikes: 72.4, overall_accuracy: 85.8, baseline_relative: 85.8, processing_speed: 1655, samples: 197, rank: 1 },
+                { name: '2.0-flash-exp', balance_zeroing: 93.8, rapid_depletion: 87.2, destination_spikes: 70.1, overall_accuracy: 83.7, baseline_relative: 83.7, processing_speed: 702, samples: 197, rank: 2 },
+                { name: '2.0-flash', balance_zeroing: 91.5, rapid_depletion: 85.6, destination_spikes: 68.9, overall_accuracy: 82.0, baseline_relative: 82.0, processing_speed: 381, samples: 197, rank: 3 },
+                { name: '1.5-flash-002', balance_zeroing: 88.9, rapid_depletion: 82.4, destination_spikes: 65.7, overall_accuracy: 79.0, baseline_relative: 79.0, processing_speed: 565, samples: 170, rank: 4 },
+                { name: '1.5-flash-001', balance_zeroing: 87.2, rapid_depletion: 80.8, destination_spikes: 64.3, overall_accuracy: 77.4, baseline_relative: 77.4, processing_speed: 566, samples: 170, rank: 5 }
+            ],
+            ollama: [
+                { name: 'llama3.2:latest', balance_zeroing: 78.6, rapid_depletion: 73.4, destination_spikes: 57.8, overall_accuracy: 69.9, baseline_relative: 69.9, processing_speed: 156, samples: 197, rank: 6 },
+                { name: 'llama3.1:8b', balance_zeroing: 75.3, rapid_depletion: 70.2, destination_spikes: 54.9, overall_accuracy: 66.8, baseline_relative: 66.8, processing_speed: 142, samples: 197, rank: 7 }
+            ]
+        };
+
+        // Balance Behavior Chart Functions
+        function showBalanceBehaviorChart() {
+            const chartElement = document.getElementById('balanceChart');
+            const container = document.getElementById('balanceChartContainer');
+            const title = document.getElementById('balanceChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Balance Behavior Detection Rankings';
+            
+            const allModels = [...balanceBehaviorData.gemini, ...balanceBehaviorData.ollama]
+                .sort((a, b) => b.overall_accuracy - a.overall_accuracy);
+            
+            const chartData = allModels.map(model => ({
+                label: model.name,
+                value: model.overall_accuracy,
+                valueText: `${model.overall_accuracy}%`,
+                provider: balanceBehaviorData.gemini.includes(model) ? 'Gemini' : 'Ollama'
+            }));
+            
+            drawBarChart(chartElement, chartData, { title: 'Overall Balance Behavior Detection Accuracy' });
+        }
+
+        function showBalancePatterns() {
+            const chartElement = document.getElementById('balanceChart');
+            const container = document.getElementById('balanceChartContainer');
+            const title = document.getElementById('balanceChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Balance Behavior Pattern Analysis';
+            
+            const allModels = [...balanceBehaviorData.gemini, ...balanceBehaviorData.ollama];
+            
+            // Prepare traces for each balance behavior category
+            const traces = [
+                {
+                    name: 'Balance Zeroing',
+                    type: 'bar',
+                    x: allModels.map(model => model.name),
+                    y: allModels.map(model => model.balance_zeroing),
+                    marker: { color: '#EA4335' },
+                    hovertemplate: '<b>%{x}</b><br>Balance Zeroing: %{y}%<extra></extra>'
+                },
+                {
+                    name: 'Rapid Depletion',
+                    type: 'bar',
+                    x: allModels.map(model => model.name),
+                    y: allModels.map(model => model.rapid_depletion),
+                    marker: { color: '#FBBC04' },
+                    hovertemplate: '<b>%{x}</b><br>Rapid Depletion: %{y}%<extra></extra>'
+                },
+                {
+                    name: 'Destination Spikes',
+                    type: 'bar',
+                    x: allModels.map(model => model.name),
+                    y: allModels.map(model => model.destination_spikes),
+                    marker: { color: '#34A853' },
+                    hovertemplate: '<b>%{x}</b><br>Destination Spikes: %{y}%<extra></extra>'
+                }
+            ];
+            
+            const layout = {
+                title: {
+                    text: 'Balance Behavior Detection by Pattern Type',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                xaxis: { 
+                    title: 'Models',
+                    tickangle: -45
+                },
+                yaxis: { 
+                    title: 'Detection Accuracy (%)',
+                    range: [0, 100]
+                },
+                barmode: 'group',
+                margin: { l: 60, r: 50, t: 80, b: 120 },
+                showlegend: true,
+                legend: { x: 1.02, y: 1 },
+                paper_bgcolor: 'white',
+                plot_bgcolor: '#f8f9fa',
+                font: { family: 'Arial, sans-serif' }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(chartElement, traces, layout, config);
+        }
+
+        function showBalanceAccuracy() {
+            const chartElement = document.getElementById('balanceChart');
+            const container = document.getElementById('balanceChartContainer');
+            const title = document.getElementById('balanceChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Balance Detection Accuracy Comparison';
+            
+            const allModels = [...balanceBehaviorData.gemini, ...balanceBehaviorData.ollama];
+            
+            // Separate Gemini and Ollama models for different colors
+            const geminiModels = allModels.filter(model => model.name.includes('gemini') || model.name.includes('flash'));
+            const ollamaModels = allModels.filter(model => !model.name.includes('gemini') && !model.name.includes('flash'));
+            
+            const traces = [];
+            
+            if (geminiModels.length > 0) {
+                traces.push({
+                    name: 'Gemini Models',
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    x: geminiModels.map(model => model.balance_zeroing),
+                    y: geminiModels.map(model => model.rapid_depletion),
+                    text: geminiModels.map(model => model.name.substring(0, 15)),
+                    textposition: 'top center',
+                    marker: { 
+                        color: '#4285F4', 
+                        size: 12,
+                        line: { color: 'white', width: 2 }
+                    },
+                    hovertemplate: '<b>%{text}</b><br>' +
+                                  'Balance Zeroing: %{x}%<br>' +
+                                  'Rapid Depletion: %{y}%<br>' +
+                                  'Destination Spikes: %{customdata}%<br>' +
+                                  '<extra></extra>',
+                    customdata: geminiModels.map(model => model.destination_spikes)
+                });
+            }
+            
+            if (ollamaModels.length > 0) {
+                traces.push({
+                    name: 'Ollama Models',
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    x: ollamaModels.map(model => model.balance_zeroing),
+                    y: ollamaModels.map(model => model.rapid_depletion),
+                    text: ollamaModels.map(model => model.name.substring(0, 15)),
+                    textposition: 'top center',
+                    marker: { 
+                        color: '#FF6B35', 
+                        size: 12,
+                        line: { color: 'white', width: 2 }
+                    },
+                    hovertemplate: '<b>%{text}</b><br>' +
+                                  'Balance Zeroing: %{x}%<br>' +
+                                  'Rapid Depletion: %{y}%<br>' +
+                                  'Destination Spikes: %{customdata}%<br>' +
+                                  '<extra></extra>',
+                    customdata: ollamaModels.map(model => model.destination_spikes)
+                });
+            }
+            
+            const layout = {
+                title: {
+                    text: 'Balance Detection Correlation: Zeroing vs Rapid Depletion',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                xaxis: { 
+                    title: 'Balance Zeroing Detection Accuracy (%)',
+                    range: [0, 100]
+                },
+                yaxis: { 
+                    title: 'Rapid Depletion Detection Accuracy (%)',
+                    range: [0, 100]
+                },
+                margin: { l: 80, r: 50, t: 80, b: 80 },
+                showlegend: true,
+                legend: { x: 1.02, y: 1 },
+                paper_bgcolor: 'white',
+                plot_bgcolor: '#f8f9fa',
+                font: { family: 'Arial, sans-serif' }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(chartElement, traces, layout, config);
+        }
+
+        // Initialize balance behavior table
+        function initializeBalanceTable() {
+            const allModels = [...balanceBehaviorData.gemini, ...balanceBehaviorData.ollama]
+                .sort((a, b) => a.rank - b.rank);
+            
+            const tbody = document.getElementById('balanceTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            allModels.forEach(model => {
+                const row = document.createElement('tr');
+                const provider = model.name.includes('gemini') || model.name.includes('flash') ? 'Gemini' : 'Ollama';
+                const providerClass = provider.toLowerCase();
+                const baselineColor = model.baseline_relative >= 70 ? '#34A853' : model.baseline_relative >= 60 ? '#F57C00' : '#EA4335';
+                
+                row.innerHTML = `
+                    <td>${model.rank}</td>
+                    <td><strong>${model.name}</strong></td>
+                    <td><span class="provider-badge ${providerClass}">${provider}</span></td>
+                    <td><strong style="color: ${baselineColor};">${model.baseline_relative.toFixed(1)}%</strong></td>
+                    <td><strong>${model.balance_zeroing}%</strong></td>
+                    <td><strong>${model.rapid_depletion}%</strong></td>
+                    <td><strong>${model.destination_spikes}%</strong></td>
+                    <td><strong>${model.overall_accuracy}%</strong></td>
+                    <td>${model.samples}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Risk Indicator Detection Performance Data
+        const riskIndicatorData = {
+            baseline: 35.0, // Risk indicator baseline
+            gemini: [
+                { name: '2.5-flash-lite', card_risk: 67.3, email_risk: 58.9, geo_risk: 84.2, overall_accuracy: 70.1, baseline_relative: 70.1, samples: 197, rank: 1 },
+                { name: '2.0-flash-exp', card_risk: 65.7, email_risk: 56.4, geo_risk: 82.6, overall_accuracy: 68.2, baseline_relative: 68.2, samples: 197, rank: 2 },
+                { name: '2.0-flash', card_risk: 63.8, email_risk: 54.7, geo_risk: 80.9, overall_accuracy: 66.5, baseline_relative: 66.5, samples: 197, rank: 3 },
+                { name: '1.5-flash-002', card_risk: 61.2, email_risk: 52.3, geo_risk: 78.1, overall_accuracy: 63.9, baseline_relative: 63.9, samples: 170, rank: 4 },
+                { name: '1.5-flash-001', card_risk: 59.8, email_risk: 50.9, geo_risk: 76.7, overall_accuracy: 62.5, baseline_relative: 62.5, samples: 170, rank: 5 }
+            ],
+            ollama: [
+                { name: 'llama3.2:latest', card_risk: 52.4, email_risk: 44.7, geo_risk: 68.3, overall_accuracy: 55.1, baseline_relative: 55.1, samples: 197, rank: 6 },
+                { name: 'llama3.1:8b', card_risk: 49.1, email_risk: 41.8, geo_risk: 65.2, overall_accuracy: 52.0, baseline_relative: 52.0, samples: 197, rank: 7 }
+            ]
+        };
+
+        // Risk Indicator Chart Functions
+        function showRiskIndicatorChart() {
+            const chartElement = document.getElementById('riskChart');
+            const container = document.getElementById('riskChartContainer');
+            const title = document.getElementById('riskChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Risk Detection Rankings';
+            
+            const allModels = [...riskIndicatorData.gemini, ...riskIndicatorData.ollama]
+                .sort((a, b) => b.overall_accuracy - a.overall_accuracy);
+            
+            const chartData = allModels.map(model => ({
+                label: model.name,
+                value: model.overall_accuracy,
+                valueText: `${model.overall_accuracy}%`,
+                provider: riskIndicatorData.gemini.includes(model) ? 'Gemini' : 'Ollama'
+            }));
+            
+            drawBarChart(chartElement, chartData, { title: 'Overall Risk Indicator Detection Accuracy' });
+        }
+
+        function showRiskCategories() {
+            const chartElement = document.getElementById('riskChart');
+            const container = document.getElementById('riskChartContainer');
+            const title = document.getElementById('riskChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Risk Category Analysis';
+            
+            const allModels = [...riskIndicatorData.gemini, ...riskIndicatorData.ollama];
+            
+            // Prepare traces for each risk category
+            const traces = [
+                {
+                    name: 'Card Type Risk',
+                    type: 'bar',
+                    x: allModels.map(model => model.name),
+                    y: allModels.map(model => model.card_risk),
+                    marker: { color: '#4285F4' },
+                    hovertemplate: '<b>%{x}</b><br>Card Type Risk: %{y}%<extra></extra>'
+                },
+                {
+                    name: 'Email Domain Risk',
+                    type: 'bar',
+                    x: allModels.map(model => model.name),
+                    y: allModels.map(model => model.email_risk),
+                    marker: { color: '#34A853' },
+                    hovertemplate: '<b>%{x}</b><br>Email Domain Risk: %{y}%<extra></extra>'
+                },
+                {
+                    name: 'Geographic Risk',
+                    type: 'bar',
+                    x: allModels.map(model => model.name),
+                    y: allModels.map(model => model.geo_risk),
+                    marker: { color: '#EA4335' },
+                    hovertemplate: '<b>%{x}</b><br>Geographic Risk: %{y}%<extra></extra>'
+                }
+            ];
+            
+            const layout = {
+                title: {
+                    text: 'Risk Indicator Detection by Category',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                xaxis: { 
+                    title: 'Models',
+                    tickangle: -45
+                },
+                yaxis: { 
+                    title: 'Detection Accuracy (%)',
+                    range: [0, 100]
+                },
+                barmode: 'group',
+                margin: { l: 60, r: 50, t: 80, b: 120 },
+                showlegend: true,
+                legend: { x: 1.02, y: 1 },
+                paper_bgcolor: 'white',
+                plot_bgcolor: '#f8f9fa',
+                font: { family: 'Arial, sans-serif' }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(chartElement, traces, layout, config);
+        }
+
+        function showRiskCorrelation() {
+            const chartElement = document.getElementById('riskChart');
+            const container = document.getElementById('riskChartContainer');
+            const title = document.getElementById('riskChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Risk Correlation Analysis';
+            
+            const allModels = [...riskIndicatorData.gemini, ...riskIndicatorData.ollama];
+            
+            // Separate Gemini and Ollama models for different colors
+            const geminiModels = allModels.filter(model => model.name.includes('gemini') || model.name.includes('flash'));
+            const ollamaModels = allModels.filter(model => !model.name.includes('gemini') && !model.name.includes('flash'));
+            
+            const traces = [];
+            
+            if (geminiModels.length > 0) {
+                traces.push({
+                    name: 'Gemini Models',
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    x: geminiModels.map(model => model.card_risk),
+                    y: geminiModels.map(model => model.geo_risk),
+                    text: geminiModels.map(model => model.name.substring(0, 15)),
+                    textposition: 'top center',
+                    marker: { 
+                        color: '#4285F4', 
+                        size: 12,
+                        line: { color: 'white', width: 2 }
+                    },
+                    hovertemplate: '<b>%{text}</b><br>' +
+                                  'Card Type Risk: %{x}%<br>' +
+                                  'Geographic Risk: %{y}%<br>' +
+                                  'Email Domain Risk: %{customdata}%<br>' +
+                                  '<extra></extra>',
+                    customdata: geminiModels.map(model => model.email_risk)
+                });
+            }
+            
+            if (ollamaModels.length > 0) {
+                traces.push({
+                    name: 'Ollama Models',
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    x: ollamaModels.map(model => model.card_risk),
+                    y: ollamaModels.map(model => model.geo_risk),
+                    text: ollamaModels.map(model => model.name.substring(0, 15)),
+                    textposition: 'top center',
+                    marker: { 
+                        color: '#FF6B35', 
+                        size: 12,
+                        line: { color: 'white', width: 2 }
+                    },
+                    hovertemplate: '<b>%{text}</b><br>' +
+                                  'Card Type Risk: %{x}%<br>' +
+                                  'Geographic Risk: %{y}%<br>' +
+                                  'Email Domain Risk: %{customdata}%<br>' +
+                                  '<extra></extra>',
+                    customdata: ollamaModels.map(model => model.email_risk)
+                });
+            }
+            
+            const layout = {
+                title: {
+                    text: 'Risk Detection Correlation: Card Type vs Geographic',
+                    font: { size: 18, color: '#1a1a1a' }
+                },
+                xaxis: { 
+                    title: 'Card Type Risk Detection Accuracy (%)',
+                    range: [0, 100]
+                },
+                yaxis: { 
+                    title: 'Geographic Risk Detection Accuracy (%)',
+                    range: [0, 100]
+                },
+                margin: { l: 80, r: 50, t: 80, b: 80 },
+                showlegend: true,
+                legend: { x: 1.02, y: 1 },
+                paper_bgcolor: 'white',
+                plot_bgcolor: '#f8f9fa',
+                font: { family: 'Arial, sans-serif' }
+            };
+            
+            const config = {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ['pan2d', 'select2d', 'lasso2d', 'autoScale2d']
+            };
+            
+            Plotly.newPlot(chartElement, traces, layout, config);
+        }
+
+        // Initialize risk indicator table
+        function initializeRiskTable() {
+            const allModels = [...riskIndicatorData.gemini, ...riskIndicatorData.ollama]
+                .sort((a, b) => a.rank - b.rank);
+            
+            const tbody = document.getElementById('riskTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            allModels.forEach(model => {
+                const row = document.createElement('tr');
+                const provider = model.name.includes('gemini') || model.name.includes('flash') ? 'Gemini' : 'Ollama';
+                const providerClass = provider.toLowerCase();
+                const baselineColor = model.baseline_relative >= 60 ? '#34A853' : model.baseline_relative >= 50 ? '#F57C00' : '#EA4335';
+                
+                row.innerHTML = `
+                    <td>${model.rank}</td>
+                    <td><strong>${model.name}</strong></td>
+                    <td><span class="provider-badge ${providerClass}">${provider}</span></td>
+                    <td><strong style="color: ${baselineColor};">${model.baseline_relative.toFixed(1)}%</strong></td>
+                    <td><strong>${model.card_risk}%</strong></td>
+                    <td><strong>${model.email_risk}%</strong></td>
+                    <td><strong>${model.geo_risk}%</strong></td>
+                    <td><strong>${model.overall_accuracy}%</strong></td>
+                    <td>${model.samples}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Cross-Dataset Correlation Analysis Performance Data
+        const crossDatasetData = {
+            baseline: 45.0, // Cross-dataset baseline
+            gemini: [
+                { name: '2.5-flash-lite', bigquery_analysis: 92.4, gcp_analysis: 100.0, invoice_analysis: 68.7, cross_validation: 87.0, baseline_relative: 87.0, samples: 197, rank: 1 },
+                { name: '2.0-flash-exp', bigquery_analysis: 90.1, gcp_analysis: 98.5, invoice_analysis: 66.3, cross_validation: 84.9, baseline_relative: 84.9, samples: 197, rank: 2 },
+                { name: '2.0-flash', bigquery_analysis: 88.7, gcp_analysis: 96.8, invoice_analysis: 64.8, cross_validation: 83.4, baseline_relative: 83.4, samples: 197, rank: 3 },
+                { name: '1.5-flash-002', bigquery_analysis: 85.3, gcp_analysis: 92.7, invoice_analysis: 61.2, cross_validation: 79.7, baseline_relative: 79.7, samples: 170, rank: 4 },
+                { name: '1.5-flash-001', bigquery_analysis: 83.9, gcp_analysis: 91.4, invoice_analysis: 59.8, cross_validation: 78.4, baseline_relative: 78.4, samples: 170, rank: 5 }
+            ],
+            ollama: [
+                { name: 'llama3.2:latest', bigquery_analysis: 76.2, gcp_analysis: 82.1, invoice_analysis: 52.4, cross_validation: 70.2, baseline_relative: 70.2, samples: 197, rank: 6 },
+                { name: 'llama3.1:8b', bigquery_analysis: 73.8, gcp_analysis: 79.3, invoice_analysis: 49.7, cross_validation: 67.6, baseline_relative: 67.6, samples: 197, rank: 7 }
+            ]
+        };
+
+        // Cross-Dataset Chart Functions
+        function showCrossDatasetChart() {
+            const chartElement = document.getElementById('crossDatasetChart');
+            const container = document.getElementById('crossDatasetChartContainer');
+            const title = document.getElementById('crossDatasetChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Cross-Dataset Rankings';
+            
+            const allModels = [...crossDatasetData.gemini, ...crossDatasetData.ollama]
+                .sort((a, b) => b.cross_validation - a.cross_validation);
+            
+            const chartData = allModels.map(model => ({
+                label: model.name,
+                value: model.cross_validation,
+                valueText: `${model.cross_validation}%`,
+                provider: crossDatasetData.gemini.includes(model) ? 'Gemini' : 'Ollama'
+            }));
+            
+            drawBarChart(chartElement, chartData, { title: 'Cross-Dataset Validation Performance' });
+        }
+
+        function showDataSourceAnalysis() {
+            const chartElement = document.getElementById('crossDatasetChart');
+            const container = document.getElementById('crossDatasetChartContainer');
+            const title = document.getElementById('crossDatasetChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Data Source Analysis';
+            
+            const allModels = [...crossDatasetData.gemini, ...crossDatasetData.ollama];
+            const categories = ['BigQuery', 'GCP Training', 'Invoice Training'];
+            
+            // Create traces for each data source
+            const traces = categories.map((category, index) => {
+                const colors = ['#4285F4', '#34A853', '#EA4335'];
+                const values = allModels.map(model => {
+                    if (index === 0) return model.bigquery_analysis;
+                    if (index === 1) return model.gcp_analysis;
+                    return model.invoice_analysis;
+                });
+                
+                return {
+                    x: values,
+                    y: allModels.map(model => model.name),
+                    name: category,
+                    type: 'bar',
+                    orientation: 'h',
+                    marker: {
+                        color: colors[index]
+                    },
+                    text: values.map(v => `${v}%`),
+                    textposition: 'inside',
+                    hovertemplate: '<b>%{y}</b><br>' + category + ': %{x}%<extra></extra>'
+                };
+            });
+            
+            const layout = {
+                title: 'Cross-Dataset Analysis by Data Source',
+                xaxis: { title: 'Performance (%)' },
+                yaxis: { title: 'Models' },
+                barmode: 'group',
+                height: 500,
+                margin: { l: 200, r: 50, t: 80, b: 50 },
+                showlegend: true,
+                legend: { x: 0.8, y: 1 }
+            };
+            
+            Plotly.newPlot(chartElement, traces, layout, { responsive: true });
+        }
+
+        function showCorrelationMatrix() {
+            const chartElement = document.getElementById('crossDatasetChart');
+            const container = document.getElementById('crossDatasetChartContainer');
+            const title = document.getElementById('crossDatasetChartTitle');
+            
+            // Show the chart container and set title
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            title.textContent = 'Dataset Correlation Matrix';
+            
+            const allModels = [...crossDatasetData.gemini, ...crossDatasetData.ollama];
+            
+            const trace = {
+                x: allModels.map(model => model.bigquery_analysis),
+                y: allModels.map(model => model.gcp_analysis),
+                mode: 'markers+text',
+                type: 'scatter',
+                text: allModels.map(model => model.name.substring(0, 10)),
+                textposition: 'top center',
+                marker: {
+                    size: 12,
+                    color: allModels.map(model => 
+                        model.name.includes('gemini') || model.name.includes('flash') ? '#4285F4' : '#FF6B35'
+                    ),
+                    line: { width: 2, color: 'white' }
+                },
+                hovertemplate: '<b>%{text}</b><br>' +
+                    'BigQuery Analysis: %{x}%<br>' +
+                    'GCP Training: %{y}%<br>' +
+                    '<extra></extra>'
+            };
+            
+            const layout = {
+                title: 'Cross-Dataset Correlation: BigQuery vs GCP Training',
+                xaxis: { 
+                    title: 'BigQuery Analysis Performance (%)',
+                    range: [0, 100]
+                },
+                yaxis: { 
+                    title: 'GCP Training Analysis Performance (%)',
+                    range: [0, 100]
+                },
+                height: 500,
+                margin: { l: 80, r: 50, t: 80, b: 80 },
+                showlegend: false
+            };
+            
+            Plotly.newPlot(chartElement, [trace], layout, { responsive: true });
+        }
+
+        // Initialize cross-dataset table
+        function initializeCrossDatasetTable() {
+            const allModels = [...crossDatasetData.gemini, ...crossDatasetData.ollama]
+                .sort((a, b) => a.rank - b.rank);
+            
+            const tbody = document.getElementById('crossDatasetTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            allModels.forEach(model => {
+                const row = document.createElement('tr');
+                const provider = model.name.includes('gemini') || model.name.includes('flash') ? 'Gemini' : 'Ollama';
+                const providerClass = provider.toLowerCase();
+                const baselineColor = model.baseline_relative >= 75 ? '#34A853' : model.baseline_relative >= 65 ? '#F57C00' : '#EA4335';
+                
+                row.innerHTML = `
+                    <td>${model.rank}</td>
+                    <td><strong>${model.name}</strong></td>
+                    <td><span class="provider-badge ${providerClass}">${provider}</span></td>
+                    <td><strong style="color: ${baselineColor};">${model.baseline_relative.toFixed(1)}%</strong></td>
+                    <td><strong>${model.bigquery_analysis}%</strong></td>
+                    <td><strong>${model.gcp_analysis}%</strong></td>
+                    <td><strong>${model.invoice_analysis}%</strong></td>
+                    <td><strong>${model.cross_validation}%</strong></td>
+                    <td>${model.samples}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Sort functions for each table
+        function sortTransactionTable(column, direction) {
+            const allModels = [...transactionPatternData.gemini, ...transactionPatternData.ollama];
+            const tbody = document.getElementById('transactionTableBody');
+            if (!tbody) return;
+            
+            allModels.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+                
+                if (typeof aVal === 'string') {
+                    return direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                } else {
+                    return direction === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+            });
+            
+            tbody.innerHTML = '';
+            allModels.forEach(model => {
+                const row = document.createElement('tr');
+                const provider = model.name.includes('gemini') || model.name.includes('flash') ? 'Gemini' : 'Ollama';
+                const providerClass = provider.toLowerCase();
+                
+                row.innerHTML = `
+                    <td>${model.rank}</td>
+                    <td><strong>${model.name}</strong></td>
+                    <td><span class="provider-badge ${providerClass}">${provider}</span></td>
+                    <td><strong>${model.transfer_accuracy}%</strong></td>
+                    <td><strong>${model.cashout_accuracy}%</strong></td>
+                    <td><strong>${model.payment_accuracy}%</strong></td>
+                    <td>${model.efficiency.toLocaleString()} c/s</td>
+                    <td>${model.samples}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function sortAmountTable(column, direction) {
+            const allModels = [...amountAnomalyData.gemini, ...amountAnomalyData.ollama];
+            const tbody = document.getElementById('amountTableBody');
+            if (!tbody) return;
+            
+            allModels.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+                
+                if (typeof aVal === 'string') {
+                    return direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                } else {
+                    return direction === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+            });
+            
+            tbody.innerHTML = '';
+            allModels.forEach(model => {
+                const row = document.createElement('tr');
+                const provider = model.name.includes('gemini') || model.name.includes('flash') ? 'Gemini' : 'Ollama';
+                const providerClass = provider.toLowerCase();
+                
+                row.innerHTML = `
+                    <td>${model.rank}</td>
+                    <td><strong>${model.name}</strong></td>
+                    <td><span class="provider-badge ${providerClass}">${provider}</span></td>
+                    <td><strong>${model.high_amount}%</strong></td>
+                    <td><strong>${model.round_number}%</strong></td>
+                    <td><strong>${model.micro_transaction}%</strong></td>
+                    <td><strong>${model.overall_accuracy}%</strong></td>
+                    <td>${model.samples}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function sortBalanceTable(column, direction) {
+            const allModels = [...balanceBehaviorData.gemini, ...balanceBehaviorData.ollama];
+            const tbody = document.getElementById('balanceTableBody');
+            if (!tbody) return;
+            
+            allModels.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+                
+                if (typeof aVal === 'string') {
+                    return direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                } else {
+                    return direction === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+            });
+            
+            tbody.innerHTML = '';
+            allModels.forEach(model => {
+                const row = document.createElement('tr');
+                const provider = model.name.includes('gemini') || model.name.includes('flash') ? 'Gemini' : 'Ollama';
+                const providerClass = provider.toLowerCase();
+                
+                row.innerHTML = `
+                    <td>${model.rank}</td>
+                    <td><strong>${model.name}</strong></td>
+                    <td><span class="provider-badge ${providerClass}">${provider}</span></td>
+                    <td><strong>${model.balance_zeroing}%</strong></td>
+                    <td><strong>${model.rapid_depletion}%</strong></td>
+                    <td><strong>${model.destination_spikes}%</strong></td>
+                    <td><strong>${model.overall_accuracy}%</strong></td>
+                    <td>${model.samples}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function sortRiskTable(column, direction) {
+            const allModels = [...riskIndicatorData.gemini, ...riskIndicatorData.ollama];
+            const tbody = document.getElementById('riskTableBody');
+            if (!tbody) return;
+            
+            allModels.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+                
+                if (typeof aVal === 'string') {
+                    return direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                } else {
+                    return direction === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+            });
+            
+            tbody.innerHTML = '';
+            allModels.forEach(model => {
+                const row = document.createElement('tr');
+                const provider = model.name.includes('gemini') || model.name.includes('flash') ? 'Gemini' : 'Ollama';
+                const providerClass = provider.toLowerCase();
+                
+                row.innerHTML = `
+                    <td>${model.rank}</td>
+                    <td><strong>${model.name}</strong></td>
+                    <td><span class="provider-badge ${providerClass}">${provider}</span></td>
+                    <td><strong>${model.card_risk}%</strong></td>
+                    <td><strong>${model.email_risk}%</strong></td>
+                    <td><strong>${model.geo_risk}%</strong></td>
+                    <td><strong>${model.overall_accuracy}%</strong></td>
+                    <td>${model.samples}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function sortCrossDatasetTable(column, direction) {
+            const allModels = [...crossDatasetData.gemini, ...crossDatasetData.ollama];  
+            const tbody = document.getElementById('crossDatasetTableBody');
+            if (!tbody) return;
+            
+            allModels.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+                
+                if (typeof aVal === 'string') {
+                    return direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                } else {
+                    return direction === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+            });
+            
+            tbody.innerHTML = '';
+            allModels.forEach(model => {
+                const row = document.createElement('tr');
+                const provider = model.name.includes('gemini') || model.name.includes('flash') ? 'Gemini' : 'Ollama';
+                const providerClass = provider.toLowerCase();
+                
+                row.innerHTML = `
+                    <td>${model.rank}</td>
+                    <td><strong>${model.name}</strong></td>
+                    <td><span class="provider-badge ${providerClass}">${provider}</span></td>
+                    <td><strong>${model.bigquery_analysis}%</strong></td>
+                    <td><strong>${model.gcp_analysis}%</strong></td>
+                    <td><strong>${model.invoice_analysis}%</strong></td>
+                    <td><strong>${model.cross_validation}%</strong></td>
+                    <td>${model.samples}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Auto-render functions for all charts
+        function renderTransactionCharts() {
+            // Render all three transaction charts
+            renderTransactionChart('transactionChart1', 'Pattern Detection Rankings');
+            renderTransactionChart('transactionChart2', 'Accuracy Analysis');
+            renderTransactionChart('transactionChart3', 'Processing Speed');
+        }
+
+        function renderAmountCharts() {
+            // Render all three amount charts
+            renderAmountChart('amountChart1', 'Amount Detection Rankings');
+            renderAmountChart('amountChart2', 'Threshold Analysis');
+            renderAmountChart('amountChart3', 'Precision Metrics');
+        }
+
+        function renderBalanceCharts() {
+            // Render all three balance charts
+            renderBalanceChart('balanceChart1', 'Balance Detection Rankings');
+            renderBalanceChart('balanceChart2', 'Pattern Analysis');
+            renderBalanceChart('balanceChart3', 'Accuracy Comparison');
+        }
+
+        function renderRiskCharts() {
+            // Render all three risk charts
+            renderRiskChart('riskChart1', 'Risk Detection Rankings');
+            renderRiskChart('riskChart2', 'Category Analysis');
+            renderRiskChart('riskChart3', 'Risk Correlation');
+        }
+
+        function renderCrossDatasetCharts() {
+            // Render all three cross-dataset charts
+            renderCrossDatasetChart('crossDatasetChart1', 'Cross-Dataset Rankings');
+            renderCrossDatasetChart('crossDatasetChart2', 'Source Analysis');
+            renderCrossDatasetChart('crossDatasetChart3', 'Correlation Matrix');
+        }
+
+        // Generic chart rendering functions
+        function renderTransactionChart(canvasId, title) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Simple bar chart for transaction patterns
+            const allModels = [...transactionPatternData.gemini, ...transactionPatternData.ollama]
+                .sort((a, b) => b.transfer_accuracy - a.transfer_accuracy).slice(0, 10);
+            
+            const barWidth = 60;
+            const barSpacing = 10;
+            const startX = 50;
+            const maxHeight = 300;
+            
+            allModels.forEach((model, i) => {
+                const x = startX + i * (barWidth + barSpacing);
+                const height = (model.transfer_accuracy / 100) * maxHeight;
+                const y = canvas.height - height - 50;
+                
+                // Draw bar
+                ctx.fillStyle = model.name.includes('gemini') ? '#4285F4' : '#FF6B35';
+                ctx.fillRect(x, y, barWidth, height);
+                
+                // Draw value on top
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${model.transfer_accuracy}%`, x + barWidth/2, y - 5);
+                
+                // Draw model name (rotated)
+                ctx.save();
+                ctx.translate(x + barWidth/2, canvas.height - 20);
+                ctx.rotate(-Math.PI/4);
+                ctx.textAlign = 'right';
+                ctx.fillText(model.name, 0, 0);
+                ctx.restore();
+            });
+        }
+
+        function renderAmountChart(canvasId, title) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Simple bar chart for amount anomalies
+            const allModels = [...amountAnomalyData.gemini, ...amountAnomalyData.ollama]
+                .sort((a, b) => b.overall_accuracy - a.overall_accuracy).slice(0, 10);
+            
+            const barWidth = 60;
+            const barSpacing = 10;
+            const startX = 50;
+            const maxHeight = 300;
+            
+            allModels.forEach((model, i) => {
+                const x = startX + i * (barWidth + barSpacing);
+                const height = (model.overall_accuracy / 100) * maxHeight;
+                const y = canvas.height - height - 50;
+                
+                // Draw bar
+                ctx.fillStyle = model.name.includes('gemini') ? '#4285F4' : '#FF6B35';
+                ctx.fillRect(x, y, barWidth, height);
+                
+                // Draw value on top
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${model.overall_accuracy}%`, x + barWidth/2, y - 5);
+                
+                // Draw model name (rotated)
+                ctx.save();
+                ctx.translate(x + barWidth/2, canvas.height - 20);
+                ctx.rotate(-Math.PI/4);
+                ctx.textAlign = 'right';
+                ctx.fillText(model.name, 0, 0);
+                ctx.restore();
+            });
+        }
+
+        function renderBalanceChart(canvasId, title) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Simple bar chart for balance behavior
+            const allModels = [...balanceBehaviorData.gemini, ...balanceBehaviorData.ollama]
+                .sort((a, b) => b.overall_accuracy - a.overall_accuracy).slice(0, 10);
+            
+            const barWidth = 60;
+            const barSpacing = 10;
+            const startX = 50;
+            const maxHeight = 300;
+            
+            allModels.forEach((model, i) => {
+                const x = startX + i * (barWidth + barSpacing);
+                const height = (model.overall_accuracy / 100) * maxHeight;
+                const y = canvas.height - height - 50;
+                
+                // Draw bar
+                ctx.fillStyle = model.name.includes('gemini') ? '#4285F4' : '#FF6B35';
+                ctx.fillRect(x, y, barWidth, height);
+                
+                // Draw value on top
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${model.overall_accuracy}%`, x + barWidth/2, y - 5);
+                
+                // Draw model name (rotated)
+                ctx.save();
+                ctx.translate(x + barWidth/2, canvas.height - 20);
+                ctx.rotate(-Math.PI/4);
+                ctx.textAlign = 'right';
+                ctx.fillText(model.name, 0, 0);
+                ctx.restore();
+            });
+        }
+
+        function renderRiskChart(canvasId, title) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Simple bar chart for risk indicators
+            const allModels = [...riskIndicatorData.gemini, ...riskIndicatorData.ollama]
+                .sort((a, b) => b.overall_accuracy - a.overall_accuracy).slice(0, 10);
+            
+            const barWidth = 60;
+            const barSpacing = 10;
+            const startX = 50;
+            const maxHeight = 300;
+            
+            allModels.forEach((model, i) => {
+                const x = startX + i * (barWidth + barSpacing);
+                const height = (model.overall_accuracy / 100) * maxHeight;
+                const y = canvas.height - height - 50;
+                
+                // Draw bar
+                ctx.fillStyle = model.name.includes('gemini') ? '#4285F4' : '#FF6B35';
+                ctx.fillRect(x, y, barWidth, height);
+                
+                // Draw value on top
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${model.overall_accuracy}%`, x + barWidth/2, y - 5);
+                
+                // Draw model name (rotated)
+                ctx.save();
+                ctx.translate(x + barWidth/2, canvas.height - 20);
+                ctx.rotate(-Math.PI/4);
+                ctx.textAlign = 'right';
+                ctx.fillText(model.name, 0, 0);
+                ctx.restore();
+            });
+        }
+
+        function renderCrossDatasetChart(canvasId, title) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Simple bar chart for cross-dataset analysis
+            const allModels = [...crossDatasetData.gemini, ...crossDatasetData.ollama]
+                .sort((a, b) => b.cross_validation - a.cross_validation).slice(0, 10);
+            
+            const barWidth = 60;
+            const barSpacing = 10;
+            const startX = 50;
+            const maxHeight = 300;
+            
+            allModels.forEach((model, i) => {
+                const x = startX + i * (barWidth + barSpacing);
+                const height = (model.cross_validation / 100) * maxHeight;
+                const y = canvas.height - height - 50;
+                
+                // Draw bar
+                ctx.fillStyle = model.name.includes('gemini') ? '#4285F4' : '#FF6B35';
+                ctx.fillRect(x, y, barWidth, height);
+                
+                // Draw value on top
+                ctx.fillStyle = '#333';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${model.cross_validation}%`, x + barWidth/2, y - 5);
+                
+                // Draw model name (rotated)
+                ctx.save();
+                ctx.translate(x + barWidth/2, canvas.height - 20);
+                ctx.rotate(-Math.PI/4);
+                ctx.textAlign = 'right';
+                ctx.fillText(model.name, 0, 0);
+                ctx.restore();
+            });
+        }
+
+        // Initialize the dashboard when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all tables
+            initializeTransactionTable();
+            initializeAmountTable();
+            initializeBalanceTable();
+            initializeRiskTable();
+            initializeCrossDatasetTable();
+            
+            // Show overview tab by default
+            showTab('overview');
+        });
+    </script>
+</body>
+</html>

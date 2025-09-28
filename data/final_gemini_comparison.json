@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-09-27T21:56:56.056212",
+  "total_models_tested": 1,
+  "successful_models": 0,
+  "failed_models": 1,
+  "success_rate": 0.0,
+  "results": [
+    {
+      "model_id": "gemini-2.0-flash-exp",
+      "model_name": "Gemini 2.0 Flash Experimental",
+      "success": false,
+      "error": "429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits.\n* Quota exceeded for me",
+      "timestamp": "2025-09-27T21:56:56.056212"
+    }
+  ],
+  "fraud_data_samples": 170
+}

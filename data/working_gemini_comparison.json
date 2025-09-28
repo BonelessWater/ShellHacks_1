@@ -1,0 +1,39 @@
+{
+  "comparison_timestamp": "2025-09-27T22:02:16.140445",
+  "total_models_attempted": 3,
+  "successful_models": 0,
+  "failed_models": 3,
+  "rate_limited_models": 0,
+  "success_rate": 0.0,
+  "model_results": [
+    {
+      "model_id": "gemini-1.5-pro",
+      "model_name": "Gemini 1.5 Pro",
+      "error": "404 models/gemini-1.5-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+      "timestamp": "2025-09-27T22:02:16.140445"
+    },
+    {
+      "model_id": "gemini-1.5-flash",
+      "model_name": "Gemini 1.5 Flash",
+      "error": "404 models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+      "timestamp": "2025-09-27T22:02:16.140445"
+    },
+    {
+      "model_id": "gemini-pro",
+      "model_name": "Gemini Pro",
+      "error": "404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+      "timestamp": "2025-09-27T22:02:16.140445"
+    }
+  ],
+  "performance_summary": {
+    "message": "No successful results to analyze"
+  },
+  "bigquery_project": "vaulted-timing-473322-f9",
+  "datasets_analyzed": [
+    "ieee_cis_fraud",
+    "credit_card_fraud",
+    "paysim_fraud",
+    "relational_fraud"
+  ],
+  "total_fraud_samples": 170
+}

@@ -1,0 +1,1087 @@
+[
+  {
+    "invoice_id": "INV-2024-001234",
+    "vendor_name": "Tech Solutions Inc.",
+    "vendor_address": "1234 Silicon Valley Dr, San Jose, CA 95110",
+    "vendor_tax_id": "12-3456789",
+    "client_name": "Global Enterprises LLC",
+    "client_address": "5678 Corporate Blvd, Austin, TX 73301",
+    "invoice_date": "2024-03-15",
+    "due_date": "2024-04-14",
+    "subtotal": 15750.00,
+    "tax_rate": 0.0825,
+    "tax_amount": 1299.38,
+    "total_amount": 17049.38,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Software Development Services - Q1 2024",
+        "quantity": 350,
+        "unit": "hours",
+        "unit_price": 45.00,
+        "total": 15750.00
+      }
+    ],
+    "is_fraudulent": false,
+    "fraud_indicators": [],
+    "payment_status": "paid",
+    "payment_date": "2024-04-10"
+  },
+  {
+    "invoice_id": "INV-2024-001235",
+    "vendor_name": "Office Supply Pro",
+    "vendor_address": "9876 Business Park Way, Denver, CO 80202",
+    "vendor_tax_id": "98-7654321",
+    "client_name": "Marketing Agency Plus",
+    "client_address": "2468 Creative Ave, Portland, OR 97201",
+    "invoice_date": "2024-03-16",
+    "due_date": "2024-04-15",
+    "subtotal": 2847.50,
+    "tax_rate": 0.07,
+    "tax_amount": 199.33,
+    "total_amount": 3046.83,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Premium Paper - A4 (500 sheets/box)",
+        "quantity": 25,
+        "unit": "boxes",
+        "unit_price": 12.50,
+        "total": 312.50
+      },
+      {
+        "description": "Laser Printer Toner - HP LaserJet",
+        "quantity": 8,
+        "unit": "cartridges",
+        "unit_price": 89.99,
+        "total": 719.92
+      },
+      {
+        "description": "Ergonomic Office Chairs",
+        "quantity": 6,
+        "unit": "chairs",
+        "unit_price": 245.00,
+        "total": 1470.00
+      },
+      {
+        "description": "Standing Desk Converters",
+        "quantity": 3,
+        "unit": "units",
+        "unit_price": 115.03,
+        "total": 345.09
+      }
+    ],
+    "is_fraudulent": false,
+    "fraud_indicators": [],
+    "payment_status": "pending",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001236",
+    "vendor_name": "Consulting Experts LLC",
+    "vendor_address": "1357 Professional Plaza, Chicago, IL 60601",
+    "vendor_tax_id": "24-6813579",
+    "client_name": "Manufacturing Corp",
+    "client_address": "8642 Industrial Blvd, Detroit, MI 48201",
+    "invoice_date": "2024-03-17",
+    "due_date": "2024-04-16",
+    "subtotal": 45000.00,
+    "tax_rate": 0.095,
+    "tax_amount": 4275.00,
+    "total_amount": 49275.00,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Strategic Business Consulting - Phase 1",
+        "quantity": 1,
+        "unit": "project",
+        "unit_price": 25000.00,
+        "total": 25000.00
+      },
+      {
+        "description": "Process Optimization Analysis",
+        "quantity": 100,
+        "unit": "hours",
+        "unit_price": 200.00,
+        "total": 20000.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "unusually_high_amount",
+      "vendor_not_in_approved_list",
+      "rush_payment_request"
+    ],
+    "payment_status": "flagged",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001237",
+    "vendor_name": "CloudTech Services",
+    "vendor_address": "5432 Tech Center Dr, Seattle, WA 98101",
+    "vendor_tax_id": "87-1234567",
+    "client_name": "StartupX Inc.",
+    "client_address": "1111 Innovation St, San Francisco, CA 94105",
+    "invoice_date": "2024-03-18",
+    "due_date": "2024-04-17",
+    "subtotal": 8900.00,
+    "tax_rate": 0.0875,
+    "tax_amount": 778.75,
+    "total_amount": 9678.75,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "AWS Cloud Infrastructure - March 2024",
+        "quantity": 1,
+        "unit": "month",
+        "unit_price": 3200.00,
+        "total": 3200.00
+      },
+      {
+        "description": "Database Management Services",
+        "quantity": 1,
+        "unit": "month",
+        "unit_price": 1500.00,
+        "total": 1500.00
+      },
+      {
+        "description": "Security Monitoring & Compliance",
+        "quantity": 1,
+        "unit": "month",
+        "unit_price": 2100.00,
+        "total": 2100.00
+      },
+      {
+        "description": "Technical Support (24/7)",
+        "quantity": 1,
+        "unit": "month",
+        "unit_price": 2100.00,
+        "total": 2100.00
+      }
+    ],
+    "is_fraudulent": false,
+    "fraud_indicators": [],
+    "payment_status": "paid",
+    "payment_date": "2024-04-12"
+  },
+  {
+    "invoice_id": "INV-2024-001238",
+    "vendor_name": "Quick Fix Solutions",
+    "vendor_address": "999 Shady Lane, Unknown City, XX 00000",
+    "vendor_tax_id": "11-1111111",
+    "client_name": "Global Enterprises LLC",
+    "client_address": "5678 Corporate Blvd, Austin, TX 73301",
+    "invoice_date": "2024-03-19",
+    "due_date": "2024-03-24",
+    "subtotal": 25000.00,
+    "tax_rate": 0.00,
+    "tax_amount": 0.00,
+    "total_amount": 25000.00,
+    "currency": "USD",
+    "payment_terms": "Due Immediately",
+    "line_items": [
+      {
+        "description": "Emergency IT Services",
+        "quantity": 1,
+        "unit": "service",
+        "unit_price": 25000.00,
+        "total": 25000.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "suspicious_vendor_address",
+      "no_tax_applied",
+      "immediate_payment_terms",
+      "vague_service_description",
+      "round_number_amount"
+    ],
+    "payment_status": "blocked",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001239",
+    "vendor_name": "Legal Advisory Group",
+    "vendor_address": "7890 Law Plaza, New York, NY 10001",
+    "vendor_tax_id": "33-4567890",
+    "client_name": "Real Estate Holdings Inc.",
+    "client_address": "4321 Property Way, Miami, FL 33101",
+    "invoice_date": "2024-03-20",
+    "due_date": "2024-04-19",
+    "subtotal": 12800.00,
+    "tax_rate": 0.08,
+    "tax_amount": 1024.00,
+    "total_amount": 13824.00,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Contract Review and Analysis",
+        "quantity": 32,
+        "unit": "hours",
+        "unit_price": 350.00,
+        "total": 11200.00
+      },
+      {
+        "description": "Legal Document Preparation",
+        "quantity": 8,
+        "unit": "hours",
+        "unit_price": 200.00,
+        "total": 1600.00
+      }
+    ],
+    "is_fraudulent": false,
+    "fraud_indicators": [],
+    "payment_status": "paid",
+    "payment_date": "2024-04-15"
+  },
+  {
+    "invoice_id": "INV-2024-001240",
+    "vendor_name": "Maintenance Masters",
+    "vendor_address": "6789 Service Road, Houston, TX 77001",
+    "vendor_tax_id": "55-9876543",
+    "client_name": "Corporate Plaza LLC",
+    "client_address": "1357 Business Center, Dallas, TX 75201",
+    "invoice_date": "2024-03-21",
+    "due_date": "2024-04-20",
+    "subtotal": 5670.00,
+    "tax_rate": 0.0825,
+    "tax_amount": 467.78,
+    "total_amount": 6137.78,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "HVAC System Maintenance - Q1 2024",
+        "quantity": 1,
+        "unit": "service",
+        "unit_price": 2200.00,
+        "total": 2200.00
+      },
+      {
+        "description": "Elevator Maintenance Contract",
+        "quantity": 3,
+        "unit": "months",
+        "unit_price": 450.00,
+        "total": 1350.00
+      },
+      {
+        "description": "Plumbing Repairs and Fixtures",
+        "quantity": 1,
+        "unit": "service",
+        "unit_price": 1320.00,
+        "total": 1320.00
+      },
+      {
+        "description": "Electrical System Inspection",
+        "quantity": 1,
+        "unit": "service",
+        "unit_price": 800.00,
+        "total": 800.00
+      }
+    ],
+    "is_fraudulent": false,
+    "fraud_indicators": [],
+    "payment_status": "pending",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001241",
+    "vendor_name": "Premium Catering Co.",
+    "vendor_address": "2468 Culinary Blvd, Los Angeles, CA 90210",
+    "vendor_tax_id": "77-2468135",
+    "client_name": "Event Management Pro",
+    "client_address": "9753 Entertainment Ave, Las Vegas, NV 89101",
+    "invoice_date": "2024-03-22",
+    "due_date": "2024-04-21",
+    "subtotal": 18500.00,
+    "tax_rate": 0.095,
+    "tax_amount": 1757.50,
+    "total_amount": 20257.50,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Corporate Event Catering - 200 guests",
+        "quantity": 200,
+        "unit": "servings",
+        "unit_price": 45.00,
+        "total": 9000.00
+      },
+      {
+        "description": "Premium Wine Selection",
+        "quantity": 50,
+        "unit": "bottles",
+        "unit_price": 35.00,
+        "total": 1750.00
+      },
+      {
+        "description": "Service Staff (8 hours)",
+        "quantity": 12,
+        "unit": "staff-hours",
+        "unit_price": 25.00,
+        "total": 2400.00
+      },
+      {
+        "description": "Equipment Rental & Setup",
+        "quantity": 1,
+        "unit": "service",
+        "unit_price": 3850.00,
+        "total": 3850.00
+      },
+      {
+        "description": "Linens and Decorative Items",
+        "quantity": 1,
+        "unit": "package",
+        "unit_price": 1500.00,
+        "total": 1500.00
+      }
+    ],
+    "is_fraudulent": false,
+    "fraud_indicators": [],
+    "payment_status": "paid",
+    "payment_date": "2024-04-18"
+  },
+  {
+    "invoice_id": "INV-2024-001242",
+    "vendor_name": "Dubious Tech LLC",
+    "vendor_address": "123 Fake Street, Nowhere, ZZ 99999",
+    "vendor_tax_id": "00-0000000",
+    "client_name": "Global Enterprises LLC",
+    "client_address": "5678 Corporate Blvd, Austin, TX 73301",
+    "invoice_date": "2024-03-23",
+    "due_date": "2024-03-25",
+    "subtotal": 50000.00,
+    "tax_rate": 0.00,
+    "tax_amount": 0.00,
+    "total_amount": 50000.00,
+    "currency": "USD",
+    "payment_terms": "Immediate Payment Required",
+    "line_items": [
+      {
+        "description": "Software License",
+        "quantity": 1,
+        "unit": "license",
+        "unit_price": 50000.00,
+        "total": 50000.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "fake_vendor_address",
+      "invalid_tax_id",
+      "immediate_payment_required",
+      "unusually_high_amount",
+      "vague_description",
+      "no_detailed_breakdown",
+      "suspicious_vendor_name"
+    ],
+    "payment_status": "blocked",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001243",
+    "vendor_name": "Marketing Dynamics Inc.",
+    "vendor_address": "4567 Advertisement Way, Atlanta, GA 30301",
+    "vendor_tax_id": "44-7891234",
+    "client_name": "Retail Chain Stores",
+    "client_address": "8901 Commerce Dr, Phoenix, AZ 85001",
+    "invoice_date": "2024-03-24",
+    "due_date": "2024-04-23",
+    "subtotal": 22400.00,
+    "tax_rate": 0.08,
+    "tax_amount": 1792.00,
+    "total_amount": 24192.00,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Digital Marketing Campaign - Q1 2024",
+        "quantity": 1,
+        "unit": "campaign",
+        "unit_price": 12000.00,
+        "total": 12000.00
+      },
+      {
+        "description": "Social Media Management",
+        "quantity": 3,
+        "unit": "months",
+        "unit_price": 1800.00,
+        "total": 5400.00
+      },
+      {
+        "description": "Content Creation Services",
+        "quantity": 50,
+        "unit": "pieces",
+        "unit_price": 60.00,
+        "total": 3000.00
+      },
+      {
+        "description": "Analytics and Reporting",
+        "quantity": 1,
+        "unit": "package",
+        "unit_price": 2000.00,
+        "total": 2000.00
+      }
+    ],
+    "is_fraudulent": false,
+    "fraud_indicators": [],
+    "payment_status": "pending",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001244",
+    "vendor_name": "Transportation Services Ltd.",
+    "vendor_address": "3456 Logistics Lane, Memphis, TN 38101",
+    "vendor_tax_id": "66-3456789",
+    "client_name": "Distribution Network Inc.",
+    "client_address": "7890 Warehouse Way, Cincinnati, OH 45201",
+    "invoice_date": "2024-03-25",
+    "due_date": "2024-04-24",
+    "subtotal": 8750.00,
+    "tax_rate": 0.075,
+    "tax_amount": 656.25,
+    "total_amount": 9406.25,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Freight Transportation - Dallas to Chicago",
+        "quantity": 5,
+        "unit": "shipments",
+        "unit_price": 850.00,
+        "total": 4250.00
+      },
+      {
+        "description": "Express Delivery Service",
+        "quantity": 25,
+        "unit": "packages",
+        "unit_price": 45.00,
+        "total": 1125.00
+      },
+      {
+        "description": "Warehousing Services - March 2024",
+        "quantity": 1,
+        "unit": "month",
+        "unit_price": 2200.00,
+        "total": 2200.00
+      },
+      {
+        "description": "Insurance and Handling Fees",
+        "quantity": 1,
+        "unit": "service",
+        "unit_price": 1175.00,
+        "total": 1175.00
+      }
+    ],
+    "is_fraudulent": false,
+    "fraud_indicators": [],
+    "payment_status": "paid",
+    "payment_date": "2024-04-20"
+  },
+  {
+    "invoice_id": "INV-2024-001245",
+    "vendor_name": "Scam Solutions Inc.",
+    "vendor_address": "0000 Nonexistent Rd, Faketown, YY 11111",
+    "vendor_tax_id": "99-9999999",
+    "client_name": "Tech Startup Beta",
+    "client_address": "2345 Innovation Blvd, Boston, MA 02101",
+    "invoice_date": "2024-03-26",
+    "due_date": "2024-03-27",
+    "subtotal": 75000.00,
+    "tax_rate": 0.00,
+    "tax_amount": 0.00,
+    "total_amount": 75000.00,
+    "currency": "USD",
+    "payment_terms": "Payment Due Within 24 Hours",
+    "line_items": [
+      {
+        "description": "Emergency System Recovery",
+        "quantity": 1,
+        "unit": "service",
+        "unit_price": 75000.00,
+        "total": 75000.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "extremely_short_payment_terms",
+      "suspicious_vendor_details",
+      "excessively_high_amount",
+      "no_tax_applied",
+      "generic_service_description",
+      "pressure_tactics_implied"
+    ],
+    "payment_status": "blocked",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001246",
+    "vendor_name": "Green Energy Solutions",
+    "vendor_address": "5678 Solar Panel Dr, Phoenix, AZ 85301",
+    "vendor_tax_id": "88-5432109",
+    "client_name": "Eco-Friendly Manufacturing",
+    "client_address": "9012 Sustainable Way, Portland, OR 97301",
+    "invoice_date": "2024-03-27",
+    "due_date": "2024-04-26",
+    "subtotal": 125000.00,
+    "tax_rate": 0.09,
+    "tax_amount": 11250.00,
+    "total_amount": 136250.00,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Solar Panel Installation - 500kW System",
+        "quantity": 1,
+        "unit": "system",
+        "unit_price": 95000.00,
+        "total": 95000.00
+      },
+      {
+        "description": "Electrical Integration Services",
+        "quantity": 120,
+        "unit": "hours",
+        "unit_price": 125.00,
+        "total": 15000.00
+      },
+      {
+        "description": "Monitoring System Setup",
+        "quantity": 1,
+        "unit": "system",
+        "unit_price": 8000.00,
+        "total": 8000.00
+      },
+      {
+        "description": "Project Management and Permits",
+        "quantity": 1,
+        "unit": "service",
+        "unit_price": 7000.00,
+        "total": 7000.00
+      }
+    ],
+    "is_fraudulent": false,
+    "fraud_indicators": [],
+    "payment_status": "pending",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001247",
+    "vendor_name": "Insurance Specialists Group",
+    "vendor_address": "1122 Protection Blvd, Hartford, CT 06103",
+    "vendor_tax_id": "22-8765432",
+    "client_name": "Small Business Network",
+    "client_address": "3344 Enterprise St, Nashville, TN 37201",
+    "invoice_date": "2024-03-28",
+    "due_date": "2024-04-27",
+    "subtotal": 14600.00,
+    "tax_rate": 0.065,
+    "tax_amount": 949.00,
+    "total_amount": 15549.00,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "General Liability Insurance - Annual Premium",
+        "quantity": 1,
+        "unit": "policy",
+        "unit_price": 6200.00,
+        "total": 6200.00
+      },
+      {
+        "description": "Property Insurance Coverage",
+        "quantity": 1,
+        "unit": "policy",
+        "unit_price": 4800.00,
+        "total": 4800.00
+      },
+      {
+        "description": "Workers Compensation Insurance",
+        "quantity": 1,
+        "unit": "policy",
+        "unit_price": 2900.00,
+        "total": 2900.00
+      },
+      {
+        "description": "Cyber Liability Coverage",
+        "quantity": 1,
+        "unit": "policy",
+        "unit_price": 700.00,
+        "total": 700.00
+      }
+    ],
+    "is_fraudulent": false,
+    "fraud_indicators": [],
+    "payment_status": "paid",
+    "payment_date": "2024-04-25"
+  },
+  {
+    "invoice_id": "INV-2024-001248",
+    "vendor_name": "Training & Development Corp",
+    "vendor_address": "6677 Education Ave, Minneapolis, MN 55401",
+    "vendor_tax_id": "11-2345678",
+    "client_name": "Healthcare Systems Inc.",
+    "client_address": "8899 Medical Center Dr, Cleveland, OH 44101",
+    "invoice_date": "2024-03-29",
+    "due_date": "2024-04-28",
+    "subtotal": 28500.00,
+    "tax_rate": 0.07,
+    "tax_amount": 1995.00,
+    "total_amount": 30495.00,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "HIPAA Compliance Training Program",
+        "quantity": 150,
+        "unit": "employees",
+        "unit_price": 85.00,
+        "total": 12750.00
+      },
+      {
+        "description": "Leadership Development Workshop",
+        "quantity": 25,
+        "unit": "participants",
+        "unit_price": 320.00,
+        "total": 8000.00
+      },
+      {
+        "description": "Custom Training Materials Development",
+        "quantity": 1,
+        "unit": "package",
+        "unit_price": 4500.00,
+        "total": 4500.00
+      },
+      {
+        "description": "Training Assessment and Certification",
+        "quantity": 175,
+        "unit": "certificates",
+        "unit_price": 18.00,
+        "total": 3150.00
+      },
+      {
+        "description": "Online Training Platform Access (1 year)",
+        "quantity": 1,
+        "unit": "license",
+        "unit_price": 100.00,
+        "total": 100.00
+      }
+    ],
+    "is_fraudulent": false,
+    "fraud_indicators": [],
+    "payment_status": "pending",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001249",
+    "vendor_name": "Microsoft Solutions Inc.",
+    "vendor_address": "1 Microsoft Way, Redmond, WA 98052",
+    "vendor_tax_id": "91-1144442",
+    "client_name": "Global Enterprises LLC",
+    "client_address": "5678 Corporate Blvd, Austin, TX 73301",
+    "invoice_date": "2024-03-30",
+    "due_date": "2024-04-29",
+    "subtotal": 12500.00,
+    "tax_rate": 0.08,
+    "tax_amount": 1000.00,
+    "total_amount": 13500.00,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Office 365 Enterprise Licenses",
+        "quantity": 100,
+        "unit": "licenses",
+        "unit_price": 125.00,
+        "total": 12500.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "vendor_impersonation",
+      "slight_name_variation",
+      "legitimate_looking_address"
+    ],
+    "payment_status": "flagged",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001250",
+    "vendor_name": "Industrial Equipment Corp",
+    "vendor_address": "7788 Manufacturing St, Detroit, MI 48201",
+    "vendor_tax_id": "45-9876543",
+    "client_name": "Factory Operations LLC",
+    "client_address": "1122 Production Ave, Toledo, OH 43601",
+    "invoice_date": "2024-03-31",
+    "due_date": "2024-04-30",
+    "subtotal": 89750.00,
+    "tax_rate": 0.065,
+    "tax_amount": 5833.75,
+    "total_amount": 95583.75,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "CNC Machine Maintenance - Model X2000",
+        "quantity": 15,
+        "unit": "hours",
+        "unit_price": 450.00,
+        "total": 6750.00
+      },
+      {
+        "description": "Replacement Parts - Premium Grade",
+        "quantity": 25,
+        "unit": "parts",
+        "unit_price": 1200.00,
+        "total": 30000.00
+      },
+      {
+        "description": "Emergency Repair Services",
+        "quantity": 1,
+        "unit": "service",
+        "unit_price": 53000.00,
+        "total": 53000.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "price_inflation",
+      "one_item_disproportionately_expensive",
+      "emergency_service_markup"
+    ],
+    "payment_status": "under_review",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001251",
+    "vendor_name": "DataSafe Backup Solutions",
+    "vendor_address": "4455 Cloud Storage Blvd, San Antonio, TX 78201",
+    "vendor_tax_id": "78-4561237",
+    "client_name": "Financial Services Group",
+    "client_address": "9988 Banking Plaza, Charlotte, NC 28201",
+    "invoice_date": "2024-04-01",
+    "due_date": "2024-05-01",
+    "subtotal": 15600.00,
+    "tax_rate": 0.075,
+    "tax_amount": 1170.00,
+    "total_amount": 16770.00,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Data Backup Services - March 2024",
+        "quantity": 1,
+        "unit": "month",
+        "unit_price": 3600.00,
+        "total": 3600.00
+      },
+      {
+        "description": "Additional Storage - 500TB",
+        "quantity": 1,
+        "unit": "package",
+        "unit_price": 12000.00,
+        "total": 12000.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "service_bundling_inflation",
+      "excessive_storage_charges",
+      "vendor_not_verified"
+    ],
+    "payment_status": "pending_verification",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001252",
+    "vendor_name": "Global Consulting Partners",
+    "vendor_address": "2233 Strategy Lane, Boston, MA 02101",
+    "vendor_tax_id": "25-7894561",
+    "client_name": "Retail Chain Stores",
+    "client_address": "8901 Commerce Dr, Phoenix, AZ 85001",
+    "invoice_date": "2024-02-15",
+    "due_date": "2024-03-16",
+    "subtotal": 67500.00,
+    "tax_rate": 0.0625,
+    "tax_amount": 4218.75,
+    "total_amount": 71718.75,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Strategic Planning Consultation",
+        "quantity": 225,
+        "unit": "hours",
+        "unit_price": 300.00,
+        "total": 67500.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "post_dated_invoice",
+      "invoice_submitted_late",
+      "excessive_hours_claimed",
+      "no_work_verification"
+    ],
+    "payment_status": "disputed",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001253",
+    "vendor_name": "Premier IT Support",
+    "vendor_address": "5566 Tech Support Dr, Austin, TX 78701",
+    "vendor_tax_id": "12-3456789",
+    "client_name": "Global Enterprises LLC",
+    "client_address": "5678 Corporate Blvd, Austin, TX 73301",
+    "invoice_date": "2024-04-02",
+    "due_date": "2024-05-02",
+    "subtotal": 24680.00,
+    "tax_rate": 0.0825,
+    "tax_amount": 2036.10,
+    "total_amount": 26716.10,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Network Security Audit",
+        "quantity": 1,
+        "unit": "audit",
+        "unit_price": 8500.00,
+        "total": 8500.00
+      },
+      {
+        "description": "Server Maintenance - Q1 2024",
+        "quantity": 80,
+        "unit": "hours",
+        "unit_price": 120.00,
+        "total": 9600.00
+      },
+      {
+        "description": "Software License Renewal",
+        "quantity": 1,
+        "unit": "license",
+        "unit_price": 6580.00,
+        "total": 6580.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "duplicate_tax_id",
+      "same_client_multiple_vendors",
+      "similar_services_overlap"
+    ],
+    "payment_status": "flagged",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001254",
+    "vendor_name": "Acme Office Supplies",
+    "vendor_address": "1111 Supply Chain Way, Memphis, TN 38103",
+    "vendor_tax_id": "67-8901234",
+    "client_name": "StartupX Inc.",
+    "client_address": "1111 Innovation St, San Francisco, CA 94105",
+    "invoice_date": "2024-04-03",
+    "due_date": "2024-05-03",
+    "subtotal": 847.50,
+    "tax_rate": 0.0875,
+    "tax_amount": 74.16,
+    "total_amount": 921.66,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Premium Copy Paper - A4",
+        "quantity": 10,
+        "unit": "reams",
+        "unit_price": 15.50,
+        "total": 155.00
+      },
+      {
+        "description": "Ballpoint Pens - Blue Ink",
+        "quantity": 144,
+        "unit": "pens",
+        "unit_price": 0.75,
+        "total": 108.00
+      },
+      {
+        "description": "Executive Desk Chairs",
+        "quantity": 2,
+        "unit": "chairs",
+        "unit_price": 292.25,
+        "total": 584.50
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "price_manipulation_small_amounts",
+      "itemized_padding",
+      "mixed_reasonable_unreasonable_prices"
+    ],
+    "payment_status": "paid",
+    "payment_date": "2024-04-28"
+  },
+  {
+    "invoice_id": "INV-2024-001255",
+    "vendor_name": "Expert Financial Advisors",
+    "vendor_address": "3344 Wall Street Extension, New York, NY 10005",
+    "vendor_tax_id": "10-5555555",
+    "client_name": "Investment Holdings Corp",
+    "client_address": "7766 Financial District, Chicago, IL 60601",
+    "invoice_date": "2024-04-04",
+    "due_date": "2024-05-04",
+    "subtotal": 35000.00,
+    "tax_rate": 0.08,
+    "tax_amount": 2800.00,
+    "total_amount": 37800.00,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Investment Portfolio Analysis",
+        "quantity": 1,
+        "unit": "analysis",
+        "unit_price": 15000.00,
+        "total": 15000.00
+      },
+      {
+        "description": "Risk Assessment Report",
+        "quantity": 1,
+        "unit": "report",
+        "unit_price": 8000.00,
+        "total": 8000.00
+      },
+      {
+        "description": "Market Research - Proprietary Data",
+        "quantity": 1,
+        "unit": "dataset",
+        "unit_price": 12000.00,
+        "total": 12000.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "intangible_services_overpriced",
+      "no_deliverables_verification",
+      "vague_service_descriptions"
+    ],
+    "payment_status": "under_review",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001256",
+    "vendor_name": "CloudTech Services",
+    "vendor_address": "5432 Tech Center Dr, Seattle, WA 98101",
+    "vendor_tax_id": "87-1234567",
+    "client_name": "Manufacturing Corp",
+    "client_address": "8642 Industrial Blvd, Detroit, MI 48201",
+    "invoice_date": "2024-04-05",
+    "due_date": "2024-05-05",
+    "subtotal": 18900.00,
+    "tax_rate": 0.095,
+    "tax_amount": 1795.50,
+    "total_amount": 20695.50,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Cloud Migration Services - Phase 2",
+        "quantity": 1,
+        "unit": "project",
+        "unit_price": 15000.00,
+        "total": 15000.00
+      },
+      {
+        "description": "Data Transfer and Backup",
+        "quantity": 1,
+        "unit": "service",
+        "unit_price": 3900.00,
+        "total": 3900.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "vendor_name_reuse",
+      "different_client_same_vendor",
+      "service_double_billing"
+    ],
+    "payment_status": "flagged",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001257",
+    "vendor_name": "Maintenance Solutions Pro",
+    "vendor_address": "9988 Service Road, Houston, TX 77002",
+    "vendor_tax_id": "88-9977665",
+    "client_name": "Corporate Plaza LLC",
+    "client_address": "1357 Business Center, Dallas, TX 75201",
+    "invoice_date": "2024-04-06",
+    "due_date": "2024-04-10",
+    "subtotal": 12000.00,
+    "tax_rate": 0.0825,
+    "tax_amount": 990.00,
+    "total_amount": 12990.00,
+    "currency": "USD",
+    "payment_terms": "Net 4",
+    "line_items": [
+      {
+        "description": "Emergency HVAC Repair",
+        "quantity": 1,
+        "unit": "service",
+        "unit_price": 8500.00,
+        "total": 8500.00
+      },
+      {
+        "description": "Replacement Parts - Premium",
+        "quantity": 1,
+        "unit": "kit",
+        "unit_price": 3500.00,
+        "total": 3500.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "emergency_service_scam",
+      "unusually_short_payment_terms",
+      "inflated_emergency_pricing"
+    ],
+    "payment_status": "blocked",
+    "payment_date": null
+  },
+  {
+    "invoice_id": "INV-2024-001258",
+    "vendor_name": "Legal Document Services",
+    "vendor_address": "1234 Law Plaza, Washington, DC 20001",
+    "vendor_tax_id": "20-1357924",
+    "client_name": "Real Estate Holdings Inc.",
+    "client_address": "4321 Property Way, Miami, FL 33101",
+    "invoice_date": "2024-04-07",
+    "due_date": "2024-05-07",
+    "subtotal": 8750.00,
+    "tax_rate": 0.06,
+    "tax_amount": 525.00,
+    "total_amount": 9275.00,
+    "currency": "USD",
+    "payment_terms": "Net 30",
+    "line_items": [
+      {
+        "description": "Contract Review - Property Acquisition",
+        "quantity": 25,
+        "unit": "hours",
+        "unit_price": 350.00,
+        "total": 8750.00
+      }
+    ],
+    "is_fraudulent": true,
+    "fraud_indicators": [
+      "hours_inflation",
+      "no_detailed_time_breakdown",
+      "single_line_item_large_amount"
+    ],
+    "payment_status": "disputed",
+    "payment_date": null
+  }
+]
