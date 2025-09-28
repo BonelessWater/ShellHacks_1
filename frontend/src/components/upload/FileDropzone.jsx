@@ -1,9 +1,38 @@
-import React from 'react';
-import { Upload } from 'lucide-react';
+// frontend/src/components/upload/FileDropzone.jsx
+import React, { useState } from 'react';
+import { Upload, CheckCircle, AlertCircle } from 'lucide-react';
 
 const FileDropzone = ({ onFileUpload, processing }) => {
-  const handleFileChange = (event) => {
-    onFileUpload(event);
+  const [message, setMessage] = useState('');
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:8000/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      
+      if (response.ok) {
+        setMessage(`✅ ${result.message}`);
+      } else {
+        setMessage(`❌ Upload failed: ${result.detail}`);
+      }
+    } catch (error) {
+      setMessage(`❌ Error: ${error.message}`);
+    }
+
+    // Call parent callback if provided
+    if (onFileUpload) {
+      onFileUpload(event);
+    }
   };
 
   return (
@@ -22,7 +51,6 @@ const FileDropzone = ({ onFileUpload, processing }) => {
           id="file-upload"
           name="file-upload"
           type="file"
-          multiple
           accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls"
           className="sr-only"
           onChange={handleFileChange}
@@ -35,6 +63,17 @@ const FileDropzone = ({ onFileUpload, processing }) => {
       >
         {processing ? 'Processing...' : 'Select Files'}
       </button>
+
+      {/* Success/Error Message */}
+      {message && (
+        <div className={`mt-4 p-3 rounded-md ${
+          message.includes('✅') 
+            ? 'bg-green-50 border border-green-200 text-green-800' 
+            : 'bg-red-50 border border-red-200 text-red-800'
+        }`}>
+          {message}
+        </div>
+      )}
     </div>
   );
 };
