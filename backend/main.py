@@ -1,9 +1,15 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import os
 
-app = FastAPI(title="AgentZero Backend API", version="1.0.0")
+# Import your existing fraud detection modules
+try:
+    from .parallel_llm_agents import ParallelLLMExecutor, LLMTask, get_fraud_detection_agent_configs
+    from .agent_definitions import FRAUD_DETECTION_AGENTS
+except ImportError:
+    # Fallback for direct execution
+    from parallel_llm_agents import ParallelLLMExecutor, LLMTask, get_fraud_detection_agent_configs
+    from agent_definitions import FRAUD_DETECTION_AGENTS
 
 # Import API routes
 try:
@@ -17,8 +23,11 @@ UPLOAD_DIR = Path("uploads")
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 app = FastAPI(title="ShellHacks Invoice System", version="1.0.0")
+import os
 
-# CORS middleware
+app = FastAPI(title="AgentZero Backend API", version="1.0.0")
+
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # In production, specify your domain
