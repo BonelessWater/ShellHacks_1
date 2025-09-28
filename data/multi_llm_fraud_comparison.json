@@ -1,0 +1,40 @@
+{
+  "comparison_timestamp": "2025-09-27T21:14:09.807023",
+  "bigquery_project": "vaulted-timing-473322-f9",
+  "datasets_analyzed": [
+    "ieee_cis_fraud",
+    "credit_card_fraud",
+    "paysim_fraud",
+    "relational_fraud"
+  ],
+  "total_samples": 170,
+  "llm_count": 3,
+  "llm_analyses": [
+    {
+      "llm": "OpenAI GPT-4o Mini",
+      "error": "Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}",
+      "timestamp": "2025-09-27T21:13:58.081618"
+    },
+    {
+      "llm": "Google Gemini 2.0 Flash",
+      "analysis": "Okay, I've analyzed the provided fraud data samples from IEEE CIS Fraud, Credit Card Fraud, PaySim, and Relational Fraud datasets. Based on the data, here are the top 5 fraud patterns I've identified, along with actionable detection strategies:\n\n**1. Pattern Name: \"R\" Product Code Fraud**\n\n*   **Evidence:** In the `ieee_cis_fraud` dataset, the `ProductCD` \"R\" appears frequently in fraudulent transactions. All the provided fraudulent transaction samples are using the \"R\" product code.\n*   **Risk Level:** High\n*   **Detection Strategy:**\n    1.  **Rule-Based System:** Create a rule that flags transactions with `ProductCD == \"R\"` and a high transaction amount (e.g., > $100). The ideal threshold should be obtained from a dataset that is not limited by a sample size.\n    2.  **Machine Learning Model:** Train a model that includes `ProductCD` as a feature. The model should learn the association between \"R\" and fraud.\n*   **False Positive Risk:** Medium. It depends on the distribution of legitimate \"R\" transactions.\n\n**2. Pattern Name: Zeroed-Out Balance After High Transfer**\n\n*   **Evidence:** The `paysim_fraud` dataset shows a pattern where fraudulent transactions (especially `TRANSFER`) result in `newbalanceOrig` becoming zero immediately after a transfer.\n*   **Risk Level:** High\n*   **Detection Strategy:**\n    1.  **Real-time Monitoring:** Monitor `TRANSFER` transactions. If `newbalanceOrig` becomes 0 immediately after a large transfer (e.g., > 50% of `oldbalanceOrg`), flag the transaction.\n    2.  **Ratio Analysis:** Calculate the ratio of `amount` to `oldbalanceOrg`. If this ratio is close to 1.0 and `newbalanceOrig` is close to 0.0, flag the transaction.\n*   **False Positive Risk:** Low. It's unlikely a legitimate user would completely empty their account with a single transfer regularly.\n\n**3. Pattern Name: High C1-C4 Counts in IEEE CIS Fraud**\n\n*   **Evidence:** In the `ieee_cis_fraud` dataset, some fraudulent transactions show very high `C1`, `C2`, and `C4` values (e.g., TransactionID 3488672 has C1 = 1379, C2 = 1522, C4 = 1020). These features represent counts of activities. This suggests potential bot activity or attempts to brute-force credentials.\n*   **Risk Level:** Medium\n*   **Detection Strategy:**\n    1.  **Statistical Analysis:** Calculate the average and standard deviation of `C1`, `C2`, and `C4` for legitimate transactions.\n    2.  **Anomaly Detection:** Flag transactions where `C1`, `C2`, or `C4` values are significantly higher than the average (e.g., > 3 standard deviations).\n    3.  **Machine Learning Model:** These features are good for ML model training.\n*   **False Positive Risk:** Medium. Some legitimate users might have high activity counts, especially businesses. Segment users to improve accuracy.\n\n**4. Pattern Name: E-mail Domain Similarity**\n\n*   **Evidence:** In the `ieee_cis_fraud` dataset, the provided fraudulent transaction samples show that the `P_emaildomain` and `R_emaildomain` are identical (\"gmail.com\" and \"aol.com\").\n*   **Risk Level:** Medium\n*   **Detection Strategy:**\n    1.  **Rule-Based System:** Create a rule that flags transactions where `P_emaildomain` and `R_emaildomain` are identical.\n    2.  **Compare the frequency**: Find which E-mail domains are most frequent and use less frequent Email domains in the fraud patterns.\n*   **False Positive Risk:** Medium. Depends on the E-mail provider.\n\n**5. Pattern Name: Zero Amount Transactions with Anomalous V* Values**\n\n*   **Evidence:** The `credit_card_fraud` dataset exhibits fraudulent transactions with `Amount = 0.0` and highly anomalous `V1-V5` values (the anonymized PCA features).\n*   **Risk Level:** High\n*   **Detection Strategy:**\n    1.  **Rule-Based System:**  Flag transactions with `Amount = 0` AND (`V1 < threshold_v1` OR `V2 > threshold_v2` OR `V3 < threshold_v3` OR `V4 > threshold_v4` OR `V5 < threshold_v5`). Determine appropriate thresholds based on analysis of legitimate vs. fraudulent `V` values.\n    2.  **Anomaly Detection:**  Since V1-V28 are PCA transformed, use an anomaly detection algorithm (e.g., Isolation Forest, One-Class SVM) on these features to identify outliers.\n*   **False Positive Risk:** Low. Zero amount transactions are rare, and coupling that with significant anomalies in the V* features makes it more indicative of fraud.\n\n**Important Considerations:**\n\n*   **Data Imbalance:**  Fraud datasets are typically heavily imbalanced. Use appropriate sampling techniques (e.g., SMOTE, oversampling, undersampling) when training machine learning models.\n*   **Feature Engineering:** Create new features by combining existing ones (e.g., ratio of transaction amount to account balance, time since last transaction).\n*   **Model Selection:** Experiment with different machine learning models (e.g., Random Forest, Gradient Boosting, Neural Networks).\n*   **Threshold Tuning:** Carefully tune the thresholds used in rule-based systems and machine learning models to balance fraud detection rate with false positive rate.\n*   **Feedback Loop:**  Continuously monitor the performance of the fraud detection system and retrain models with new data.\n*   **Alert Prioritization:**  Implement a scoring system to prioritize alerts for review by fraud analysts.\n*   **Explanation/Interpretability:** Use explainable AI (XAI) techniques to understand why a transaction was flagged as fraudulent. This helps analysts make informed decisions.\n\nBy implementing these strategies and continually refining them based on data analysis and feedback, you can significantly improve the effectiveness of a fraud detection system.\n",
+      "timestamp": "2025-09-27T21:14:09.664498"
+    },
+    {
+      "llm": "Anthropic Claude 3.5 Sonnet",
+      "error": "Error code: 401 - {'type': 'error', 'error': {'type': 'authentication_error', 'message': 'invalid x-api-key'}, 'request_id': 'req_011CTZusDYc8xZRnWDfNKugd'}",
+      "timestamp": "2025-09-27T21:14:09.807023"
+    }
+  ],
+  "analysis_summary": {
+    "successful_analyses": 1,
+    "failed_analyses": 2,
+    "llms_tested": [
+      "OpenAI GPT-4o Mini",
+      "Google Gemini 2.0 Flash",
+      "Anthropic Claude 3.5 Sonnet"
+    ],
+    "total_analysis_length": 5597,
+    "average_analysis_length": 5597.0
+  }
+}

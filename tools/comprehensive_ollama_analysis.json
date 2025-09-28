@@ -1,0 +1,124 @@
+{
+  "timestamp": "2025-09-27T23:20:22.089527",
+  "total_models_tested": 1,
+  "models_info": {
+    "llama3.2:3b": {
+      "size": "2GB",
+      "speed": "Fast",
+      "quality": "Good",
+      "description": "Latest LLaMA 3.2, 3B params"
+    },
+    "llama3.2:1b": {
+      "size": "1.3GB",
+      "speed": "Very Fast",
+      "quality": "Fair",
+      "description": "Smallest LLaMA 3.2, fastest"
+    },
+    "llama3.1:8b": {
+      "size": "4.7GB",
+      "speed": "Medium",
+      "quality": "Excellent",
+      "description": "LLaMA 3.1, 8B params, high quality"
+    },
+    "llama3:8b": {
+      "size": "4.7GB",
+      "speed": "Medium",
+      "quality": "Excellent",
+      "description": "Original LLaMA 3, proven performance"
+    },
+    "mistral:7b": {
+      "size": "4.1GB",
+      "speed": "Medium",
+      "quality": "Excellent",
+      "description": "Mistral 7B, great for analysis"
+    },
+    "mistral-nemo:12b": {
+      "size": "7GB",
+      "speed": "Slow",
+      "quality": "Excellent",
+      "description": "Larger Mistral model"
+    },
+    "mistral:instruct": {
+      "size": "4.1GB",
+      "speed": "Medium",
+      "quality": "Excellent",
+      "description": "Mistral fine-tuned for instructions"
+    },
+    "phi3:mini": {
+      "size": "2.3GB",
+      "speed": "Fast",
+      "quality": "Good",
+      "description": "Microsoft Phi-3, optimized"
+    },
+    "phi3:medium": {
+      "size": "7.9GB",
+      "speed": "Medium",
+      "quality": "Excellent",
+      "description": "Larger Phi-3 model"
+    },
+    "gemma2:9b": {
+      "size": "5.4GB",
+      "speed": "Medium",
+      "quality": "Excellent",
+      "description": "Google Gemma 2, latest"
+    },
+    "gemma2:2b": {
+      "size": "1.6GB",
+      "speed": "Fast",
+      "quality": "Good",
+      "description": "Smaller Gemma 2"
+    },
+    "codellama:7b": {
+      "size": "3.8GB",
+      "speed": "Medium",
+      "quality": "Good",
+      "description": "Code-focused LLaMA"
+    },
+    "codegemma:7b": {
+      "size": "5GB",
+      "speed": "Medium",
+      "quality": "Good",
+      "description": "Code-focused Gemma"
+    },
+    "qwen2:7b": {
+      "size": "4.4GB",
+      "speed": "Fast",
+      "quality": "Excellent",
+      "description": "Alibaba Qwen 2, very efficient"
+    },
+    "qwen2:1.5b": {
+      "size": "934MB",
+      "speed": "Very Fast",
+      "quality": "Fair",
+      "description": "Tiny but capable Qwen"
+    },
+    "neural-chat:7b": {
+      "size": "4.1GB",
+      "speed": "Medium",
+      "quality": "Good",
+      "description": "Intel neural chat model"
+    },
+    "orca-mini:3b": {
+      "size": "1.9GB",
+      "speed": "Fast",
+      "quality": "Good",
+      "description": "Microsoft Orca, instruction-tuned"
+    }
+  },
+  "results": [
+    {
+      "model": "llama3.2:3b",
+      "status": "success",
+      "analysis_length": 3033,
+      "response_time": 9.313044,
+      "efficiency": 325.67225066261904,
+      "analysis": "I'll provide a hypothetical analysis based on the provided transactions data, as no actual data is given.\n\n**Overall Fraud Risk Assessment:**\n\nBased on the analysis of the transactions data, I would assess the overall fraud risk level as \"Moderate\" (6/10). The data suggests some suspicious patterns and anomalies, but they do not appear to be indicative of a high-level or sophisticated fraud scheme.\n\n**Specific Suspicious Patterns Identified:**\n\n1. **Balance Inconsistencies:** There are several instances where the account balance is inconsistent with the transaction history. For example, on Transaction 12, the account balance was $100, but the subsequent transactions show a balance increase to $200 without any corresponding deposits or income. This inconsistency raises suspicions about potential unauthorized activity.\n2. **Unusual Amounts:** Transactions 7 and 9 involve large amounts of money being withdrawn from the account ($5,000 and $3,000, respectively). These amounts are significantly higher than usual and may indicate a potential money laundering scheme or other illicit activity.\n3. **Transaction Type Anomalies:** Transaction 11 involves a purchase of a large quantity of gift cards, which is unusual for this account holder. This could be indicative of a scam to obtain prepaid debit cards for future use.\n4. **Account Behavior Patterns:** The account has been inactive for several months, with only a few small transactions in the past year. This lack of activity raises suspicions about potential abandonment or non-use of the account.\n\n**Key Red Flags and Anomalies:**\n\n1. Unusual transaction amounts (Transactions 7 and 9)\n2. Balance inconsistencies (Transaction 12)\n3. Transaction type anomalies (Transaction 11)\n4. Inactive account behavior\n5. Large number of small transactions in a short period (Transactions 3-6)\n\n**Recommendations for Prevention:**\n\n1. **Monitor Account Activity:** Regularly review the account activity to detect any suspicious patterns or anomalies.\n2. **Verify Transaction Amounts:** Verify the legitimacy of large transaction amounts and ensure they are authorized by the account holder.\n3. **Check Balance Consistencies:** Ensure that the account balance is consistent with the transaction history.\n4. **Implement Additional Security Measures:** Consider implementing additional security measures, such as two-factor authentication or a credit card verification process, to prevent unauthorized access to the account.\n5. **Investigate Inactive Accounts:** Investigate inactive accounts and take steps to re-activate them if necessary.\n\n**Confidence Level:**\n\nI have a confidence level of 80% in my analysis, as I am relying on patterns and anomalies identified from the transactions data. However, it is essential to note that no analysis can guarantee 100% accuracy, and further investigation may be required to confirm or rule out potential fraud.\n\nPlease note that this analysis is hypothetical, and actual results may vary based on the specific transactions data provided.",
+      "model_info": {
+        "size": "2GB",
+        "speed": "Fast",
+        "quality": "Good",
+        "description": "Latest LLaMA 3.2, 3B params"
+      }
+    }
+  ]
+}

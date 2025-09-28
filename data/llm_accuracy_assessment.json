@@ -1,0 +1,19 @@
+{
+  "assessment_timestamp": "2025-09-27T20:55:41.846272",
+  "assessment_results": {
+    "llms_used": [
+      "Google Gemini 2.0 Flash Experimental"
+    ],
+    "accuracy_scores": {
+      "transaction_types": "\u2705 ACCURATE",
+      "balance_zeroing": "\u2705 ACCURATE",
+      "amount_patterns": "\u26a0\ufe0f PARTIAL",
+      "card_patterns": "\u2705 OBSERVABLE",
+      "email_patterns": "\u2705 OBSERVABLE"
+    },
+    "overall_accuracy": 80.0,
+    "sample_size": 170,
+    "total_available": 7000000,
+    "representation": 0.0024285714285714284
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "analysis_metadata": {
+    "timestamp": "2025-09-27T20:10:12.395775",
+    "invoice_data_source": "C:\\Users\\johnp\\Desktop\\shellhacks2\\ShellHacks_1\\tools\\../data/invoice_training_data.json",
+    "total_invoices_analyzed": 25,
+    "fraudulent_invoices_count": 14,
+    "legitimate_invoices_count": 11,
+    "llm_responses_count": 0
+  },
+  "llm_responses": [],
+  "summary_analysis": {
+    "error": "No results to summarize"
+  }
+}
