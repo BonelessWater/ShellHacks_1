@@ -7,10 +7,30 @@ on:
       - main
       - prod
   workflow_dispatch:  # Keep manual option as backup
+    inputs:
+      skip_tests:
+        description: 'Skip tests and linting'
+        required: false
+        default: false
+        type: boolean
+      run_tests:
+        description: 'Run tests before deploy'
+        required: false
+        default: true
+        type: boolean
+      run_linting:
+        description: 'Run linting before deploy'
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Skip if manually disabled OR commit message contains [skip-tests]
+    if: |
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.run_tests == 'true' && github.event.inputs.skip_tests == 'false') ||
+      (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip-tests]') && !contains(github.event.head_commit.message, '[skip-ci]'))
     steps:
       - uses: actions/checkout@v4
       
@@ -38,6 +58,14 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     needs: test
+    # Skip if manually disabled OR commit message contains [skip-lint] or [skip-tests]
+    if: |
+      always() && 
+      (
+        (github.event_name == 'workflow_dispatch' && github.event.inputs.run_linting == 'true' && github.event.inputs.skip_tests == 'false') ||
+        (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip-lint]') && !contains(github.event.head_commit.message, '[skip-tests]') && !contains(github.event.head_commit.message, '[skip-ci]'))
+      ) &&
+      (needs.test.result == 'success' || needs.test.result == 'skipped')
     steps:
       - uses: actions/checkout@v4
       
@@ -64,7 +92,8 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [test, lint]  # Only deploy if tests and linting pass
+    needs: [test, lint]  # Wait for both jobs but they can be skipped
+    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped') && (needs.lint.result == 'success' || needs.lint.result == 'skipped')
     permissions:
       contents: read
       id-token: write
@@ -76,6 +105,8 @@ jobs:
           echo "Repository: ${{ github.repository }}"
           echo "Commit: ${{ github.sha }}"
           echo "Triggered by: ${{ github.event_name }}"
+          echo "Tests result: ${{ needs.test.result }}"
+          echo "Lint result: ${{ needs.lint.result }}"
           
       - uses: actions/checkout@v4
 
