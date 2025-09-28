@@ -84,6 +84,131 @@ class TransactionAnomalyTrainer:
                     y.append(float(row[label_column]))
             return X, y
 
+    def load_from_bigquery(self, query: str = None, table: str = None, project: str = None, dataset: str = None, feature_columns: list = None, label_column: str = None):
+        """Load data from BigQuery into (X, y).
+
+        Either provide a SQL `query` or `table` in the form 'dataset.table' (project optional).
+        This function is guarded: if the BigQuery client isn't available it raises a
+        clear ImportError. It will try to return numpy arrays when possible.
+        """
+        try:
+            from google.cloud import bigquery  # type: ignore
+        except Exception as e:  # pragma: no cover - depends on environment
+            raise ImportError("google-cloud-bigquery is not installed or not available") from e
+
+        client_kwargs = {}
+        if project:
+            client_kwargs["project"] = project
+
+        client = bigquery.Client(**client_kwargs)
+
+        if query:
+            bq_query = query
+        elif table:
+            # if table looks like dataset.table or project.dataset.table
+            if project and dataset:
+                bq_query = f"SELECT * FROM `{project}.{dataset}.{table}`"
+            else:
+                bq_query = f"SELECT * FROM `{table}`"
+        else:
+            raise ValueError("Either query or table must be provided")
+
+        # Execute query
+        job = client.query(bq_query)
+        rows = job.result()
+
+        # Convert to lists
+        cols = rows.schema
+        # If feature_columns/label_column not provided, attempt best-effort auto-detect
+        all_cols = [s.name for s in cols]
+        if feature_columns is None or label_column is None:
+            # Heuristic: last column is label
+            if len(all_cols) < 2:
+                raise ValueError("Insufficient columns in BigQuery result to derive features/label")
+            feature_columns = feature_columns or all_cols[:-1]
+            label_column = label_column or all_cols[-1]
+
+        X = []
+        y = []
+        for r in rows:
+            try:
+                X.append([r[c] for c in feature_columns])
+                y.append(r[label_column])
+            except Exception:
+                # If field access by name fails, convert to dict
+                d = dict(r.items())
+                X.append([d.get(c) for c in feature_columns])
+                y.append(d.get(label_column))
+
+        try:
+            import numpy as _np  # type: ignore
+
+            return _np.array(X), _np.array(y)
+        except Exception:
+            return X, y
+
+    def train_on_bq(self, *, query: str = None, table: str = None, project: str = None, dataset: str = None, feature_columns: list = None, label_column: str = None, n_trials: int = 0, optuna_search: bool = False, save_dir: str = "./models", require_opt_in: bool = True):
+        """High-level helper to load training data from BigQuery and train a model.
+
+        This function performs safety checks: it requires an explicit opt-in via
+        env `RUN_TRAINING=1` unless `require_opt_in=False`. It also guards imports
+        so that local dev without GCP/TF SDKs won't break.
+        """
+        import os
+
+        if require_opt_in and os.environ.get("RUN_TRAINING", "0") != "1":
+            raise RuntimeError("Training from BigQuery is disabled by default. Set RUN_TRAINING=1 to proceed.")
+
+        # Load data
+        X, y = self.load_from_bigquery(query=query, table=table, project=project, dataset=dataset, feature_columns=feature_columns, label_column=label_column)
+
+        # Optional Optuna tuning (thin wrapper). If optuna not available this will raise.
+        if optuna_search and n_trials > 0:
+            try:
+                from backend.ml.optuna_utils import run_optuna_study
+            except Exception:
+                raise RuntimeError("Optuna is required for optuna_search but is not available")
+
+            # Example simple objective: wrap train_and_evaluate with sampled hyperparams
+            def objective(trial):
+                # A few simple searchable params
+                lr = trial.suggest_loguniform("lr", 1e-5, 1e-2)
+                dropout = trial.suggest_float("dropout", 0.0, 0.5)
+
+                def builder(input_dim):
+                    # Use existing create_model but apply small modifications
+                    if not _HAS_TF:
+                        raise RuntimeError("TF not available for builder")
+                    import tensorflow as _tf  # type: ignore
+
+                    model = _tf.keras.Sequential([
+                        _tf.keras.layers.Dense(128, activation="relu", input_shape=(input_dim,)),
+                        _tf.keras.layers.Dropout(dropout),
+                        _tf.keras.layers.Dense(64, activation="relu"),
+                        _tf.keras.layers.Dropout(dropout),
+                        _tf.keras.layers.Dense(32, activation="relu"),
+                        _tf.keras.layers.Dense(1, activation="sigmoid"),
+                    ])
+                    model.compile(optimizer=_tf.keras.optimizers.Adam(learning_rate=lr), loss="binary_crossentropy", metrics=["accuracy"])
+                    return model
+
+                # Train with a single small epoch to get a proxy metric
+                try:
+                    res = self.train_and_evaluate(X, y, test_size=0.2, model_builder=builder, save_dir=save_dir)
+                    # Optuna minimizes — return negative accuracy if accuracy available
+                    acc = res.get("metrics", {}).get("accuracy")
+                    if acc is None:
+                        return 1.0
+                    return 1.0 - float(acc)
+                except Exception:
+                    return 1.0
+
+            # Run optuna study (requires opt-in inside run_optuna_study as well)
+            run_optuna_study(objective, n_trials=n_trials, trial_log_path=os.path.join(save_dir, "optuna_trials.jsonl"))
+
+        # Finally, run full training & evaluation
+        return self.train_and_evaluate(X, y, save_dir=save_dir)
+
     def split_train_test(self, X, y, test_size: float = 0.2, random_state: int | None = None):
         """Split dataset into train/test. Uses sklearn if available, otherwise falls back to a simple numpy-based shuffle.
 
