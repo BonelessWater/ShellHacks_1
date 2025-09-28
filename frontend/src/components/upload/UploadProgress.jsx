@@ -38,7 +38,9 @@ const UploadProgress = ({ uploads, onComplete }) => {
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Processing Invoice</h3>
           <span className="text-sm text-gray-600">
-            {isProcessing ? `${currentProgress}% complete` : `${completedFiles}/${totalFiles} completed`}
+            {isProcessing
+            ? `${currentProgress.toFixed(2)}% complete`
+            : `${completedFiles}/${totalFiles} completed`}
           </span>
         </div>
         

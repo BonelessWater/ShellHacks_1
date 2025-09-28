@@ -1,11 +1,55 @@
-// Invoice Response Display Component
 // frontend/src/components/upload/InvoiceResponse.jsx
 import React, { useState } from 'react';
 import { CheckCircle, AlertTriangle, XCircle, Eye, Download, Clock, Shield, FileText } from 'lucide-react';
 
+const STATUS_STYLES = {
+  approved: {
+    badge: 'bg-green-100 text-green-800',
+    panel: 'bg-green-50 border-green-200',
+    heading: 'text-green-800',
+    accent: 'text-green-600',
+  },
+  rejected: {
+    badge: 'bg-red-100 text-red-800',
+    panel: 'bg-red-50 border-red-200',
+    heading: 'text-red-800',
+    accent: 'text-red-600',
+  },
+  review_required: {
+    badge: 'bg-yellow-100 text-yellow-800',
+    panel: 'bg-yellow-50 border-yellow-200',
+    heading: 'text-yellow-800',
+    accent: 'text-yellow-600',
+  },
+  default: {
+    badge: 'bg-gray-100 text-gray-800',
+    panel: 'bg-gray-50 border-gray-200',
+    heading: 'text-gray-800',
+    accent: 'text-gray-600',
+  }
+};
+
+// Risk % color (text) without template strings
+const riskTextClass = (score) => {
+  if (score >= 70) return 'text-red-600';
+  if (score >= 40) return 'text-yellow-600';
+  return 'text-green-600';
+};
+
+// Keep the icon helper (static classes are fine)
+const getStatusIcon = (status) => {
+  switch (status) {
+    case 'approved': return <CheckCircle className="w-6 h-6 text-green-500" />;
+    case 'rejected': return <XCircle className="w-6 h-6 text-red-500" />;
+    case 'review_required': return <AlertTriangle className="w-6 h-6 text-yellow-500" />;
+    default: return <Clock className="w-6 h-6 text-gray-500" />;
+  }
+};
+
 const InvoiceResponse = ({ invoiceData, analysisResult }) => {
   const [showDetails, setShowDetails] = useState(false);
 
+  // ✅ Guard FIRST before using analysisResult anywhere
   if (!analysisResult) {
     return (
       <div className="bg-gray-50 rounded-lg p-6 text-center">
@@ -15,29 +59,8 @@ const InvoiceResponse = ({ invoiceData, analysisResult }) => {
     );
   }
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'approved': return 'green';
-      case 'rejected': return 'red';
-      case 'review_required': return 'yellow';
-      default: return 'gray';
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'approved': return <CheckCircle className="w-6 h-6 text-green-500" />;
-      case 'rejected': return <XCircle className="w-6 h-6 text-red-500" />;
-      case 'review_required': return <AlertTriangle className="w-6 h-6 text-yellow-500" />;
-      default: return <Clock className="w-6 h-6 text-gray-500" />;
-    }
-  };
-
-  const getRiskColor = (score) => {
-    if (score >= 70) return 'red';
-    if (score >= 40) return 'yellow';
-    return 'green';
-  };
+  // Safe to compute styles now
+  const styles = STATUS_STYLES[analysisResult.status] || STATUS_STYLES.default;
 
   return (
     <div className="bg-white rounded-lg shadow-lg border">
@@ -47,16 +70,13 @@ const InvoiceResponse = ({ invoiceData, analysisResult }) => {
           <div className="flex items-center gap-3">
             {getStatusIcon(analysisResult.status)}
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Invoice Analysis Complete
-              </h3>
-              <p className="text-sm text-gray-600">
-                Invoice ID: {analysisResult.invoice_id}
-              </p>
+              <h3 className="text-lg font-semibold text-gray-900">Invoice Analysis Complete</h3>
+              <p className="text-sm text-gray-600">Invoice ID: {analysisResult.invoice_id}</p>
             </div>
           </div>
           <div className="text-right">
-            <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium bg-${getStatusColor(analysisResult.status)}-100 text-${getStatusColor(analysisResult.status)}-800`}>
+            {/* ✅ use styles.badge */}
+            <div className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${styles.badge}`}>
               {analysisResult.status.replace('_', ' ').toUpperCase()}
             </div>
           </div>
@@ -66,14 +86,15 @@ const InvoiceResponse = ({ invoiceData, analysisResult }) => {
       {/* Quick Stats */}
       <div className="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="text-center">
-          <div className={`text-2xl font-bold text-${getRiskColor(analysisResult.overall_risk_score)}-600`}>
+          {/* ✅ riskTextClass instead of template */}
+          <div className={`text-2xl font-bold ${riskTextClass(analysisResult.overall_risk_score)}`}>
             {Math.round(analysisResult.overall_risk_score)}%
           </div>
           <div className="text-sm text-gray-600">Risk Score</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-blue-600">
-            {Math.round(analysisResult.confidence * 100)}%
+            {Math.round((analysisResult.confidence ?? 0) * 100)}%
           </div>
           <div className="text-sm text-gray-600">Confidence</div>
         </div>
@@ -85,7 +106,7 @@ const InvoiceResponse = ({ invoiceData, analysisResult }) => {
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-green-600">
-            {analysisResult.processing_time?.toFixed(1) || 'N/A'}s
+            {analysisResult.processing_time?.toFixed?.(1) || 'N/A'}s
           </div>
           <div className="text-sm text-gray-600">Processing Time</div>
         </div>
@@ -93,13 +114,10 @@ const InvoiceResponse = ({ invoiceData, analysisResult }) => {
 
       {/* Recommendation */}
       <div className="px-6 pb-4">
-        <div className={`p-4 rounded-lg bg-${getStatusColor(analysisResult.status)}-50 border border-${getStatusColor(analysisResult.status)}-200`}>
-          <h4 className={`font-medium text-${getStatusColor(analysisResult.status)}-800 mb-1`}>
-            Recommendation
-          </h4>
-          <p className={`text-sm text-${getStatusColor(analysisResult.status)}-700`}>
-            {analysisResult.recommendation}
-          </p>
+        {/* ✅ use styles.panel + styles.heading */}
+        <div className={`p-4 rounded-lg border ${styles.panel}`}>
+          <h4 className={`font-medium mb-1 ${styles.heading}`}>Recommendation</h4>
+          <p className="text-sm">{analysisResult.recommendation}</p>
         </div>
       </div>
 
@@ -113,7 +131,7 @@ const InvoiceResponse = ({ invoiceData, analysisResult }) => {
           <div className="space-y-2">
             {analysisResult.red_flags.map((flag, index) => (
               <div key={index} className="flex items-start gap-2 p-2 bg-red-50 rounded border-l-2 border-red-400">
-                <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0"></div>
+                <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0" />
                 <span className="text-sm text-red-800">{flag}</span>
               </div>
             ))}
@@ -135,9 +153,11 @@ const InvoiceResponse = ({ invoiceData, analysisResult }) => {
                   <span className="text-sm font-medium text-gray-900">
                     {agent.agent_id?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || `Agent ${index + 1}`}
                   </span>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    agent.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      agent.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}
+                  >
                     {agent.status}
                   </span>
                 </div>
@@ -148,9 +168,9 @@ const InvoiceResponse = ({ invoiceData, analysisResult }) => {
                       <span>{agent.risk_score}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
-                      <div 
+                      <div
                         className={`h-1 rounded-full ${
-                          agent.risk_score > 70 ? 'bg-red-400' : 
+                          agent.risk_score > 70 ? 'bg-red-400' :
                           agent.risk_score > 40 ? 'bg-yellow-400' : 'bg-green-400'
                         }`}
                         style={{ width: `${agent.risk_score}%` }}
@@ -173,7 +193,7 @@ const InvoiceResponse = ({ invoiceData, analysisResult }) => {
           <Eye className="w-4 h-4" />
           {showDetails ? 'Hide Details' : 'View Details'}
         </button>
-        
+
         <div className="flex gap-2">
           <button className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border rounded-md hover:bg-gray-50 transition-colors">
             <Download className="w-4 h-4" />
@@ -191,8 +211,7 @@ const InvoiceResponse = ({ invoiceData, analysisResult }) => {
         <div className="border-t bg-gray-50">
           <div className="p-6 space-y-4">
             <h4 className="font-medium text-gray-900">Detailed Analysis</h4>
-            
-            {/* Analysis Summary */}
+
             {analysisResult.analysis_summary && (
               <div className="p-4 bg-white rounded border">
                 <h5 className="font-medium text-gray-800 mb-2">Executive Summary</h5>
@@ -200,7 +219,6 @@ const InvoiceResponse = ({ invoiceData, analysisResult }) => {
               </div>
             )}
 
-            {/* All Agent Results */}
             {analysisResult.agent_results && (
               <div className="space-y-3">
                 <h5 className="font-medium text-gray-800">Complete Agent Analysis</h5>
@@ -210,31 +228,28 @@ const InvoiceResponse = ({ invoiceData, analysisResult }) => {
                       <span className="font-medium text-gray-900">
                         {agent.agent_id?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || `Agent ${index + 1}`}
                       </span>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        agent.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          agent.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}
+                      >
                         {agent.status}
                       </span>
                     </div>
-                    {agent.analysis && (
-                      <p className="text-sm text-gray-700 mb-2">{agent.analysis}</p>
-                    )}
+                    {agent.analysis && <p className="text-sm text-gray-700 mb-2">{agent.analysis}</p>}
                     {agent.findings && agent.findings.length > 0 && (
                       <div className="text-xs text-gray-600">
                         <strong>Findings:</strong> {agent.findings.join(', ')}
                       </div>
                     )}
                     {agent.execution_time && (
-                      <div className="text-xs text-gray-500 mt-1">
-                        Execution time: {agent.execution_time.toFixed(2)}s
-                      </div>
+                      <div className="text-xs text-gray-500 mt-1">Execution time: {agent.execution_time.toFixed(2)}s</div>
                     )}
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Metadata */}
             {analysisResult.metadata && (
               <div className="p-4 bg-white rounded border">
                 <h5 className="font-medium text-gray-800 mb-2">Processing Metadata</h5>
