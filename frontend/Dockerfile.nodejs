@@ -1,0 +1,32 @@
+# FAST Development Dockerfile
+FROM node:18-alpine
+
+# Install dependencies for development
+RUN apk add --no-cache curl dumb-init
+
+WORKDIR /app
+
+# Copy package files first
+COPY package*.json ./
+
+# Install all dependencies (dev + prod) with cache optimizations
+RUN npm ci --silent --no-audit --no-fund
+
+# Copy source code
+COPY . .
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001 && \
+    chown -R nextjs:nodejs /app
+USER nextjs
+
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+# Use dumb-init for proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["npm", "start"]
