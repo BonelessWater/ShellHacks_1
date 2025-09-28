@@ -15,8 +15,30 @@ class TransactionAnomalyAgent:
     tests can inject a simple stub.
     """
 
-    def __init__(self, predictor=None):
+    def __init__(self, predictor=None, model_path: str = None, scaler_path: str = None):
+        """Initialize agent.
+
+        - predictor: callable(features) -> list(scores)
+        - model_path/scaler_path: optional paths to load a predictor lazily
+        """
         self.predictor = predictor
+        self._model_path = model_path
+        self._scaler_path = scaler_path
+        self._predictor_loaded = False
+
+    def _ensure_predictor(self):
+        if self.predictor or self._predictor_loaded:
+            return
+        if self._model_path or self._scaler_path:
+            try:
+                from backend.ml.predictor_utils import create_predictor
+
+                self.predictor = create_predictor(model_path=self._model_path, scaler_path=self._scaler_path)
+                self._predictor_loaded = True
+            except Exception:
+                # keep predictor None and fall back to heuristic
+                self.predictor = None
+                self._predictor_loaded = True
 
     def _extract_features(self, invoice) -> List[Dict[str, Any]]:
         # Minimal feature extraction: line amounts, total, vendor length
@@ -40,6 +62,9 @@ class TransactionAnomalyAgent:
             features = self._extract_features(invoice)
             if not features:
                 return {"risk_score": 0.0, "details": "no_features"}
+
+            # Ensure lazy predictor is loaded if configured
+            self._ensure_predictor()
 
             if self.predictor:
                 # Predictor may accept list of feature dicts and return scores
