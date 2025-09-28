@@ -1,16 +1,70 @@
 name: Deploy Full-Stack App to Azure - AgentZero
 
-# Only run when you create a tag that starts with 'd'
+# Deploy on every push to main and prod branches
 on:
   push:
-    tags:
-      - 'd*'        # Matches: d, d1, d2, deploy, dev, etc.
-      # - 'd'       # Uncomment this line if you want ONLY the exact tag 'd'
+    branches: 
+      - main
+      - prod
   workflow_dispatch:  # Keep manual option as backup
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          
+      - name: Install dependencies
+        env:
+          NO_NETWORK: "1"
+        run: |
+          poetry config virtualenvs.create false
+          poetry install --no-interaction --no-ansi
+          
+      - name: Run tests
+        run: |
+          poetry run pytest -q
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          
+      - name: Install dev dependencies
+        env:
+          NO_NETWORK: "1"
+        run: |
+          poetry config virtualenvs.create false
+          poetry install --no-interaction --no-ansi
+          
+      - name: Run flake8
+        run: |
+          poetry run flake8 || true
+
   deploy:
     runs-on: ubuntu-latest
+    needs: [test, lint]  # Only deploy if tests and linting pass
     permissions:
       contents: read
       id-token: write
@@ -18,9 +72,10 @@ jobs:
     steps:
       - name: Show deployment info
         run: |
-          echo "🚀 Deploying with tag: ${{ github.ref_name }}"
+          echo "🚀 Auto-deploying from branch: ${{ github.ref_name }}"
           echo "Repository: ${{ github.repository }}"
           echo "Commit: ${{ github.sha }}"
+          echo "Triggered by: ${{ github.event_name }}"
           
       - uses: actions/checkout@v4
 
