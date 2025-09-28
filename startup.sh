@@ -1,29 +1,41 @@
 #!/bin/bash
-set -euo pipefail
+set -e
 
-echo "🚀 Starting Node + FastAPI app..."
+echo "🚀 Starting AgentZero deployment..."
 
-# --- Step 1: Root npm install ---
-echo "📦 Installing root Node.js dependencies..."
-npm ci || npm install --no-audit --no-fund
+# Set environment variables
+export NODE_ENV=production
+export PORT="${PORT:-8080}"
 
-# --- Step 2: Frontend build ---
-echo "📦 Installing frontend dependencies and building React app..."
-cd frontend
-npm ci || npm install --no-audit --no-fund
-npm run build
-cd ..
+# Install Node.js dependencies
+echo "📦 Installing Node.js dependencies..."
+npm install --production
 
-# --- Step 3: Python dependencies ---
+# Install Python dependencies
+echo "🐍 Installing Python dependencies..."
 if [ -f "requirements.txt" ]; then
-  echo "🐍 Installing Python dependencies..."
-  pip install --no-cache-dir -r requirements.txt
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
+elif [ -f "api/requirements.txt" ]; then
+    python -m pip install --upgrade pip
+    python -m pip install -r api/requirements.txt
 fi
 
-# --- Step 4: Start FastAPI backend ---
-echo "🐍 Starting FastAPI backend (backend/main.py) on :8000..."
-( uvicorn backend.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips="*" ) &
+# Start Python backend in background
+echo "🐍 Starting Python FastAPI backend on port 8000..."
+if [ -f "api/main.py" ]; then
+    cd api
+    python -m uvicorn main:app --host 0.0.0.0 --port 8000 --workers 1 &
+    cd ..
+elif [ -f "backend/main.py" ]; then
+    python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --workers 1 &
+elif [ -f "main.py" ]; then
+    python -m uvicorn main:app --host 0.0.0.0 --port 8000 --workers 1 &
+fi
 
-# --- Step 5: Start Node server ---
-echo "🟩 Starting Node/Express server.js on ${PORT:-8080}..."
+# Wait a moment for backend to start
+sleep 5
+
+# Start Node.js server (main process)
+echo "🟢 Starting Node.js server on port $PORT..."
 exec node server.js
