@@ -15,6 +15,11 @@ env:
 jobs:
   build-and-deploy-frontend:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write
+    
     steps:
     - uses: actions/checkout@v4
 
@@ -41,15 +46,27 @@ jobs:
         cp package.json frontend/
         cp package-lock.json frontend/
 
+    # ✅ ADD AZURE LOGIN STEP
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_88FBF5A58CF4436E8F8955E200248A41 }}
+        tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7DE0416DFB4B4CB88EDDCA0CC26BC123 }}
+        subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AD05817C00C745649FDAAE35BB36A645 }}
+
     - name: Deploy to Azure Web App (Frontend)
-      uses: azure/webapps-deploy@v2
+      uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME_FRONTEND }}
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_FRONTEND }}
         package: frontend/
 
   build-and-deploy-backend:
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write
+    
     steps:
     - uses: actions/checkout@v4
 
@@ -63,17 +80,38 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Create startup script
+    - name: Create deployment package
       run: |
-        echo "#!/bin/bash" > startup.sh
-        echo "cd /home/site/wwwroot" >> startup.sh
-        echo "python -m uvicorn backend.main_simple:app --host 0.0.0.0 --port 8000" >> startup.sh
-        chmod +x startup.sh
+        mkdir -p deploy
+        
+        # Copy Python files
+        cp requirements.txt deploy/
+        cp -r backend/* deploy/
+        
+        # Create startup script for Azure App Service
+        cat > deploy/startup.sh << 'EOF'
+        #!/bin/bash
+        set -e
+        echo "🚀 Starting FastAPI backend..."
+        cd /home/site/wwwroot
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        python -m uvicorn main:app --host 0.0.0.0 --port 8000
+        EOF
+        
+        chmod +x deploy/startup.sh
+
+    # ✅ ADD AZURE LOGIN STEP
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_88FBF5A58CF4436E8F8955E200248A41 }}
+        tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7DE0416DFB4B4CB88EDDCA0CC26BC123 }}
+        subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AD05817C00C745649FDAAE35BB36A645 }}
 
     - name: Deploy to Azure Web App (Backend)
-      uses: azure/webapps-deploy@v2
+      uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME_BACKEND }}
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_BACKEND }}
-        package: .
+        package: deploy/
         startup-command: './startup.sh'
