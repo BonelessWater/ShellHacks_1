@@ -24,7 +24,7 @@ except ImportError:
 
 # Import API routes
 try:
-    from api.routes import router as api_router
+    from .api.routes import router as api_router
 except ImportError:
     # Fallback for direct execution from backend directory
     from api.routes import router as api_router

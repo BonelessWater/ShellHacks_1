@@ -41,6 +41,28 @@ try:
 except Exception:
     FRAUD_DETECTION_AVAILABLE = False
 
+# Try to import database service
+database_service = None
+try:
+    try:
+        # Relative import when executed as package
+        from ..services.database import DatabaseService
+    except Exception:
+        # Absolute import fallback for different execution contexts
+        try:
+            from services.database import DatabaseService
+        except Exception:
+            import sys
+            import os
+            sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+            from services.database import DatabaseService
+    
+    database_service = DatabaseService()
+    DATABASE_AVAILABLE = True
+except Exception as e:
+    print(f"⚠️  Database service not available: {e}")
+    DATABASE_AVAILABLE = False
+
 
 
 def run_fraud_detection(payload, max_iterations=1):
