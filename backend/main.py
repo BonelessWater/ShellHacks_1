@@ -23,7 +23,15 @@ except ImportError:
     from agent_definitions import FRAUD_DETECTION_AGENTS
 
 # Import API routes
-from backend.api.routes import router as api_router
+try:
+    from backend.api.routes import router as api_router
+except ImportError:
+    # Fallback for direct execution from backend directory
+    from api.routes import router as api_router
+
+# Create upload directory
+UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 app = FastAPI(title="ShellHacks Invoice System", version="1.0.0")
 
