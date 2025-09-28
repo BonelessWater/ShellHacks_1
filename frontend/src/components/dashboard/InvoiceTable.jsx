@@ -231,8 +231,8 @@ const InvoiceTable = ({ invoices, filteredInvoices }) => {
                       <span className="font-medium">1.2 seconds</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Agents Involved:</span>
-                      <span className="font-medium">4</span>
+                      <span className="text-gray-600">Verification Method:</span>
+                      <span className="font-medium">AI Analysis</span>
                     </div>
                   </div>
                   
