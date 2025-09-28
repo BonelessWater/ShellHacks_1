@@ -1,5 +1,5 @@
 # Example 1: Data Scientist getting training data
-from data_pipeline import easy_access
+from backend.data_pipeline import easy_access
 
 # Get fraud detection data with features
 train_data = easy_access.get_training_data(
@@ -33,7 +33,7 @@ model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"]
 model.fit(tf_dataset, epochs=10)
 
 # Example 3: Data Analyst checking quality
-from data_pipeline import easy_access
+from backend.data_pipeline import easy_access
 
 df = easy_access.pipeline.get_dataset("credit_card_fraud")
 quality_report = easy_access.monitor.monitor_data_quality("credit_card_fraud", df)
@@ -43,7 +43,7 @@ print(f"Row count: {quality_report['row_count']}")
 print(f"Issues found: {quality_report['quality_issues']}")
 
 # Example 4: Real-time scoring
-from data_pipeline.streaming import StreamProcessor
+from backend.data_pipeline.streaming import StreamProcessor
 
 
 def score_transaction(data):

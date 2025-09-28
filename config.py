@@ -32,7 +32,7 @@ api_key_manager = _StubAPIKeyManager()
 # Try to import real constants from backend.config if available, but do not
 # allow import-time failures to crash test collection.
 try:
-	from backend.config import (
+	from backend.archive.config import (
 		APPROVED_VENDORS,
 		SUSPICIOUS_KEYWORDS,
 		HIGH_VALUE_THRESHOLD,
