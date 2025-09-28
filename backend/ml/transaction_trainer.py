@@ -239,9 +239,11 @@ class TransactionAnomalyTrainer:
 
         # Persist
         import os
+        import json
         os.makedirs(save_dir, exist_ok=True)
         scaler_path = os.path.join(save_dir, "scaler.pkl")
         model_path = os.path.join(save_dir, "model")
+        metadata_path = os.path.join(save_dir, "metadata.json")
         try:
             save_preprocessor(scaler, scaler_path)
         except Exception as e:
@@ -253,4 +255,25 @@ class TransactionAnomalyTrainer:
         except Exception as e:
             log.warning(f"Failed to save model: {e}")
 
-        return {"model": model, "metrics": metrics, "scaler_path": scaler_path, "model_path": model_path}
+        # Compute a dataset fingerprint for reproducibility and save as metadata
+        try:
+            from backend.ml.dataset_utils import fingerprint_rows
+
+            # Fingerprint training rows by combining features + label per row
+            combined = []
+            for xi, yi in zip(X_train, y_train):
+                # ensure iteration works for numpy arrays or lists
+                combined.append(list(xi) + [yi])
+            dataset_fp = fingerprint_rows(combined)
+        except Exception as e:
+            log.warning(f"Failed to compute dataset fingerprint: {e}")
+            dataset_fp = None
+
+        try:
+            meta = {"metrics": metrics, "dataset_fingerprint": dataset_fp}
+            with open(metadata_path, "w") as fh:
+                json.dump(meta, fh)
+        except Exception as e:
+            log.warning(f"Failed to write metadata: {e}")
+
+        return {"model": model, "metrics": metrics, "scaler_path": scaler_path, "model_path": model_path, "metadata_path": metadata_path}

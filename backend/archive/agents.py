@@ -12,6 +12,12 @@ from typing import Any, Dict, List, Set
 
 from data_models import (DataValidator, Invoice, PatternAnalysisResult,
                          TotalsCheckResult, VendorCheckResult)
+# Import lightweight ML agents (they are test-friendly and lazy-load heavy deps)
+try:
+    from backend.archive.ml_agents import TransactionAnomalyAgent, GraphFraudAgent
+except Exception:
+    TransactionAnomalyAgent = None
+    GraphFraudAgent = None
 
 log = logging.getLogger("fraud_detection_agents")
 
@@ -739,6 +745,16 @@ class AgentCoordinator:
         self.exchange_agent = ExchangeRateAgent()
         self.geo_agent = GeoLocationAgent()
         self.execution_history = []
+
+        # ML agents (optional; lightweight defaults)
+        try:
+            self.transaction_agent = TransactionAnomalyAgent()
+        except Exception:
+            self.transaction_agent = None
+        try:
+            self.graph_agent = GraphFraudAgent()
+        except Exception:
+            self.graph_agent = None
 
         log.info("✅ Agent coordinator initialized")
 

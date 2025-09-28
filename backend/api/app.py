@@ -97,6 +97,52 @@ def analyze_per_agent(payload: InvoicePayload):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/analyze/ml")
+def analyze_ml_agents(payload: InvoicePayload):
+    """Run ML/graph agents (TransactionAnomalyAgent, GraphFraudAgent) and return their outputs.
+
+    This endpoint is intentionally separate and conservative: it will not perform any
+    network writes or external deployments. If ML agents are not configured it returns
+    heuristic outputs or safe defaults.
+    """
+    try:
+        if isinstance(payload, dict):
+            payload_dict = payload
+        else:
+            payload_dict = payload.dict()
+
+        coordinator = get_pipeline().agent_coordinator
+
+        invoice_obj = DataValidator.validate_invoice(payload_dict)
+        if not invoice_obj:
+            raise HTTPException(status_code=400, detail="Invalid invoice payload")
+
+        results = {}
+        # Transaction anomaly agent
+        tx_agent = getattr(coordinator, "transaction_agent", None)
+        if tx_agent is not None:
+            try:
+                results["transaction_anomaly"] = tx_agent.run(invoice_obj)
+            except Exception as e:
+                results["transaction_anomaly"] = {"risk_score": 1.0, "details": f"agent_error:{e}"}
+        else:
+            results["transaction_anomaly"] = {"risk_score": 0.0, "details": "agent_unavailable"}
+
+        # Graph fraud agent
+        graph_agent = getattr(coordinator, "graph_agent", None)
+        if graph_agent is not None:
+            try:
+                results["graph_fraud"] = graph_agent.run(invoice_obj)
+            except Exception as e:
+                results["graph_fraud"] = {"risk_score": 1.0, "details": f"agent_error:{e}"}
+        else:
+            results["graph_fraud"] = {"risk_score": 0.0, "details": "agent_unavailable"}
+
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/feedback")
 def apply_feedback(feedback: dict):
     try:

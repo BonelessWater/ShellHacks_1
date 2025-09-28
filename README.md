@@ -194,6 +194,37 @@ instructions, architecture overview, and deployment considerations.
 - Security and secrets
 - Next steps and integration plan (see `nextstep.txt`)
 
+## New features (summary)
+
+These recent additions aim to make ML experimentation and auditability safer
+and easier to use in developer and CI environments:
+
+- Dataset fingerprinting: a lightweight utility `backend/ml/dataset_utils.py`
+  computes stable SHA-256 fingerprints for CSVs and row iterables. The
+  training helper `TransactionAnomalyTrainer.train_and_evaluate` now
+  persists a `metadata.json` alongside saved models which includes the
+  computed `dataset_fingerprint` and evaluation metrics for reproducibility.
+
+- Optuna opt-in CLI & trial logging: an example CLI `examples/run_optuna_study.py`
+  demonstrates a guarded Optuna run. Optuna runs are opt-in; set
+  `RUN_OPTUNA=1` or pass `--confirm` to execute. Trial metadata is logged to
+  a JSONL file when `trial_log_path` is provided. The helper wrapper is in
+  `backend/ml/optuna_utils.py` and raises a clear error when Optuna isn't
+  installed.
+
+- Lightweight ML & Graph agents: `backend/archive/ml_agents.py` provides
+  `TransactionAnomalyAgent` and `GraphFraudAgent` which accept injected
+  predictors/graph-builders. These agents are test-friendly and safe to
+  import in environments without TensorFlow or graph libraries.
+
+- Separate ML analysis endpoint: `POST /analyze/ml` (in
+  `backend/api/app.py`) runs ML/graph agents and returns their per-agent
+  outputs. The endpoint is conservative: it will not perform training or
+  external deployments and returns safe defaults if ML agents are not
+  configured.
+
+See the `backend/ml` and `examples/` folders for usage examples and tests.
+
 ## Repository layout
 
 - `backend/` — core backend modules: agents, pipeline orchestration, data
