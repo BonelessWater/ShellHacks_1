@@ -182,7 +182,7 @@ jobs:
       - name: Build React frontend
         run: |
           cd frontend
-          npm ci --prefer-offline --no-audit
+          npm install
           npm run build
           echo "✅ React build completed"
           ls -la build/
@@ -213,7 +213,7 @@ jobs:
           
           # Install only production Node.js dependencies
           echo "📦 Installing Node.js dependencies..."
-          npm ci --only=production --no-audit --prefer-offline
+          npm install --only=production --no-audit --prefer-offline
           
           # Start FastAPI backend on port 8000 in background
           echo "🐍 Starting FastAPI backend on port 8000..."
