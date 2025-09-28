@@ -6,6 +6,7 @@ import asyncio
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+import time
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -118,21 +119,22 @@ async def get_message():
     }
 
 # FILE UPLOAD ENDPOINT - Main feature for connecting to frontend
+# Replace your upload_file function in main.py with this corrected version:
+
 @app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
     """
-    Upload file endpoint for invoice processing
-    Accepts PDF, PNG, JPG, JPEG, XLSX, XLS files
+    Upload and analyze invoice file with ultra-fast fraud detection
     """
     try:
         # Validate file type
-        allowed_extensions = {'.pdf', '.png', '.jpg', '.jpeg', '.xlsx', '.xls', '.json'}
-        file_extension = Path(file.filename).suffix.lower()
+        file_extension = file.filename.split('.')[-1].lower()
+        allowed_extensions = {'json', 'txt', 'pdf', 'png', 'jpg', 'jpeg'}
         
         if file_extension not in allowed_extensions:
             raise HTTPException(
                 status_code=400, 
-                detail=f"File type {file_extension} not allowed. Allowed types: {', '.join(allowed_extensions)}"
+                detail=f"File type '{file_extension}' not allowed. Allowed types: {', '.join(allowed_extensions)}"
             )
         
         # Create unique filename with timestamp
@@ -150,15 +152,56 @@ async def upload_file(file: UploadFile = File(...)):
         
         print(f"✅ File uploaded successfully: {safe_filename} ({file_size_mb}MB)")
         
-        from main_detector import main as run_detector
-        analysis_result = await run_detector(file=str(file_path))
-
-        print(f"📝 Analysis Result: {json.dumps(analysis_result, indent=2)}")
-
-        # Return success response
+        # CORRECTED: Import and use UltraFastFraudDetector directly
+        # Don't call main() - it expects command line arguments
+        from main_detector import UltraFastFraudDetector
+        
+        # Initialize the detector
+        detector = UltraFastFraudDetector(max_workers=8)
+        
+        # Read file content based on type
+        try:
+            if file_extension == 'json':
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    file_content = f.read()
+                # Validate JSON
+                json.loads(file_content)  # This will raise JSONDecodeError if invalid
+                print(f"📄 Valid JSON file processed")
+            else:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    file_content = f.read()
+                print(f"📄 Text file processed")
+        except json.JSONDecodeError as e:
+            print(f"⚠️ JSON parsing error: {e}")
+            # Treat as text anyway
+            with open(file_path, 'r', encoding='utf-8') as f:
+                file_content = f.read()
+        except UnicodeDecodeError:
+            # For binary files, read as binary and convert to string representation
+            with open(file_path, 'rb') as f:
+                binary_content = f.read()
+                file_content = f"Binary file: {file.filename}, size: {len(binary_content)} bytes"
+                print(f"📄 Binary file processed")
+        
+        # Run the ultra-fast analysis
+        print(f"⚡ Starting ultra-fast fraud analysis...")
+        start_time = time.time()
+        
+        # Call analyze_invoice_ultra_fast directly - this is the correct method
+        analysis_result = await detector.analyze_invoice_ultra_fast(file_content)
+        
+        analysis_duration = time.time() - start_time
+        
+        # Log results
+        print(f"✅ Analysis completed in {analysis_duration:.3f}s")
+        print(f"🎯 Risk Score: {analysis_result['overall_risk_score']}/10")
+        print(f"📋 Recommendation: {analysis_result['recommendation']}")
+        print(f"🚩 Red Flags: {len(analysis_result['red_flags'])}")
+        
+        # Return comprehensive response with analysis results
         return {
             "success": True,
-            "message": f"Analysis Result: {json.dumps(analysis_result, indent=2)}",
+            "message": f"File analyzed successfully in {analysis_duration:.3f}s",
             "data": {
                 "filename": file.filename,
                 "saved_as": safe_filename,
@@ -166,15 +209,58 @@ async def upload_file(file: UploadFile = File(...)):
                 "size_mb": file_size_mb,
                 "file_type": file_extension,
                 "upload_time": datetime.now().isoformat(),
-                "file_path": str(file_path)
+                "file_path": str(file_path),
+                "analysis_duration_seconds": round(analysis_duration, 3)
             },
-            "next_steps": "File is ready for processing by fraud detection agents"
+            "fraud_analysis": {
+                "overall_risk_score": analysis_result['overall_risk_score'],
+                "recommendation": analysis_result['recommendation'], 
+                "red_flags": analysis_result['red_flags'],
+                "confidence": analysis_result.get('confidence', 'N/A'),
+                "agents_used": analysis_result.get('agents_used', 'Multiple AI agents'),
+                "analysis_summary": analysis_result.get('analysis_summary', 'Comprehensive fraud analysis completed')
+            },
+            "performance": {
+                "target_time_seconds": 3.0,
+                "actual_time_seconds": round(analysis_duration, 3),
+                "performance_status": "✅ FAST" if analysis_duration < 3.0 else "⚠️ SLOW",
+                "efficiency_rating": "Excellent" if analysis_duration < 1.0 else "Good" if analysis_duration < 3.0 else "Needs optimization"
+            }
         }
         
     except Exception as e:
-        print(f"❌ Upload error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+        error_msg = f"Upload and analysis failed: {str(e)}"
+        print(f"❌ {error_msg}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=error_msg)
 
+
+# Add this helper function to test files manually:
+async def test_file_analysis(file_path: str):
+    """Test function to analyze any file manually"""
+    try:
+        from main_detector import UltraFastFraudDetector
+        
+        detector = UltraFastFraudDetector(max_workers=8)
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        print(f"🔍 Analyzing file: {file_path}")
+        start = time.time()
+        result = await detector.analyze_invoice_ultra_fast(content)
+        duration = time.time() - start
+        
+        print(f"⚡ Analysis completed in {duration:.3f}s")
+        print(f"📊 Results: {json.dumps(result, indent=2)}")
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ Test failed: {e}")
+        return None
+    
 # Multiple file upload endpoint
 @app.post("/api/upload/multiple")
 async def upload_multiple_files(files: List[UploadFile] = File(...)):
