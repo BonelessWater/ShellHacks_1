@@ -64,15 +64,15 @@ jobs:
         mkdir -p deploy/static
         cp -r frontend/build/* deploy/static/
         
-        # Create .deployment file to force Python platform detection
+        # Create .deployment file to DISABLE Oryx build
         cat > deploy/.deployment << 'EOF'
         [config]
-        SCM_DO_BUILD_DURING_DEPLOYMENT=true
-        PYTHON_VERSION=3.11
+        SCM_DO_BUILD_DURING_DEPLOYMENT=false
         EOF
         
-        # Remove any package.json files that might confuse Oryx
+        # Remove any package.json files that might confuse deployment
         find deploy -name "package*.json" -delete || true
+        find deploy -name "node_modules" -type d -exec rm -rf {} + || true
         
         # Create startup script for Azure App Service
         cat > deploy/startup.sh << 'EOF'
@@ -80,8 +80,12 @@ jobs:
         set -e
         echo "🚀 Starting unified FastAPI backend with static frontend..."
         cd /home/site/wwwroot
+        
+        # Install Python dependencies at runtime
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        
+        # Start the FastAPI application
         python -m uvicorn main:app --host 0.0.0.0 --port 8000
         EOF
         
@@ -95,12 +99,20 @@ jobs:
         tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7DE0416DFB4B4CB88EDDCA0CC26BC123 }}
         subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AD05817C00C745649FDAAE35BB36A645 }}
 
+    # Disable Oryx build completely
+    - name: Configure Azure App Settings
+      run: |
+        az webapp config appsettings set \
+          --resource-group Personal \
+          --name ${{ env.AZURE_WEBAPP_NAME }} \
+          --settings \
+            SCM_DO_BUILD_DURING_DEPLOYMENT=false \
+            ENABLE_ORYX_BUILD=false \
+            DISABLE_COLLECTSTATIC=1
+
     # Deploy to single Azure Web App
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
         package: deploy/
-      env:
-        # Force Python platform detection
-        ORYX_BUILD_FLAGS: "--platform python --platform-version 3.11"
