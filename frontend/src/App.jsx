@@ -5,7 +5,6 @@ import Navigation from './components/common/Navigation';
 import Dashboard from './components/dashboard/Dashboard';
 import UploadInterface from './components/upload/UploadInterface';
 import Analytics from './components/analytics/Analytics';
-import Settings from './components/settings/Settings';
 import { useInvoices } from './hooks/useInvoices';
 import { useSystemStatus } from './hooks/useSystemStatus';
 import BigQueryTest from './components/BigQueryTest';
@@ -35,8 +34,6 @@ function App() {
         );
       case 'analytics':
         return <Analytics invoices={invoices} systemStatus={systemStatus} />;
-      case 'settings':
-        return <Settings backendConnected={backendConnected} />;
       case 'bq-test':
         return <BigQueryTest />;
       default:

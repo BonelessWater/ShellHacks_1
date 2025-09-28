@@ -4,6 +4,7 @@ import React, { useState, useCallback } from 'react';
 import FileDropzone from './FileDropzone';
 import UploadProgress from './UploadProgress';
 import InvoiceResponse from './InvoiceResponse';
+import { mapBackendToUI } from '../utils/mapAnalysisResult';
 
 const UploadInterface = ({ onFileUpload, processing }) => {
   const [uploads, setUploads] = useState([]);
@@ -121,13 +122,23 @@ const UploadInterface = ({ onFileUpload, processing }) => {
               : u
           ));
           
-          // Add to analysis results
-          setAnalysisResults(prev => [...prev, {
-            id: upload.id,
-            fileName: upload.fileName,
-            ...result.data
-          }]);
-          
+          // Map backend response to UI format and add to analysis results
+          const mappedResult = mapBackendToUI(result);
+          if (mappedResult) {
+            setAnalysisResults(prev => [...prev, {
+              id: upload.id,
+              fileName: upload.fileName,
+              ...mappedResult
+            }]);
+          } else {
+            console.error('Failed to map backend result:', result);
+            // Fallback: try to use raw result data
+            setAnalysisResults(prev => [...prev, {
+              id: upload.id,
+              fileName: upload.fileName,
+              ...result.data
+            }]);
+          }
         } else {
           // Handle upload failure
           setUploads(prev => prev.map(u => 
@@ -202,7 +213,8 @@ const UploadInterface = ({ onFileUpload, processing }) => {
           {analysisResults.map((result) => (
             <InvoiceResponse 
               key={result.id}
-              data={result}
+              analysisResult={result}
+              invoiceData={{ fileName: result.fileName }}
             />
           ))}
         </div>

@@ -4,7 +4,6 @@ import Navigation from './common/Navigation';
 import Dashboard from './dashboard/Dashboard';
 import UploadInterface from './upload/UploadInterface';
 import Analytics from './analytics/Analytics';
-import Settings from './settings/Settings';
 import { useInvoices } from '../hooks/useInvoices';
 import { useSystemStatus } from '../hooks/useSystemStatus';
 
@@ -21,8 +20,6 @@ const InvoiceVerificationSystem = () => {
         return <UploadInterface onFileUpload={handleFileUpload} processing={processing} />;
       case 'analytics':
         return <Analytics systemStatus={systemStatus} invoices={invoices} />;
-      case 'settings':
-        return <Settings />;
       default:
         return <Dashboard invoices={invoices} />;
     }
