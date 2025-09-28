@@ -5,6 +5,13 @@ This module centralizes the import-fallback pattern used to keep
 `backend.archive.<module>` after a merge. Each shim file calls
 `reexport_module("module_name")` to copy public symbols into the shim's
 globals.
+
+NOTE: These shims are a short-term compatibility layer created during a
+merge. They should be removed or replaced by proper refactors in a follow-up
+cleanup PR once callers have been updated. See TODO below.
+
+TODO: create `backend/compat_cleanup.md` in a follow-up PR that documents
+which modules are re-exported and why, then remove the shims.
 """
 from importlib import import_module
 from types import ModuleType
