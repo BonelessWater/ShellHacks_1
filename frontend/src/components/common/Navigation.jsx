@@ -6,7 +6,8 @@ const Navigation = ({ activeTab, onTabChange }) => {
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'upload', label: 'Upload', icon: Upload },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'settings', label: 'Settings', icon: Settings }
+    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'bq-test', label: 'BQ Test', icon: BarChart3 }
   ];
 
   return (
