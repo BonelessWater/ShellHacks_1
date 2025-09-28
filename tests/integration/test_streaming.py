@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from data_pipeline.streaming.stream_processor import StreamProcessor
+from backend.data_pipeline.streaming.stream_processor import StreamProcessor
 
 
 class TestStreamingPipeline:

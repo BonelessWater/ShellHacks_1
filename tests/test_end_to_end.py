@@ -27,7 +27,7 @@ class TestEndToEnd:
             assert len(train_data) > 0
 
             # 2. Feature engineering (mocked)
-            from data_pipeline.features.feature_store import FeatureStore
+            from backend.data_pipeline.features.feature_store import FeatureStore
 
             with patch.object(FeatureStore, "engineer_features") as mock_engineer:
                 mock_engineer.return_value = train_data
@@ -76,7 +76,7 @@ class TestEndToEnd:
     @pytest.mark.integration
     def test_monitoring_workflow(self):
         """Test monitoring and alerting workflow"""
-        from data_pipeline.monitoring.data_monitor import DataMonitor
+    from backend.data_pipeline.monitoring.data_monitor import DataMonitor
 
         with patch("data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
             monitor = DataMonitor(mock_pipeline.return_value)

@@ -10,8 +10,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from backend.main_pipeline import FraudDetectionPipeline
-from data_pipeline.api.easy_access import EasyDataAccess
+from backend.archive.main_pipeline import FraudDetectionPipeline
+from backend.data_pipeline.api.easy_access import EasyDataAccess
 
 
 class TestPipelineIntegration:
@@ -20,7 +20,7 @@ class TestPipelineIntegration:
     @pytest.mark.integration
     def test_easy_access_interface(self, sample_transaction_data):
         """Test the easy access interface"""
-        with patch("data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
+    with patch("backend.data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
             # Mock the pipeline methods
             mock_pipeline.return_value.get_dataset.return_value = (
                 sample_transaction_data
@@ -54,8 +54,8 @@ class TestPipelineIntegration:
     @pytest.mark.integration
     def test_data_versioning_workflow(self, sample_transaction_data):
         """Test data versioning workflow"""
-        with patch("data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
-            from data_pipeline.monitoring.data_monitor import DataMonitor
+        with patch("backend.data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
+            from backend.data_pipeline.monitoring.data_monitor import DataMonitor
 
             monitor = DataMonitor(mock_pipeline.return_value)
 
