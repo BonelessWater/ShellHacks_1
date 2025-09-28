@@ -23,6 +23,7 @@ class DataValidator:
         vendor = data.get("vendor")
         total = data.get("total")
         items = data.get("items") or []
+        date = data.get("date") or data.get("invoice_date")
 
         if not invoice_id or vendor is None or total is None:
             return None
@@ -32,13 +33,14 @@ class DataValidator:
         except Exception:
             return None
 
-        return Invoice(invoice_id=invoice_id, vendor=vendor, total=total, items=items)
+        return Invoice(invoice_id=invoice_id, vendor=vendor, total=total, items=items, date=date)
 
     @staticmethod
     def normalize_vendor_name(name: str) -> str:
         if not name:
             return ""
-        return str(name).strip().lower()
+        # Preserve original casing for approved vendors; only trim whitespace
+        return str(name).strip()
 
 @dataclass
 class Invoice:
@@ -46,6 +48,7 @@ class Invoice:
     vendor: str
     total: float
     items: List[Dict[str, Any]] = None
+    date: Optional[str] = None
     
     def __post_init__(self):
         if self.items is None:
@@ -56,78 +59,133 @@ class Invoice:
         """Calculate total from items if available (quantity * unit_price)."""
         total = 0.0
         for it in self.items:
-            try:
-                qty = float(it.get("quantity", 1))
-            except Exception:
-                qty = 1
-            try:
-                price = float(it.get("unit_price", it.get("price", 0.0)))
-            except Exception:
-                price = 0.0
+            # Support either dict-like items or objects with attributes
+            if isinstance(it, dict):
+                try:
+                    qty = float(it.get("quantity", 1))
+                except Exception:
+                    qty = 1
+                try:
+                    price = float(it.get("unit_price", it.get("price", 0.0)))
+                except Exception:
+                    price = 0.0
+            else:
+                try:
+                    qty = float(getattr(it, "quantity", 1))
+                except Exception:
+                    qty = 1
+                try:
+                    price = float(getattr(it, "unit_price", getattr(it, "price", 0.0)))
+                except Exception:
+                    price = 0.0
             total += qty * price
         return total
 
+    def to_dict(self) -> Dict[str, Any]:
+        items_out = []
+        for it in self.items:
+            if hasattr(it, "__dict__"):
+                items_out.append(it.__dict__)
+            else:
+                items_out.append(it)
+        return {
+            "invoice_id": self.invoice_id,
+            "vendor": self.vendor,
+            "date": self.date,
+            "items": items_out,
+            "total": self.total,
+        }
+
+
+@dataclass
+class InvoiceItem:
+    description: str
+    quantity: float
+    unit_price: float
+    total: Optional[float] = None
+
+    def __post_init__(self):
+        try:
+            if self.total is None:
+                self.total = float(self.quantity) * float(self.unit_price)
+        except Exception:
+            self.total = 0.0
+
+
+def create_test_invoice(invoice_id: str = "TEST-001", vendor_name: str = "Test Vendor", total: float = 100.0, include_issues: bool = False) -> Invoice:
+    item = InvoiceItem(description="Test item", quantity=1, unit_price=float(total), total=float(total))
+    inv = Invoice(invoice_id=invoice_id, vendor={"name": vendor_name}, total=float(total), items=[item.__dict__])
+    if include_issues:
+        try:
+            inv.issues = ["test_issue"]
+        except Exception:
+            pass
+    return inv
+
 @dataclass
 class PatternAnalysisResult:
-    pattern_type: str
-    confidence: float
-    details: Dict[str, Any] = None
-    
-    def __post_init__(self):
-        if self.details is None:
-            self.details = {}
+    """Flexible pattern analysis result used by agents/tests."""
+    def __init__(self, anomalies_found: int = 0, anomaly_details: List[str] = None, risk_factor: str = "LOW", pattern_types: List[str] = None, severity_score: float = 0.0, **kwargs):
+        self.anomalies_found = anomalies_found
+        self.anomaly_details = anomaly_details or []
+        self.risk_factor = risk_factor
+        self.pattern_types = pattern_types or []
+        self.severity_score = severity_score
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "anomalies_found": self.anomalies_found,
+            "anomaly_details": self.anomaly_details,
+            "risk_factor": self.risk_factor,
+            "pattern_types": self.pattern_types,
+            "severity_score": self.severity_score,
+        }
 
 @dataclass
 class TotalsCheckResult:
     # Keep dataclass for simple usage, but allow alternate kwarg names in helper
-    is_valid: bool
-    expected_total: float
-    actual_total: float
-    variance: float = 0.0
-
-    def __init__(self, is_valid: bool = True, expected_total: float = 0.0, actual_total: float = 0.0, reported_total: float = None, variance: float = 0.0, **kwargs):
-        # Accept alternate kwarg names used across legacy code (reported_total)
-        if reported_total is not None:
-            actual_total = reported_total
-        # assign
-        self.is_valid = is_valid
-        self.expected_total = expected_total
-        self.actual_total = actual_total
-        self.variance = variance
-        # Compatibility: some agents expect a 'risk_factor' attribute
+    def __init__(self, **kwargs):
+        # Accept a broad set of field names used across the codebase
+        self.is_valid = kwargs.get("is_valid", kwargs.get("valid", True))
+        # reported_total or expected_total naming differences
+        self.reported_total = kwargs.get("reported_total", kwargs.get("actual_total", kwargs.get("reported", 0.0)))
+        self.calculated_total = kwargs.get("calculated_total", kwargs.get("expected_total", kwargs.get("calculated", 0.0)))
+        # Some callers pass 'actual_total' meaning reported; keep both synonyms
+        self.actual_total = kwargs.get("actual_total", self.reported_total)
+        self.expected_total = kwargs.get("expected_total", self.calculated_total)
+        self.difference = kwargs.get("difference", self.actual_total - self.expected_total if (self.actual_total and self.expected_total) else 0.0)
+        self.totals_match = kwargs.get("totals_match", abs(self.difference) <= kwargs.get("variance", 0.0))
+        self.variance = kwargs.get("variance", kwargs.get("tolerance", 0.0))
         self.risk_factor = kwargs.get("risk_factor", "LOW")
-
-    @property
-    def difference(self) -> float:
-        return self.actual_total - self.expected_total
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "is_valid": self.is_valid,
-            "expected_total": self.expected_total,
-            "actual_total": self.actual_total,
+            "reported_total": self.reported_total,
+            "calculated_total": self.calculated_total,
             "difference": self.difference,
             "variance": self.variance,
+            "totals_match": self.totals_match,
+            "risk_factor": self.risk_factor,
         }
 
-    @property
-    def totals_match(self) -> bool:
-        return abs(self.difference) <= (self.variance or 0.0)
-
 class VendorCheckResult:
-    def __init__(self, is_valid: bool = True, vendor_name: str = None, vendor: str = None, confidence: float = 0.0, issues: List[str] = None, **kwargs):
-        # Accept either 'vendor' or 'vendor_name'
+    def __init__(self, is_valid: bool = True, vendor_name: str = None, vendor: str = None, vendor_valid: bool = True, confidence: float = 0.0, issues: List[str] = None, **kwargs):
         if vendor_name is None and vendor is not None:
             vendor_name = vendor
         self.is_valid = is_valid
         self.vendor_name = vendor_name
+        self.vendor_valid = vendor_valid if vendor_valid is not None else is_valid
         self.confidence = confidence
         self.issues = issues or []
+        # compatibility
+        self.risk_factor = kwargs.get("risk_factor", "LOW")
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "is_valid": self.is_valid,
             "vendor_name": self.vendor_name,
+            "vendor_valid": self.vendor_valid,
             "confidence": self.confidence,
             "issues": self.issues,
         }

@@ -19,6 +19,10 @@ except Exception:
     aiplatform = None
     _HAS_TF = False
 
+# Provide a placeholder name for tests that monkeypatch backend.ml.transaction_trainer.bigquery
+# Some tests do monkeypatch.setattr('backend.ml.transaction_trainer.bigquery', ...)
+bigquery = None
+
 
 class TransactionAnomalyTrainer:
     """Trainer wrapper. Only functional when TensorFlow and Vertex SDK are installed.

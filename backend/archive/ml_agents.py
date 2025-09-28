@@ -112,16 +112,18 @@ class GraphFraudAgent:
                 if payee:
                     edges.append((vendor, payee))
 
-            if not edges:
-                return {"risk_score": 0.0, "details": "no_edges"}
-
+            # If a builder is provided, call it even if edges list is empty — tests may
+            # provide a builder that handles empty inputs.
             if self.graph_builder:
-                graph = self.graph_builder(edges)
                 try:
+                    graph = self.graph_builder(edges)
                     score = graph.score_node(vendor)
                     return {"risk_score": min(max(float(score), 0.0), 1.0), "details": "graph_score"}
                 except Exception:
                     return {"risk_score": 0.0, "details": "graph_builder_failed"}
+
+            if not edges:
+                return {"risk_score": 0.0, "details": "no_edges"}
 
             # Default heuristic: if >3 distinct payees, raise suspicion
             payees = {p for (_, p) in edges}
