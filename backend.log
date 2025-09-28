@@ -1,0 +1,21 @@
+INFO:     Will watch for changes in these directories: ['/Users/ilandanial/ShellHacks_1']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [31333] using WatchFiles
+INFO:fraud_detection_llm:Found GOOGLE_API_KEY
+INFO:fraud_detection_llm:Found GOOGLE_APPLICATION_CREDENTIALS
+INFO:fraud_detection_llm:Found BIGQUERY_API_KEY
+INFO:fraud_detection_llm:Found GOOGLE_GENAI_USE_VERTEXAI
+INFO:fraud_detection_llm:Found CLOUD_DOCUMENT_AI
+INFO:fraud_detection_llm:Prioritized 1 working API key(s)
+INFO:fraud_detection_llm:Loaded 5 API keys
+INFO:     Started server process [31370]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:53912 - "GET /api/invoices/sample?limit=50&dynamic=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53912 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53925 - "GET /api/invoices/sample?limit=50&dynamic=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53912 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53936 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53963 - "GET /api/system/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:0 - "GET /__react_refresh__/runtime HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53996 - "GET /api/system/status HTTP/1.1" 200 OK

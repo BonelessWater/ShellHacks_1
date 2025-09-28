@@ -62,11 +62,15 @@ const InvoiceFilters = ({ invoices, onFilterChange, onSortChange, onExport, sort
 
     // Apply search filter
     if (currentSearchTerm) {
-      filtered = filtered.filter(invoice =>
-        invoice.vendor.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-        invoice.id.toLowerCase().includes(currentSearchTerm.toLowerCase()) ||
-        (invoice.description && invoice.description.toLowerCase().includes(currentSearchTerm.toLowerCase()))
-      );
+      const term = currentSearchTerm.toLowerCase();
+      filtered = filtered.filter(invoice => {
+        const vendor = (typeof invoice.vendor === 'string') ? invoice.vendor : (invoice.vendor && invoice.vendor.name) ? invoice.vendor.name : '';
+        return (
+          vendor.toLowerCase().includes(term) ||
+          (invoice.id && invoice.id.toLowerCase().includes(term)) ||
+          (invoice.description && invoice.description.toLowerCase().includes(term))
+        );
+      });
     }
 
     // Apply confidence level filter

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TrendingUp, Users, FileText, Shield, Activity, DollarSign, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 import OrchestratorStats from './OrchestratorStats';
+import { vendorName } from '../../utils/vendor';
 
 const Analytics = ({ systemStatus, invoices = [] }) => {
   const [activeTab, setActiveTab] = useState('business');
@@ -154,7 +155,7 @@ const Analytics = ({ systemStatus, invoices = [] }) => {
 
   const VendorAnalytics = () => {
     const vendorStats = invoices.reduce((acc, invoice) => {
-      const vendor = invoice.vendor || 'Unknown';
+      const vendor = vendorName(invoice.vendor);
       if (!acc[vendor]) {
         acc[vendor] = { count: 0, totalAmount: 0, problemCount: 0 };
       }
@@ -219,7 +220,7 @@ const Analytics = ({ systemStatus, invoices = [] }) => {
               <span className="text-gray-600">Fraud Rate</span>
               <span className="font-medium text-red-600">{fraudRate.toFixed(2)}%</span>
             </div>
-            <div className="flex justify-between">
+                <div className="flex justify-between">
               <span className="text-gray-600">Amount at Risk</span>
               <span className="font-medium">
                 ${invoices.filter(invoice => invoice.status === 'rejected' || invoice.status === 'review_required')

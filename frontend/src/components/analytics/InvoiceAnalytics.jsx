@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BarChart3, PieChart, TrendingUp, Clock, DollarSign, AlertCircle, Calendar, Filter } from 'lucide-react';
+import { vendorName } from '../../utils/vendor';
 
 const InvoiceAnalytics = ({ invoices }) => {
   const [timeFilter, setTimeFilter] = useState('all');
@@ -316,7 +317,7 @@ const InvoiceAnalytics = ({ invoices }) => {
               <div key={invoice.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
                   <p className="font-medium text-gray-900">{invoice.id}</p>
-                  <p className="text-sm text-gray-600">{invoice.vendor}</p>
+                  <p className="text-sm text-gray-600">{vendorName(invoice.vendor)}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium text-gray-900">{formatCurrency(invoice.amount)}</p>
@@ -339,7 +340,7 @@ const InvoiceAnalytics = ({ invoices }) => {
               <div key={invoice.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
                   <p className="font-medium text-gray-900">{invoice.id}</p>
-                  <p className="text-sm text-gray-600">{invoice.vendor}</p>
+                  <p className="text-sm text-gray-600">{vendorName(invoice.vendor)}</p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium text-gray-900">{formatCurrency(invoice.amount)}</p>

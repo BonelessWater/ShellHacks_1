@@ -171,42 +171,84 @@ export const useInvoices = () => {
   }, []);
 
   useEffect(() => {
-    // Start with mock data immediately for better UX
+    // Start with mock data immediately for better UX while we fetch
     setInvoices(mockInvoices);
     setBackendConnected(false);
 
-    // In development prefer dev sample file (sanitized) to give realistic UI
-    const doDevSample = async () => {
-      if (process.env.NODE_ENV !== 'production') {
+    const useStaticSample = (process.env.REACT_APP_USE_STATIC_SAMPLE === 'true');
+
+    // By default, prefer live backend data and run orchestrator scoring on it.
+    const fetchAndScore = async () => {
+      try {
+        const connected = await checkBackendConnection();
+        if (!connected) {
+          setError('Backend not available. Using offline mock data.');
+          return;
+        }
+
+        // Fetch invoices from backend
+        const resp = await apiService.getInvoices({ limit: 50 });
+        const fetched = (resp && resp.invoices) ? resp.invoices : resp || [];
+
+        if (!fetched || fetched.length === 0) {
+          setInvoices([]);
+          return;
+        }
+
+        // Merge orchestrator scores (prefer ADK when backend supports it)
+        try {
+          const scoreResp = await apiService.scoreInvoices(fetched);
+          const scoreMap = {};
+          if (scoreResp && scoreResp.results) {
+            for (const r of scoreResp.results) {
+              scoreMap[r.invoice_id || r.invoiceId || r.id] = r.score;
+            }
+          }
+
+          const merged = fetched.map(inv => {
+            const id = inv.id || inv.invoice_number || inv.invoice_id || (inv._raw && inv._raw.invoice_id);
+            const score = scoreMap[id] || {};
+            return {
+              ...inv,
+              confidence: (score.confidence !== undefined) ? score.confidence : (inv.confidence || inv.confidence_score || 0),
+              riskLevel: score.risk || inv.risk_level || inv.risk || 'unknown',
+              vendor_score: score.vendor_score || null,
+              totals_score: score.totals_score || null,
+              pattern_score: score.pattern_score || null
+            };
+          });
+
+          setInvoices(merged);
+          setError(null);
+        } catch (err) {
+          // scoring failed; still set fetched invoices
+          console.warn('Scoring failed, showing raw invoices', err);
+          setInvoices(fetched);
+        }
+      } catch (err) {
+        console.error('Failed to load and score invoices', err);
+        setError('Unable to load invoices from backend. Using offline mode.');
+      }
+    };
+
+    const doInit = async () => {
+      if (process.env.NODE_ENV !== 'production' && useStaticSample) {
+        // Dev opt-in: use static sample file if explicitly requested
         try {
           const samples = await apiService.getSampleInvoices(50, false);
           if (samples && samples.length > 0) {
-            // normalize sample rows to expected frontend shape if needed
-            const normalized = samples.map(s => ({
-              id: s.get?.('id') || s.id || s.invoice_number || s.invoice_id || s._raw?.invoice_id || s._raw?.id || (s.vendor && s.vendor.name ? s.vendor.name + '-' + Math.random().toString(36).slice(2,8) : Math.random().toString(36).slice(2,8)),
-              vendor: typeof s.vendor === 'string' ? s.vendor : (s.vendor?.name || s.vendor_display || (s._raw && s._raw.vendor_name) || 'Unknown Vendor'),
-              amount: s.total_amount || s.amount || s.total || 0,
-              status: s.verification_status || s.status || 'processed',
-              confidence: s.confidence_score || s.confidence || 0,
-              issues: (s.verification_results && s.verification_results.length) || (s._raw && s._raw.verification_results && s._raw.verification_results.length) || 0,
-              date: s.invoice_date || s.date || s.processed_date || new Date().toISOString().split('T')[0],
-              description: s.notes || s.description || '' ,
-              line_items: s.line_items || s.items || []
-            }));
-            setInvoices(normalized);
+            setInvoices(samples);
             return;
           }
         } catch (err) {
-          // ignore and fall back to loadInvoices
-          console.warn('Failed to load dev sample', err);
+          console.warn('Failed to load static sample, falling back to backend', err);
         }
       }
 
-      // Then try to load from backend normally
-      loadInvoices();
+      await fetchAndScore();
     };
 
-    doDevSample();
+    doInit();
   }, [loadInvoices]);
 
   const handleFileUpload = async (event) => {

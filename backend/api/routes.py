@@ -7,19 +7,99 @@ import json
 import asyncio
 import uuid
 import os
+import math
+import numpy as _np
+
+
+def _sanitize_value(v):
+    """Recursively sanitize a value to be JSON-serializable.
+
+    - numpy scalars -> Python types via .item()
+    - pandas/numpy NaN/Inf -> None
+    - datetimes -> isoformat strings
+    - dict/list -> recursively sanitize
+    - fallback: str(v)
+    """
+    # None stays None
+    if v is None:
+        return None
+
+    # Recursively sanitize dicts and lists
+    if isinstance(v, dict):
+        return {k: _sanitize_value(val) for k, val in v.items()}
+    if isinstance(v, (list, tuple)):
+        return [_sanitize_value(x) for x in v]
+
+    # numpy scalar -> python
+    try:
+        if hasattr(v, 'item') and not isinstance(v, (str, bytes, bytearray)):
+            return _sanitize_value(v.item())
+    except Exception:
+        pass
+
+    # datetimes/pandas timestamps
+    if hasattr(v, 'isoformat'):
+        try:
+            return v.isoformat()
+        except Exception:
+            return str(v)
+
+    # floats: guard NaN/Inf
+    if isinstance(v, float):
+        if not math.isfinite(v):
+            return None
+        return v
+
+    # ints and basic types pass through
+    if isinstance(v, (int, bool, str)):
+        return v
+
+    # bytes
+    if isinstance(v, (bytes, bytearray)):
+        try:
+            return v.decode('utf-8')
+        except Exception:
+            return str(v)
+
+    # Fallback
+    try:
+        return str(v)
+    except Exception:
+        return None
+
+# Optional database service detection (populate DATABASE_AVAILABLE and database_service)
+database_service = None
+DATABASE_AVAILABLE = False
+try:
+    try:
+        # when running as package
+        from ..services.database import database_service as _db_service  # type: ignore
+    except Exception:
+        # fallback absolute import
+        from backend.services.database import database_service as _db_service  # type: ignore
+    database_service = _db_service
+    # Consider DB available if the service exposes a BigQuery manager
+    DATABASE_AVAILABLE = bool(getattr(database_service, 'bq_manager', None))
+except Exception:
+    database_service = None
+    DATABASE_AVAILABLE = False
 
 # BigQuery manager (lazy import to avoid importing heavy deps at module import time)
 def get_bq_manager():
     try:
-        from ... import bigquery_config
-        return bigquery_config.bq_manager
-    except Exception:
-        # Try absolute import
+        # Import dynamically to avoid heavy imports at module load time
+        import importlib
         try:
-            import bigquery_config
-            return bigquery_config.bq_manager
+            _bqmod = importlib.import_module('bigquery_config')
         except Exception:
-            return None
+            # try package-style import when running as package
+            try:
+                _bqmod = importlib.import_module('backend.bigquery_config')
+            except Exception:
+                return None
+        return getattr(_bqmod, 'bq_manager', None)
+    except Exception:
+        return None
 
 # Try to import the ADK agent pipeline (preferred). If unavailable, fall back to
 # the simple heuristic scorer below. The project provides a full pipeline at
@@ -89,6 +169,12 @@ class DataValidator:
 
 router = APIRouter()
 
+# Database availability shim: some modules expect these globals to exist.
+# Set sensible defaults so endpoints can check availability without NameErrors.
+DATABASE_AVAILABLE = False
+database_service = None
+
+
 # Mock database for demonstration - replace with your actual database
 mock_invoices = []
 mock_analytics = {
@@ -140,6 +226,65 @@ class InvoiceData(BaseModel):
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "message": "Backend API is running"}
+
+
+@router.get("/debug/env")
+async def debug_env():
+    """Return a small snapshot of relevant environment variables and BigQuery manager status.
+
+    This endpoint is for developer debugging only. It deliberately does not
+    return secrets (we avoid printing full service account JSON contents).
+    """
+    try:
+        bq = get_bq_manager()
+        if bq:
+            try:
+                is_avail = bq.is_available()
+            except Exception:
+                # Defensive: if bq manager doesn't implement is_available
+                is_avail = bool(getattr(bq, 'available', False))
+            bq_info = {
+                'exists': True,
+                'is_available': is_avail,
+                'project_id': getattr(bq, 'project_id', None),
+                'init_error': getattr(bq, 'init_error', None)
+            }
+        else:
+            bq_info = {'exists': False, 'is_available': False, 'project_id': None, 'init_error': None}
+    except Exception as e:
+        bq_info = {'exists': False, 'is_available': False, 'project_id': None, 'init_error': str(e)}
+
+    return {
+        'GOOGLE_APPLICATION_CREDENTIALS': os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'),
+        'BQ_PROJECT_ID': os.environ.get('BQ_PROJECT_ID'),
+        'REQUIRE_ADK_PIPELINE': os.environ.get('REQUIRE_ADK_PIPELINE'),
+        'FRAUD_DETECTION_AVAILABLE': FRAUD_DETECTION_AVAILABLE,
+        'pipeline_get_present': pipeline_get is not None,
+        'bq_manager': bq_info
+    }
+
+
+@router.get("/debug/env")
+async def debug_env():
+    """Return a small snapshot of environment and availability flags for debugging."""
+    try:
+        bq = get_bq_manager()
+        bq_info = {
+            "exists": bool(bq),
+            "is_available": bool(bq.is_available()) if bq else False,
+            "init_error": getattr(bq, 'init_error', None) if bq else None,
+            "project_id": getattr(bq, 'project_id', None) if bq else None
+        }
+    except Exception as e:
+        bq_info = {"exists": False, "is_available": False, "init_error": str(e)}
+
+    return {
+        "REQUIRE_ADK_PIPELINE": os.environ.get('REQUIRE_ADK_PIPELINE'),
+        "FRAUD_DETECTION_AVAILABLE": FRAUD_DETECTION_AVAILABLE,
+        "pipeline_get": bool(pipeline_get),
+        "bq": bq_info,
+        "GOOGLE_APPLICATION_CREDENTIALS": os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+    }
 
 @router.get("/system/status")
 async def system_status():
@@ -397,15 +542,12 @@ async def get_invoices(
         # Query the ETL destination table: <project>.training.invoice_training
         table_ref = f"{bq.project_id}.training.invoice_training"
         filters = []
-        # Simple vendor filter
         if status:
-            # ETL table may not have verification_status; fallback to source filtering when present
             filters.append(f"LOWER(verification_status) = '{status.lower()}'")
         if risk_level:
             filters.append(f"LOWER(risk_level) = '{risk_level.lower()}'")
 
         where_clause = "WHERE " + " AND ".join(filters) if filters else ""
-
         sql = f"SELECT * FROM `{table_ref}` {where_clause} LIMIT {limit} OFFSET {offset}"
 
         try:
@@ -488,16 +630,53 @@ def normalize_invoice_record(rec: Dict[str, Any]) -> Dict[str, Any]:
     amount = rec.get('total_amount') or rec.get('total') or rec.get('amount') or 0
     try:
         amount = float(amount) if amount is not None else 0
+        # guard against NaN/Inf which JSON cannot serialize
+        if not math.isfinite(amount):
+            amount = 0.0
     except Exception:
         try:
             amount = float(str(amount))
+            if not math.isfinite(amount):
+                amount = 0.0
         except Exception:
             amount = 0
+
+    # If amount is zero-ish, attempt to extract from nested raw_record JSON or common BQ fields
+    if (not amount or amount == 0.0) and isinstance(rec, dict):
+        candidates = []
+        # direct common column names
+        for key in ['TransactionAmt', 'transactionamt', 'amount', 'total_amount', 'total', 'AMOUNT']:
+            if key in rec and rec[key] is not None:
+                candidates.append(rec[key])
+
+        # nested _raw or raw_record (some tables store entire row as JSON string)
+        nested_raw = rec.get('raw_record') or (rec.get('_raw') and rec.get('_raw').get('raw_record'))
+        if nested_raw and isinstance(nested_raw, str):
+            try:
+                jr = json.loads(nested_raw)
+                for key in ['TransactionAmt', 'transactionamt', 'amount', 'total_amount', 'total', 'AMOUNT']:
+                    if key in jr and jr[key] is not None:
+                        candidates.append(jr[key])
+            except Exception:
+                # not JSON or not parseable, ignore
+                pass
+
+        # pick the first numeric candidate
+        for c in candidates:
+            try:
+                val = float(c)
+                if math.isfinite(val) and val != 0:
+                    amount = val
+                    break
+            except Exception:
+                continue
 
     status = rec.get('verification_status') or rec.get('status') or rec.get('verification_status', 'processed')
     confidence = rec.get('confidence_score') or rec.get('confidence') or 0
     try:
         confidence = float(confidence)
+        if not math.isfinite(confidence):
+            confidence = 0.0
     except Exception:
         confidence = 0
 
@@ -543,8 +722,8 @@ def normalize_invoice_record(rec: Dict[str, Any]) -> Dict[str, Any]:
         "date": date,
         "description": description,
         "line_items": line_items,
-        # pass-through raw record for advanced UI use
-        "_raw": rec
+        # pass-through raw record for advanced UI use (sanitized)
+        "_raw": _sanitize_value(rec)
     }
 
 
@@ -652,7 +831,7 @@ async def get_sample_invoices(limit: int = 25, dynamic: bool = False):
     if dynamic and bq:
         try:
             table = f"{bq.project_id}.training.invoice_training"
-            sql = f"SELECT * FROM `{table}` LIMIT {limit}`"
+            sql = f"SELECT * FROM `{table}` LIMIT {limit}"
             df = bq.query(sql)
             records = []
             for _, row in df.iterrows():
@@ -760,6 +939,12 @@ async def score_invoices(payload: Dict[str, Any]):
             # Normalize shape to frontend-friendly record
             rec = normalize_invoice_record(inv) if isinstance(inv, dict) else inv
             # Avoid passing raw data to any external model here
+            # If configuration requires ADK pipeline, enforce it (fail fast)
+            require_adk = os.environ.get('REQUIRE_ADK_PIPELINE', '').lower() in ('1', 'true', 'yes')
+            if require_adk and not (FRAUD_DETECTION_AVAILABLE and pipeline_get is not None):
+                # Service configured to require ADK pipeline but it's unavailable
+                raise HTTPException(status_code=503, detail='ADK orchestrator pipeline is unavailable')
+
             # Prefer ADK agent pipeline scoring when available
             if FRAUD_DETECTION_AVAILABLE and pipeline_get is not None:
                 try:
@@ -855,6 +1040,80 @@ async def update_agent_config(config: Dict[str, Any]):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update config: {str(e)}")
+
+
+# Mapping agent endpoints
+@router.post('/agents/infer_mapping')
+async def infer_mapping(payload: Dict[str, Any]):
+    """Infer a mapping from provided columns or sample records.
+
+    payload can be:
+      - { "columns": ["col1", "col2", ...] }
+      - { "sample_records": [ {raw record}, ... ] }
+    """
+    try:
+        import importlib
+        try:
+            mod = importlib.import_module('backend.agents.invoice_mapper')
+        except Exception:
+            mod = importlib.import_module('agents.invoice_mapper')
+        infer_mapping_from_columns = getattr(mod, 'infer_mapping_from_columns')
+        apply_mapping = getattr(mod, 'apply_mapping')
+
+        cols = payload.get('columns')
+        if not cols:
+            samples = payload.get('sample_records', [])
+            if not samples:
+                raise HTTPException(status_code=400, detail='Provide columns or sample_records')
+            # derive columns from first sample
+            first = samples[0]
+            cols = list(first.keys())
+
+        mapping = infer_mapping_from_columns(cols)
+        return { 'mapping': mapping }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post('/agents/apply_mapping')
+async def apply_mapping_endpoint(payload: Dict[str, Any]):
+    """Apply a provided mapping to given records and return normalized invoices.
+
+    payload: { "mapping": {target: source}, "records": [raw records] }
+    """
+    try:
+        import importlib
+        try:
+            mod = importlib.import_module('backend.agents.invoice_mapper')
+        except Exception:
+            mod = importlib.import_module('agents.invoice_mapper')
+        _apply = getattr(mod, 'apply_mapping')
+
+        mapping = payload.get('mapping')
+        records = payload.get('records')
+        if mapping is None or records is None:
+            raise HTTPException(status_code=400, detail='mapping and records are required')
+
+        normalized = [_apply(r, mapping) for r in records]
+        return { 'invoices': normalized }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Temporary debug endpoint (remove before production)
+@router.get('/debug/env')
+async def debug_env():
+    """Return debug info about environment vars and pipeline availability."""
+    return {
+        'require_adk_env': os.environ.get('REQUIRE_ADK_PIPELINE'),
+        'fraud_detection_available': FRAUD_DETECTION_AVAILABLE,
+        'pipeline_get_present': pipeline_get is not None,
+        'pipeline_run_present': pipeline_run_fraud_detection is not None,
+    }
 
 # Fraud detection endpoints (existing functionality)
 @router.post("/analyze")

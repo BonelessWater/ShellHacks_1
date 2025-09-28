@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SummaryCards from './SummaryCards';
 import InvoiceTable from './InvoiceTable';
 import InvoiceFilters from './InvoiceFilters';
+import { vendorName } from '../../utils/vendor';
 
 const Dashboard = ({ invoices, backendConnected, error }) => {
   const [filteredInvoices, setFilteredInvoices] = useState(invoices);
@@ -43,8 +44,9 @@ const Dashboard = ({ invoices, backendConnected, error }) => {
           bValue = new Date(bValue);
           break;
         case 'vendor':
-          aValue = String(aValue).toLowerCase();
-          bValue = String(bValue).toLowerCase();
+          aValue = vendorName(aValue).toLowerCase();
+          bValue = vendorName(bValue).toLowerCase();
+          break;
           break;
         default:
           aValue = String(aValue).toLowerCase();
@@ -70,7 +72,7 @@ const Dashboard = ({ invoices, backendConnected, error }) => {
     // Simple export functionality
     const dataToExport = filteredInvoices.map(invoice => ({
       ID: invoice.id,
-      Vendor: invoice.vendor,
+      Vendor: vendorName(invoice.vendor),
       Amount: invoice.amount,
       Status: invoice.status,
       Confidence: Math.round(invoice.confidence * 100) + '%',
