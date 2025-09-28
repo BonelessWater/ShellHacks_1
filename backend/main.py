@@ -22,23 +22,7 @@ except ImportError:
     from parallel_llm_agents import ParallelLLMExecutor, LLMTask, get_fraud_detection_agent_configs
     from agent_definitions import FRAUD_DETECTION_AGENTS
 
-# Import API routes (robust to different execution contexts)
-import importlib
-api_router = None
-for mod_name in (".api.routes", "backend.api.routes", "api.routes"):
-    try:
-        if mod_name.startswith("."):
-            # package relative import when running as a package
-            api_mod = importlib.import_module(mod_name, package="backend")
-        else:
-            api_mod = importlib.import_module(mod_name)
-        api_router = getattr(api_mod, "router")
-        break
-    except Exception:
-        api_router = None
-
-if api_router is None:
-    raise ImportError("Failed to import API router from api.routes in any expected location")
+from backend.api.routes import router as api_router
 
 # Create upload directory
 UPLOAD_DIR = Path("uploads")

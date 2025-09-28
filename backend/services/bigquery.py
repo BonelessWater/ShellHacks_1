@@ -1,6 +1,11 @@
 from google.cloud import bigquery
 import os
 import pandas as pd
+from backend.services.adk import run_fraud_detection
+import logging
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 class BigQueryService:
     def __init__(self):
@@ -9,6 +14,7 @@ class BigQueryService:
         self.dataset_id = os.environ.get("BIGQUERY_DATASET", "ieee_cis_fraud")
 
     def get_invoices(self, limit=100):
+        log.info("Fetching invoices from BigQuery...")
         table_id = f"{self.project_id}.{self.dataset_id}.sample_transactions"
         query = f"""
             SELECT 
@@ -30,9 +36,20 @@ class BigQueryService:
         """
         try:
             df = self.client.query(query).to_dataframe(create_bqstorage_client=False)
-            return df.to_dict('records')
+            invoices = df.to_dict('records')
+            log.info(f"Found {len(invoices)} invoices.")
+            
+            for invoice in invoices:
+                fraud_result = run_fraud_detection(invoice)
+                invoice['confidence'] = fraud_result.get('risk_score', 0)
+                invoice['status'] = 'rejected' if fraud_result.get('risk_score', 0) > 0.5 else 'approved'
+                invoice['issues'] = 1 if fraud_result.get('risk_score', 0) > 0.5 else 0
+                invoice['date'] = '2024-01-01'
+                invoice['description'] = 'Sample Description'
+
+            return invoices
         except Exception as e:
-            print(f"Error fetching invoices from BigQuery: {e}")
+            log.error(f"Error fetching invoices from BigQuery: {e}")
             return []
 
 bigquery_service = BigQueryService()
