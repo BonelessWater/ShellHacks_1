@@ -258,6 +258,74 @@ Data flow (high level):
 3. Agents run locally or call external services (BigQuery reads, 3rd-party
    checks) and return structured `AgentResponse` objects.
 4. Results are compiled and optionally written to BigQuery or emitted to
+5. BigQuery: ingest & schema
+
+### BigQuery: ingest & schema
+
+This repo includes a recommended BigQuery schema and sample data for invoices. I created a dataset `invoice_dataset` and a nested `invoices` table in project `vaulted-timing-473322-f9` as an example. Files added to the repo under `bq/`:
+
+- `bq/schema_invoices.json` — BigQuery schema JSON for the invoices table
+- `bq/sample_invoices.ndjson` — a small newline-delimited JSON example row
+
+Quick commands (replace `PROJECT_ID` with your project if different):
+
+```bash
+# set gcloud project
+gcloud config set project PROJECT_ID
+
+# create dataset
+bq --location=US mk --dataset --description "Invoice data for clients (ingest for training & analytics)" PROJECT_ID:invoice_dataset
+
+# create table (DDL with nested vendor and repeated line_items)
+bq query --use_legacy_sql=false 'CREATE TABLE `PROJECT_ID.invoice_dataset.invoices` (
+  invoice_id STRING,
+  invoice_number STRING,
+  vendor_name STRING,
+  vendor STRUCT<name STRING, address STRING, phone STRING, email STRING, tax_id STRING>,
+  invoice_date DATE,
+  due_date DATE,
+  subtotal NUMERIC,
+  tax_amount NUMERIC,
+  total_amount NUMERIC,
+  payment_terms STRING,
+  purchase_order STRING,
+  notes STRING,
+  line_items ARRAY<STRUCT<description STRING, quantity NUMERIC, unit_price NUMERIC, total NUMERIC, sku STRING>>,
+  received_date DATE,
+  processed_ts TIMESTAMP,
+  verification_status STRING,
+  confidence_score FLOAT64,
+  ingestion_time TIMESTAMP,
+  invoice_hash STRING,
+  source STRING
+) PARTITION BY invoice_date CLUSTER BY vendor_name, invoice_number;'
+
+# load sample NDJSON
+bq load --source_format=NEWLINE_DELIMITED_JSON PROJECT_ID:invoice_dataset.invoices bq/sample_invoices.ndjson bq/schema_invoices.json
+```
+
+Sample view to flatten line items and extract training features:
+
+```sql
+CREATE OR REPLACE VIEW `PROJECT_ID.invoice_dataset.invoice_line_items_flat` AS
+SELECT
+  invoice_id,
+  invoice_number,
+  vendor_name,
+  vendor.name AS vendor_full_name,
+  invoice_date,
+  total_amount,
+  li.description AS item_description,
+  CAST(li.quantity AS FLOAT64) AS item_quantity,
+  CAST(li.unit_price AS NUMERIC) AS item_unit_price,
+  CAST(li.total AS NUMERIC) AS item_total,
+  LENGTH(vendor_name) AS vendor_len
+FROM `PROJECT_ID.invoice_dataset.invoices`,
+UNNEST(line_items) AS li;
+```
+
+If you'd like, I can commit a small SQL file with the view and/or run the `bq load` for the sample data in your environment.
+
    other pipelines.
 
 ## How to run locally (development)

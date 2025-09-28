@@ -1,0 +1,34 @@
+[
+  {"name":"invoice_id","type":"STRING","mode":"NULLABLE"},
+  {"name":"invoice_number","type":"STRING","mode":"NULLABLE"},
+  {"name":"vendor_name","type":"STRING","mode":"NULLABLE"},
+  {"name":"vendor","type":"RECORD","mode":"NULLABLE","fields":[
+      {"name":"name","type":"STRING","mode":"NULLABLE"},
+      {"name":"address","type":"STRING","mode":"NULLABLE"},
+      {"name":"phone","type":"STRING","mode":"NULLABLE"},
+      {"name":"email","type":"STRING","mode":"NULLABLE"},
+      {"name":"tax_id","type":"STRING","mode":"NULLABLE"}
+  ]},
+  {"name":"invoice_date","type":"DATE","mode":"NULLABLE"},
+  {"name":"due_date","type":"DATE","mode":"NULLABLE"},
+  {"name":"subtotal","type":"NUMERIC","mode":"NULLABLE"},
+  {"name":"tax_amount","type":"NUMERIC","mode":"NULLABLE"},
+  {"name":"total_amount","type":"NUMERIC","mode":"NULLABLE"},
+  {"name":"payment_terms","type":"STRING","mode":"NULLABLE"},
+  {"name":"purchase_order","type":"STRING","mode":"NULLABLE"},
+  {"name":"notes","type":"STRING","mode":"NULLABLE"},
+  {"name":"line_items","type":"RECORD","mode":"REPEATED","fields":[
+      {"name":"description","type":"STRING","mode":"NULLABLE"},
+      {"name":"quantity","type":"NUMERIC","mode":"NULLABLE"},
+      {"name":"unit_price","type":"NUMERIC","mode":"NULLABLE"},
+      {"name":"total","type":"NUMERIC","mode":"NULLABLE"},
+      {"name":"sku","type":"STRING","mode":"NULLABLE"}
+  ]},
+  {"name":"received_date","type":"DATE","mode":"NULLABLE"},
+  {"name":"processed_ts","type":"TIMESTAMP","mode":"NULLABLE"},
+  {"name":"verification_status","type":"STRING","mode":"NULLABLE"},
+  {"name":"confidence_score","type":"FLOAT","mode":"NULLABLE"},
+  {"name":"ingestion_time","type":"TIMESTAMP","mode":"NULLABLE"},
+  {"name":"invoice_hash","type":"STRING","mode":"NULLABLE"},
+  {"name":"source","type":"STRING","mode":"NULLABLE"}
+]
