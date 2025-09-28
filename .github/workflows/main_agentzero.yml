@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - prod
+      - temp
       # Only deploy when you explicitly mark a commit
       # e.g. git commit -m "feat: xyz [deploy]"
       #      git push
