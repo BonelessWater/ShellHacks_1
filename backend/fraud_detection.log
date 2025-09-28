@@ -37,3 +37,7 @@
 2025-09-27 18:35:03,810 [INFO] main_detector: Extracted data: vendor=QuickFix Solutions LLC, amounts=30
 2025-09-27 18:35:03,810 [INFO] main_detector: Selected 7 agents: amount_validator, tax_calculator, date_analyzer, vendor_authenticator, format_inspector, line_item_validator, payment_terms_checker
 2025-09-27 18:35:26,022 [INFO] main_detector: Analysis completed in 22.21s using 7 agents
+2025-09-28 00:15:35,488 [INFO] main_detector: Starting parallel invoice fraud analysis...
+2025-09-28 00:15:35,489 [INFO] main_detector: Extracted data: vendor=QuickFix Solutions LLC, amounts=30
+2025-09-28 00:15:35,490 [INFO] main_detector: Selected 7 agents: amount_validator, tax_calculator, date_analyzer, vendor_authenticator, format_inspector, line_item_validator, payment_terms_checker
+2025-09-28 00:15:51,480 [INFO] main_detector: Analysis completed in 15.99s using 7 agents

@@ -1,97 +1,115 @@
-// Updated API service for Vercel deployment
-const API_BASE_URL = process.env.REACT_APP_API_URL || 
-  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8000');
+// frontend/src/services/api.js
+import axios from 'axios';
 
-class APIService {
-  async request(endpoint, options = {}) {
-    // For production (Vercel), use relative URLs
-    // For development, use full URL to local backend
-    const url = process.env.NODE_ENV === 'production' 
-      ? endpoint 
-      : `${API_BASE_URL}${endpoint}`;
-    
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      ...options,
-    };
+// Configure API base URL
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://agentzero.azurewebsites.net'  // Your Azure backend URL
+  : 'http://localhost:8000';  // Local development backend
 
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 30000, // 30 seconds
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add request interceptor for debugging
+api.interceptors.request.use(
+  (config) => {
+    console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    return config;
+  },
+  (error) => {
+    console.error('❌ API Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => {
+    console.log(`✅ API Response: ${response.status} ${response.config.url}`);
+    return response;
+  },
+  (error) => {
+    console.error('❌ API Response Error:', error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
+
+// API Methods
+export const apiService = {
+  // Health checks
+  checkHealth: async () => {
     try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      return await response.json();
+      const response = await api.get('/health');
+      return response.data;
     } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
+      throw new Error(`Health check failed: ${error.message}`);
+    }
+  },
+
+  checkApiHealth: async () => {
+    try {
+      const response = await api.get('/api/health');
+      return response.data;
+    } catch (error) {
+      throw new Error(`API health check failed: ${error.message}`);
+    }
+  },
+
+  // Get message from backend
+  getMessage: async () => {
+    try {
+      const response = await api.get('/api/message');
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to get message: ${error.message}`);
+    }
+  },
+
+  // Invoice processing (placeholder for your fraud detection)
+  uploadInvoice: async (invoiceData) => {
+    try {
+      const response = await api.post('/api/invoices/upload', {
+        invoice_data: invoiceData
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Invoice upload failed: ${error.message}`);
+    }
+  },
+
+  // Get system status
+  getSystemStatus: async () => {
+    try {
+      const response = await api.get('/api/system/status');
+      return response.data;
+    } catch (error) {
+      throw new Error(`System status check failed: ${error.message}`);
+    }
+  },
+
+  // Agent configuration
+  getAgentConfig: async () => {
+    try {
+      const response = await api.get('/api/agents/config');
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to get agent config: ${error.message}`);
+    }
+  },
+
+  updateAgentConfig: async (config) => {
+    try {
+      const response = await api.put('/api/agents/config', { config });
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to update agent config: ${error.message}`);
     }
   }
+};
 
-  // Health check
-  async healthCheck() {
-    return this.request('/api/health');
-  }
-
-  // Invoice methods
-  async uploadInvoices(files) {
-    const formData = new FormData();
-    Array.from(files).forEach(file => {
-      formData.append('files', file);
-    });
-
-    return this.request('/api/invoices/upload', {
-      method: 'POST',
-      body: formData,
-      headers: {}, // Remove Content-Type to let browser set it for FormData
-    });
-  }
-
-  async processInvoiceData(invoiceData) {
-    return this.request('/api/invoices/upload', {
-      method: 'POST',
-      body: JSON.stringify({ invoice_data: invoiceData }),
-    });
-  }
-
-  async getInvoices() {
-    return this.request('/api/invoices');
-  }
-
-  async getInvoice(id) {
-    return this.request(`/api/invoices/${id}`);
-  }
-
-  async updateInvoiceStatus(id, status) {
-    return this.request(`/api/invoices/${id}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    });
-  }
-
-  // System status methods
-  async getSystemStatus() {
-    return this.request('/api/system/status');
-  }
-
-  async getAnalytics() {
-    return this.request('/api/analytics');
-  }
-
-  // Agent configuration methods
-  async getAgentConfig() {
-    return this.request('/api/agents/config');
-  }
-
-  async updateAgentConfig(config) {
-    return this.request('/api/agents/config', {
-      method: 'PUT',
-      body: JSON.stringify({ config }),
-    });
-  }
-}
-
-export const apiService = new APIService();
+export default api;

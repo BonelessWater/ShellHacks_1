@@ -63,7 +63,11 @@ if frontend_build_path.exists():
             raise HTTPException(status_code=404, detail="Frontend not found")
 
 
+# This is crucial - Azure App Service doesn't use this when deploying
+# The startup command handles the uvicorn execution
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("WEBSITES_PORT", 3000))
+    # Use WEBSITES_PORT environment variable (Azure sets this automatically)
+    port = int(os.environ.get("WEBSITES_PORT", 8000))
+    print(f"Starting server on port {port}")
     uvicorn.run(app, host="0.0.0.0", port=port)
