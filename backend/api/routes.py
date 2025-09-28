@@ -357,6 +357,65 @@ async def upload_invoices(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload processing failed: {str(e)}")
 
+
+# -------------------------
+# BigQuery proxy endpoints
+# -------------------------
+@router.get("/fraud-transactions")
+async def get_fraud_transactions(limit: int = 100):
+    """Return top fraud transactions from BigQuery via the project's bq_manager if available."""
+    bq = get_bq_manager()
+    if not bq:
+        raise HTTPException(status_code=503, detail="BigQuery manager not available")
+
+    try:
+        # Use project/dataset from bq manager if present, else rely on environment
+        project = getattr(bq, 'project_id', None)
+        dataset = os.environ.get('BIGQUERY_DATASET') or os.environ.get('BQ_DATASET') or None
+        # Compose a safe query — the caller cannot inject SQL here
+        dataset_ref = f"{project}.{dataset}" if project and dataset else None
+        table_ref = f"{dataset_ref}.transaction" if dataset_ref else "`transaction`"
+
+        query = f"SELECT TransactionID, TransactionAmt, ProductCD, isFraud, card4 as CardType FROM `{project}.{dataset}.transaction` WHERE isFraud = 1 ORDER BY TransactionAmt DESC LIMIT {int(limit)}"
+        results = bq.query(query)
+        rows = []
+        for r in results:
+            rows.append(_sanitize_value(dict(r)))
+
+        return {"success": True, "data": rows, "count": len(rows)}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"BigQuery query failed: {str(e)}")
+
+
+@router.post("/query")
+async def execute_query(payload: Dict[str, Any]):
+    """Execute a user-supplied SQL query in a restricted manner (only SELECT allowed).
+
+    NOTE: This endpoint is intentionally conservative; it only allows SELECT queries
+    to avoid data modification from the frontend. Further restrictions can be applied
+    as needed.
+    """
+    bq = get_bq_manager()
+    if not bq:
+        raise HTTPException(status_code=503, detail="BigQuery manager not available")
+
+    sql = payload.get('query') if isinstance(payload, dict) else None
+    if not sql or not isinstance(sql, str):
+        raise HTTPException(status_code=400, detail="Missing SQL query")
+
+    # Basic safety: allow only SELECT statements
+    sql_stripped = sql.strip().lower()
+    if not sql_stripped.startswith('select'):
+        raise HTTPException(status_code=400, detail="Only SELECT queries are allowed")
+
+    try:
+        results = bq.query(sql)
+        rows = [ _sanitize_value(dict(r)) for r in results ]
+        return {"success": True, "data": rows, "rows_returned": len(rows)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"BigQuery query failed: {str(e)}")
+
 async def process_single_invoice(invoice_data: Dict[str, Any]) -> Dict[str, Any]:
     """Process a single invoice through the fraud detection pipeline"""
     try:
