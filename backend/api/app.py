@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from backend.archive.main_pipeline import (
     run_fraud_detection,
@@ -13,7 +15,7 @@ from backend.archive.data_models import DataValidator
 import os
 
 
-def _check_admin_key(provided: str | None) -> bool:
+def _check_admin_key(provided: Optional[str]) -> bool:
     """Simple admin key check: uses ADMIN_API_KEY env var when set."""
     admin_key = os.environ.get("ADMIN_API_KEY")
     if not admin_key:
@@ -31,7 +33,7 @@ class InvoicePayload(BaseModel):
     items: list
     total: float
     # Optional fields
-    geocode_api_key: str | None = None
+    geocode_api_key: Optional[str] = None
 
     class Config:
         extra = "allow"
@@ -183,7 +185,7 @@ def load_state(body: dict):
 
 
 @app.get("/admin/state")
-def inspect_state(admin_key: str | None = None):
+def inspect_state(admin_key: Optional[str] = None):
     if not _check_admin_key(admin_key):
         raise HTTPException(status_code=403, detail="Forbidden: invalid admin key")
     coord = get_pipeline().agent_coordinator

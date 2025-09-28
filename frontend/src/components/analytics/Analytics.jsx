@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TrendingUp, Users, FileText, Shield, Activity, DollarSign, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import OrchestratorStats from './OrchestratorStats';
 
 const Analytics = ({ systemStatus, invoices = [] }) => {
   const [activeTab, setActiveTab] = useState('business');
@@ -201,6 +202,8 @@ const Analytics = ({ systemStatus, invoices = [] }) => {
 
   const FraudAnalytics = () => (
     <div className="space-y-6">
+      {/* Orchestrator stats: agent-based confidence & distributions */}
+      <OrchestratorStats invoices={invoices} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">

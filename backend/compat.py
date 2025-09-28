@@ -8,12 +8,15 @@ available, otherwise it returns an empty list and the shim should provide
 its own fallbacks.
 """
 
+from __future__ import annotations
+
 from importlib import import_module
+
 from types import ModuleType
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
-def _try_import(module_path: str) -> ModuleType | None:
+def _try_import(module_path: str) -> Optional[ModuleType]:
     try:
         return import_module(module_path)
     except Exception:

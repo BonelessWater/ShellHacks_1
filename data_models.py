@@ -233,6 +233,23 @@ class FraudDetectionResult:
             "results": getattr(self, "results", {}),
         }
 
+    # Backwards-compatible properties expected by tests and callers
+    @property
+    def fraud_risk(self):
+        if isinstance(self.summary, dict):
+            return self.summary.get("fraud_risk")
+        if hasattr(self.summary, "fraud_risk"):
+            return getattr(self.summary, "fraud_risk")
+        return None
+
+    @property
+    def confidence_score(self):
+        if isinstance(self.summary, dict):
+            return self.summary.get("confidence_score")
+        if hasattr(self.summary, "confidence_score"):
+            return getattr(self.summary, "confidence_score")
+        return None
+
 
 class FraudDetectionSummary:
     """Summary object used by agents during integration tests and pipeline.

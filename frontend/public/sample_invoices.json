@@ -1,0 +1,2602 @@
+[
+  {
+    "invoice_id": "19332b75-30f3-4a18-bf51-e66effc358c4",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "1f820464-8564-456c-b70b-afc62dbb5099",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "3a253ee7-e01b-423c-a4c6-6ff30e4b262f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "47e7fd08-eb0f-40ba-83af-f5d807871b04",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "571f1c07-1d8d-4280-9f2c-184457b40ff7",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "7f53dffe-492f-444f-a1e0-32e02889fa04",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "7f6f96b5-effc-4aed-b321-5d4d9a6256fb",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "848112ab-52ba-4c1e-a711-ea38a0f6ccbe",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "8ad4da75-7024-46ba-a551-267350d3fa0f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "9d27c3f4-d27b-4e50-9bc9-c7b8d973182f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "c40febbd-b85b-4b8f-a49b-9f1ff3a0e070",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "debfcaf1-775e-4b5c-9603-4d25b4ba5ade",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "0ecde3b9-baa6-4aac-90d7-5b33213f1bec",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "1d0ddf04-26e2-48f9-9074-fa4a41d8e0ca",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "4fb5715a-bd66-4a3d-813c-ae28e5556d03",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "60c95303-d359-4773-a3eb-1b6a5b0944a6",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "6d58736c-a02a-4f5b-8fee-0e28052a9b95",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "89d17fdf-427e-4a41-aa96-11a089c3a320",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "91b571a8-c592-4a32-8806-0464fd0439e3",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "b2246ab8-73bd-458b-b3bf-acd659f2ac57",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "b22aeb5f-e838-438e-a75c-4f0aa4e774e2",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "1643ec12-8915-4fb1-9cd9-65c4087a0fc2",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "2e6c83f6-dcb7-4307-bf79-e919e2f0bdc4",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "374dc12d-2a55-4a94-8229-ccf075cec865",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "661b06c9-1352-4b9d-bc81-5128e15d7c74",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "6be8a4e9-f517-4eb4-ace5-4bb1e2c190ca",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "7b756da3-f1a2-4dc6-967a-f40161e0a419",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "88084f77-aa5c-427e-b8f9-2f5054f3536d",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "88b2d2be-7d6b-48bf-8328-ea785ef31f1e",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "cc287acb-57b5-400a-976d-741f86e8c806",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "e2fd11e2-68a7-4007-a892-c4dafec43b3b",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "e4045e69-4b05-4c6b-9da7-3a4206dcc055",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "ed331a36-458b-4f05-b0a2-f04a3779d89a",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "fd931383-0789-408d-877b-cc9db8d94225",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.test_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "025a0318-f38a-493b-844a-2e71402c54cc",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "0ae7cfbc-1ef1-45ea-8452-1b3185ca54fc",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "1905cf96-9239-4d38-9873-a7739a6a52a7",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "221f6d57-9541-4000-a102-d3a2789175dd",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "35704111-e3c5-407a-bdf7-22bebcd781ed",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "3c63acc6-e431-4368-a646-58d2159bc5a1",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "51d785b9-e216-4682-b97e-884f53171629",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "58e47069-b8c5-498e-9028-868dd0347025",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "66803132-63e9-484c-998a-f32b9519198f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "76dee15b-fe1f-4725-9e8a-a5ffb88647ee",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "84fb943f-ea3f-486b-acf2-a48bd8f12ac6",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.test_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "9024d2d0-11e5-4566-9264-090e7ec1c496",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "9295bacd-6fcf-49ed-893f-ccbf75f2c07a",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "c2a2cd38-3ae5-47db-9edf-ead19a3a041c",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "d18ce4f8-9bc9-4ce9-845e-acce47d974de",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "e518efb7-2f9c-48e2-8b7a-25e4382280bf",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "efaadcfa-1396-4455-92ae-dc0a67ba342f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "fc004926-a7e2-4920-97a8-c5ee20e6a4f8",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.test_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "0b82eb15-c0ae-4963-9df6-aa072f3d9096",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "0d8a75fb-3cd4-4660-b0ad-39149674154f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "10f5f1f2-783b-44e8-b46f-e20234174a9c",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "1e269011-88ec-4a08-b41f-a237b4c41ab9",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "2f841499-73bb-43cd-8a9a-11f905d73d81",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "5f8fe745-ce5d-4660-a459-35714b1b431c",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "685bda17-dc10-4e4e-8eee-ee6d289281ee",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "76bca397-83b8-4cd3-9fc1-f1a3b17fddbc",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "7d6ff130-35fb-4002-acf9-a0734aeb89f7",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "88672472-0034-43fc-b8d6-54a2507e2c5d",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "bb85280a-5469-4652-85f0-e34bdec1e413",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "f155535b-e57a-4396-b8cd-5a2d016faeaa",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "113ce31f-06a6-4035-af40-863dd18bda1a",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "2a6ca1c1-b614-4268-a0b0-eac4e2177667",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "377e2026-0bd6-4a15-8e7b-27ee854e9670",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "b767e1db-6465-4fa7-bfc8-e9fbdde30da5",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "d4e23e59-ef33-4b54-8ca3-149a928b1d71",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "ea3a0ee0-2be5-4fa6-897c-ad65d259c3c2",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "f8bac2d4-1904-4a16-8630-7c4d511a8c84",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "0b6ca31e-40d8-44ad-97d9-0a88c57e2968",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "10025638-3115-47c5-a4f0-8d42825dff47",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "111eff95-f002-4dc4-b6ba-0208f2fcf1ac",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "52332de3-cea3-40b6-a48c-358d9d36f52e",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "9c4e8414-8ba8-4ab8-9758-29749d4b303e",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "aacc6519-9296-41cb-9f79-12b9232c7b3d",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "b0654749-2079-43aa-a8dc-087c853eb230",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "c36713a9-7e1c-4958-8394-58d86ba9c031",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "cfe5ce22-93fc-43b9-80d2-4a550d030254",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "dd697f01-207e-4ef1-9c98-dd64268987ca",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "e9139022-f029-4876-a9eb-e9340cc4453d",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "fc7d1ee0-1757-4c4f-8b59-253481523ac7",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "0d97816d-a216-46fd-8366-86cc0ff2f8e5",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "47f84e25-798a-4da4-97fb-5b46c7029c28",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "68cb459c-2e35-43ef-9513-143f22177109",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "6b61e9da-2aa7-4d1a-8831-fd81db6c594f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "6cedd7bc-a187-4b52-bf4e-9c5dfc5649b3",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "7cf4df91-4fe4-4161-877f-e73c16a3812f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "7f10ea7d-e271-44a7-9428-7548adb7e409",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "abfa8c1c-7bd6-479b-bc2f-439806e37e14",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "c973c4ed-13af-4b13-b14b-f735dfc04b86",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "d99af8cf-3d33-41aa-b28b-d82e311f6053",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "e61b3275-f8f6-4813-97e3-8e70b825e654",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "ef58195f-afbc-432c-b6c6-3b5b003ad3fb",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "0a9a6fae-8a76-4831-905a-a52f2d0c31c6",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "2d782f30-7f45-4ef2-a104-add4910bc594",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "69d9da67-af20-4c7b-a447-5b0ce29bf913",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "6c2d8a29-5346-4a6e-b8d1-4350cd055b0b",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "7ab308b1-1b48-4916-98b3-05085b16872d",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "cad66603-f143-41a5-8704-b0a01032566e",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "e21c4781-72bc-4be6-9c70-95a7542f587f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "e37349be-160c-4a2f-a0ac-1536ce1e72b8",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "e3ef1f6d-d2bd-48da-b41e-2b44a9902a9f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "e7e8fb9b-231a-460c-bf7f-a19933d9b529",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "edef621d-7a61-41ea-b7a6-2c8d92624c68",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "f4ce61e8-e130-4764-911d-60a81430e923",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.document_forgery.receipt_forgery_annotations",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "f4eb901b-5858-4463-b062-8f9d04335523",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "fd5b5cfd-2bc9-4dcc-9adc-99c46a07bc69",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "5046732d-8cfd-4101-a6be-cce77cf5a585",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.test_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "5308c18d-64fe-4075-b8fc-7d8b72e83a73",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "5c3a128b-391f-4ace-8ff8-ee90c4f791cd",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "6f5dd7e5-85a9-464e-9847-35e3be3e7080",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "77def18c-db52-470f-a760-55b0307d2c0d",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "83fd0d9e-bf4a-40e8-a144-96fbbb6a142a",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "84667655-9a9e-46a8-90e1-801431324281",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "8e496f7b-7399-4b17-be48-ab1430484168",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "a4cb9c1e-1b14-4ab3-ac64-03eba45d806d",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "a4f6119f-69d0-44bc-a7cd-baeed1d00c3f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "b964cab9-7b65-48f9-9b20-ef57f2cb8713",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "d37a5cb1-48e3-4435-b5a8-8621ec8559f1",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "f2d3c654-d19c-4c3c-9106-aa87783782bb",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "fc9b86ef-8e18-42a8-b440-0eaaeecdcbbf",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "fcba20f9-28b9-4292-a3ac-1b28f93cbd28",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "0488d4d5-2348-4b0b-a0bc-e5d1b925e60c",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "106f0582-340e-41ba-afb5-086fd4949d5d",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "4a14c88f-ea7e-4f05-8006-4f73fd2d64dd",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "4cf8baff-f5ff-4b0e-aee3-a9f0aabdc24c",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "701794a4-f6ab-47c7-84d2-bf05cf6fb4c6",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "7214eb96-501d-4cf5-95cd-08a1227cb497",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "92b34676-b9c6-463d-940e-cf626ee7fd50",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "a00fbcb1-c7b9-4c84-bc1c-023aed1a8be5",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "a46c8be5-16a4-4625-8275-46a340b83d51",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "a89542ac-1433-4e3d-82d0-da6c54a15392",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "c4f4c730-346c-4c34-bf8c-33f1ca34dc88",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "dbca31bd-ac3d-42d0-bfbe-1b3db96a3d52",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "e29dacc2-251c-4883-bff5-f8d8c8b04f41",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "fc387738-69ad-4f64-b8b9-93c74d8a29a3",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "ffa1c441-1952-4c1c-b54c-29a849bd565b",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "26cb7b63-3317-4ea3-b2ab-0d779bc00f1b",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "39aa193b-9b60-4ed7-99ec-5284eb4139ff",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "40c1bdb1-0d12-414b-99aa-906b6293f0a7",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "51c239de-7129-4b9c-9c43-490084d044b0",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "6710d5e6-8a53-4803-86b8-4379ae6c324b",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.test_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "678c4dc0-c1aa-462f-beed-06f7d458410c",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "69e43370-8b2c-40b0-a82b-ebc41884f411",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "716e5413-2dc5-454e-b492-092cde5d2e55",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "99478dda-894d-466a-873b-551827ec5c2f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "c8bd917c-6855-4e4e-bd48-5d867bcbf0d9",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "d345b32a-02f6-404a-9475-ae02e944a810",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "dc88bca4-4df9-408d-8756-72ad7fac6c44",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "eb275e35-bc87-497f-9c1e-645a7898c442",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "037a9cd5-24a8-415f-9a26-b892d17b6577",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "3c9d7983-60ef-4b85-aaba-283a93d812cb",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "4b3aa7fd-ab14-4d79-9aeb-2ca0f70f2919",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "4db2b7aa-2376-409f-81a6-a4555bf5a06a",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "62cbf178-bc30-40e0-b252-0e77df26d297",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "84293a9b-f6db-4c8e-8723-c0f56e65eb34",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "84c2884d-9002-4117-9b44-d13e170f53ae",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "8b92ae16-66af-4972-9e80-ca014158368f",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "92be7557-4587-4503-a892-7c8f116fc769",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "92ff764b-4c2d-42dc-9661-1f02e9b351b7",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "9a3165b3-c043-435e-a6e9-667babd7ccc9",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "a2389686-1ef7-49fb-91dc-6529cead984c",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "ac65e6b9-feba-4a0a-931f-69fc880cd41c",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "b7cbb3d7-cdef-4047-a392-6a9cda18e5f0",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "e72f0740-1b51-4437-8470-a480a1117bdb",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "ee849906-5cbf-4878-b8cd-bc825f78a2d4",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.document_forgery.invoice_annotations",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "f0245db3-e8a6-4c21-bdb8-bb7c7a46fb03",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "f475bffc-e5d6-4e72-8059-67e97d5e2401",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "13eddf71-0b6d-4002-9760-1d297dbbb0a5",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "43843d2c-9dfe-4226-b1c1-0f57923c170c",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "66ca36f0-435e-4107-be01-fedaf47fd56e",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "88cb3cf3-bd04-4184-8c41-7fda64b55452",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "8d1a0f24-e512-4294-8fe1-579d1b11d073",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "970a4402-bbe7-4875-b9f9-4d4e2515e3fc",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "c6ea96ae-8353-4f5e-bf9e-d294bf841062",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "de7f7e2f-9d45-48ce-ab96-fb25dd640c02",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "e52be376-8a5f-4d72-9815-4db7fb32383a",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "ec7b21c6-7a6d-4c9d-89d2-4c9fa0e282f5",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "318a02cf-6d3b-419c-bba6-b53131f3a208",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "3ec6ba90-df25-4144-b8a1-a8f397245926",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "42ea3e5e-0296-409a-83c0-72cfa548ceab",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "4362c9e1-c9d0-42b7-b74a-7811fe66fb97",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "4812f0c4-0edb-49e6-942b-729952c83a30",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "66407ddd-0df0-44b5-9c74-1a0fa7637db9",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "71e5b330-1911-4157-a519-a6b5712f09d6",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "81f49535-7a7d-4f2c-9190-bdc1627ca9ff",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "89574acd-9904-47dc-9c7a-6fbd88174766",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "96db9531-7345-4eae-b237-aad10aa13cf8",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "aa134471-98e7-4799-82a8-22cff2520a86",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "ba06f4df-ef3d-40c0-99a8-106d777cfe81",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "c4127454-64dc-4c57-9501-f239adf83b44",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "d9a5d074-02db-4350-bd48-d83b87566aea",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "15e3ce9c-7fa5-4201-bd15-c92c1e7cf7c3",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "1d2e5bd0-6f20-4355-baec-97ce5d2ad5de",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "1fbf9d86-91bb-493c-ba4c-0f0eb36ef4d5",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "3af91a01-5a1e-4059-af99-8fbe83a89fd1",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "7728deb8-6603-49b3-8495-f1f5f8729511",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  },
+  {
+    "invoice_id": "859535ac-e425-41c8-a6b9-d2fbd2a7067b",
+    "vendor_name": "",
+    "invoice_date": null,
+    "subtotal": 0.0,
+    "tax_amount": 0.0,
+    "total_amount": 0.0,
+    "line_items_json": null,
+    "source_table": "vaulted-timing-473322-f9.ieee_cis_fraud.train_transaction",
+    "vendor": {
+      "name": ""
+    }
+  }
+]

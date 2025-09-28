@@ -14,9 +14,24 @@ from typing import Optional
 
 class _StubAPIKeyManager:
 	def __init__(self):
-		self._failed = set()
+		# Minimal attributes to mimic the real APIKeyManager interface
+		self.api_keys = []
+		self.failed_keys = set()
+		self.current_key_index = 0
+		self._failed = self.failed_keys
 
 	def get_current_key(self) -> Optional[str]:
+		return None
+
+	def get_available_count(self) -> int:
+		"""Return number of available (non-failed) keys. Stub returns 0."""
+		return max(0, len(self.api_keys) - len(self.failed_keys))
+
+	def rotate_key(self) -> Optional[str]:
+		"""Rotate to next key in the stub (no-op)."""
+		if not self.api_keys:
+			return None
+		self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
 		return None
 
 	def mark_key_failed(self, key: str, error_msg: str = ""):

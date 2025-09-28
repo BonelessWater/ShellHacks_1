@@ -174,9 +174,39 @@ export const useInvoices = () => {
     // Start with mock data immediately for better UX
     setInvoices(mockInvoices);
     setBackendConnected(false);
-    
-    // Then try to load from backend
-    loadInvoices();
+
+    // In development prefer dev sample file (sanitized) to give realistic UI
+    const doDevSample = async () => {
+      if (process.env.NODE_ENV !== 'production') {
+        try {
+          const samples = await apiService.getSampleInvoices(50, false);
+          if (samples && samples.length > 0) {
+            // normalize sample rows to expected frontend shape if needed
+            const normalized = samples.map(s => ({
+              id: s.get?.('id') || s.id || s.invoice_number || s.invoice_id || s._raw?.invoice_id || s._raw?.id || (s.vendor && s.vendor.name ? s.vendor.name + '-' + Math.random().toString(36).slice(2,8) : Math.random().toString(36).slice(2,8)),
+              vendor: typeof s.vendor === 'string' ? s.vendor : (s.vendor?.name || s.vendor_display || (s._raw && s._raw.vendor_name) || 'Unknown Vendor'),
+              amount: s.total_amount || s.amount || s.total || 0,
+              status: s.verification_status || s.status || 'processed',
+              confidence: s.confidence_score || s.confidence || 0,
+              issues: (s.verification_results && s.verification_results.length) || (s._raw && s._raw.verification_results && s._raw.verification_results.length) || 0,
+              date: s.invoice_date || s.date || s.processed_date || new Date().toISOString().split('T')[0],
+              description: s.notes || s.description || '' ,
+              line_items: s.line_items || s.items || []
+            }));
+            setInvoices(normalized);
+            return;
+          }
+        } catch (err) {
+          // ignore and fall back to loadInvoices
+          console.warn('Failed to load dev sample', err);
+        }
+      }
+
+      // Then try to load from backend normally
+      loadInvoices();
+    };
+
+    doDevSample();
   }, [loadInvoices]);
 
   const handleFileUpload = async (event) => {
