@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TrendingUp, Users, FileText, Shield, Activity, DollarSign, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 import OrchestratorStats from './OrchestratorStats';
 import { vendorName } from '../../utils/vendor';
+import MoneySavedChart from './MoneySavedChart';
 
 const Analytics = ({ systemStatus, invoices = [] }) => {
   const [activeTab, setActiveTab] = useState('business');
@@ -86,9 +87,7 @@ const Analytics = ({ systemStatus, invoices = [] }) => {
       {/* Monthly Trends Chart Placeholder */}
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Monthly Processing Trends</h3>
-        <div className="h-64 bg-gray-50 rounded flex items-center justify-center">
-          <p className="text-gray-500">Chart visualization would go here</p>
-        </div>
+        <MoneySavedChart />
       </div>
     </div>
   );

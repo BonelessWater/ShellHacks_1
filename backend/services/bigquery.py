@@ -22,15 +22,7 @@ class BigQueryService:
                 TransactionAmt as amount,
                 ProductCD as product_code,
                 isFraud,
-                COALESCE(P_emaildomain, 'Unknown Vendor') as vendor,
-                CASE
-                    WHEN isFraud = 1 THEN 'rejected'
-                    ELSE 'approved'
-                END as status,
-                0.9 as confidence,
-                0 as issues,
-                '2024-01-01' as date,
-                'Sample Description' as description
+                COALESCE(P_emaildomain, 'Unknown Vendor') as vendor
             FROM `{table_id}`
             LIMIT {limit}
         """
@@ -41,15 +33,47 @@ class BigQueryService:
             
             for invoice in invoices:
                 fraud_result = run_fraud_detection(invoice)
-                invoice['confidence'] = fraud_result.get('risk_score', 0)
-                invoice['status'] = 'rejected' if fraud_result.get('risk_score', 0) > 0.5 else 'approved'
-                invoice['issues'] = 1 if fraud_result.get('risk_score', 0) > 0.5 else 0
+                risk_score = fraud_result.get('risk_score', 0)
+                invoice['confidence'] = risk_score
+                
+                if risk_score >= 0.75:
+                    invoice['status'] = 'approved'
+                    invoice['riskLevel'] = 'Low'
+                    invoice['issues'] = 0
+                elif risk_score > 0.5 and risk_score < 0.75:
+                    invoice['status'] = 'review_required'
+                    invoice['riskLevel'] = 'Medium'
+                    invoice['issues'] = 1
+                else:
+                    invoice['status'] = 'rejected'
+                    invoice['riskLevel'] = 'High'
+                    invoice['issues'] = 3
+
                 invoice['date'] = '2024-01-01'
                 invoice['description'] = 'Sample Description'
 
             return invoices
         except Exception as e:
             log.error(f"Error fetching invoices from BigQuery: {e}")
+            return []
+
+    def get_transactions_for_analytics(self):
+        log.info("Fetching transactions for analytics...")
+        table_id = f"{self.project_id}.{self.dataset_id}.sample_transactions"
+        query = f"""
+            SELECT 
+                TransactionID,
+                TransactionAmt,
+                TransactionDT,
+                ProductCD,
+                COALESCE(P_emaildomain, 'Unknown Vendor') as vendor
+            FROM `{table_id}`
+        """
+        try:
+            df = self.client.query(query).to_dataframe(create_bqstorage_client=False)
+            return df.to_dict('records')
+        except Exception as e:
+            log.error(f"Error fetching transactions for analytics from BigQuery: {e}")
             return []
 
 bigquery_service = BigQueryService()

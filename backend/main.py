@@ -6,6 +6,7 @@ import asyncio
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+import logging
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -113,6 +114,8 @@ async def get_message():
     }
 
 # FILE UPLOAD ENDPOINT - Main feature for connecting to frontend
+log = logging.getLogger(__name__)
+
 @app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
     """
@@ -162,7 +165,7 @@ async def upload_file(file: UploadFile = File(...)):
         }
         
     except Exception as e:
-        print(f"❌ Upload error: {str(e)}")
+        log.error(f"Upload error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 # Multiple file upload endpoint
