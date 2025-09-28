@@ -9,8 +9,7 @@ const Analytics = ({ systemStatus, invoices = [] }) => {
     { id: 'business', label: 'Business Metrics', icon: TrendingUp },
     { id: 'invoices', label: 'Invoice Analytics', icon: FileText },
     { id: 'vendors', label: 'Vendor Analytics', icon: Users },
-    { id: 'fraud', label: 'Fraud Analytics', icon: Shield },
-    { id: 'performance', label: 'AI Performance', icon: Activity }
+    { id: 'fraud', label: 'Fraud Analytics', icon: Shield }
   ];
 
   // Calculate data using the same structure as Dashboard
@@ -312,8 +311,6 @@ const Analytics = ({ systemStatus, invoices = [] }) => {
         return <VendorAnalytics />;
       case 'fraud':
         return <FraudAnalytics />;
-      case 'performance':
-        return <PerformanceMonitoring />;
       default:
         return <BusinessMetrics />;
     }

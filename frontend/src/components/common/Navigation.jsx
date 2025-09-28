@@ -1,12 +1,11 @@
 import React from 'react';
-import { BarChart3, Upload, Settings } from 'lucide-react';
+import { BarChart3, Upload } from 'lucide-react';
 
 const Navigation = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'upload', label: 'Upload', icon: Upload },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'settings', label: 'Settings', icon: Settings }
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 }
   ];
 
   return (
