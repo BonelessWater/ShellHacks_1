@@ -7,6 +7,15 @@ import json
 import asyncio
 import uuid
 
+# Import database service
+try:
+    from backend.services.database import database_service
+    DATABASE_AVAILABLE = True
+except ImportError as e:
+    print(f"Database service not available: {e}")
+    DATABASE_AVAILABLE = False
+    database_service = None
+
 # For now, use simplified fraud detection without complex imports
 FRAUD_DETECTION_AVAILABLE = False
 
@@ -99,23 +108,28 @@ async def health_check():
 @router.get("/system/status")
 async def system_status():
     """Get system status including agent pipeline status"""
-    try:
-        status = get_system_status()
-        return {
-            "status": "healthy",
-            "agents_online": True,
-            "database_connected": True,
-            "processing_queue": 0,
-            "system_details": status
-        }
-    except Exception as e:
-        return {
-            "status": "degraded",
-            "agents_online": False,
-            "database_connected": True,  # Assume DB is connected
-            "processing_queue": 0,
-            "error": str(e)
-        }
+    if DATABASE_AVAILABLE and database_service:
+        # Use real database status
+        return await database_service.get_system_status()
+    else:
+        # Fallback to mock status
+        try:
+            status = get_system_status()
+            return {
+                "status": "healthy",
+                "agents_online": True,
+                "database_connected": False,  # No real DB connection
+                "processing_queue": 0,
+                "system_details": status
+            }
+        except Exception as e:
+            return {
+                "status": "degraded",
+                "agents_online": False,
+                "database_connected": False,
+                "processing_queue": 0,
+                "error": str(e)
+            }
 
 # Invoice endpoints
 @router.post("/invoices/upload", response_model=InvoiceUploadResponse)
@@ -337,17 +351,44 @@ async def get_invoices(
     risk_level: Optional[str] = None
 ):
     """Get invoices with filtering and pagination"""
-    filtered_invoices = mock_invoices.copy()
-    
-    # Apply filters
-    if status:
-        filtered_invoices = [inv for inv in filtered_invoices if inv.get("verification_status") == status]
-    
-    if risk_level:
-        filtered_invoices = [inv for inv in filtered_invoices if inv.get("risk_level") == risk_level]
-    
-    # Apply pagination
-    total_count = len(filtered_invoices)
+    if DATABASE_AVAILABLE and database_service:
+        # Use real database
+        result = await database_service.get_invoices(limit=limit, offset=offset)
+        
+        # Apply frontend filters if needed
+        invoices = result["invoices"]
+        if status:
+            invoices = [inv for inv in invoices if inv.get("status") == status]
+        
+        if risk_level:
+            # Map risk level based on confidence
+            if risk_level == "high":
+                invoices = [inv for inv in invoices if inv.get("confidence", 1.0) < 0.5]
+            elif risk_level == "medium":
+                invoices = [inv for inv in invoices if 0.5 <= inv.get("confidence", 1.0) < 0.8]
+            elif risk_level == "low":
+                invoices = [inv for inv in invoices if inv.get("confidence", 1.0) >= 0.8]
+        
+        return {
+            "invoices": invoices,
+            "total": result["total"],
+            "limit": limit,
+            "offset": offset,
+            "has_more": result["has_more"]
+        }
+    else:
+        # Fallback to mock data
+        filtered_invoices = mock_invoices.copy()
+        
+        # Apply filters
+        if status:
+            filtered_invoices = [inv for inv in filtered_invoices if inv.get("verification_status") == status]
+        
+        if risk_level:
+            filtered_invoices = [inv for inv in filtered_invoices if inv.get("risk_level") == risk_level]
+        
+        # Apply pagination
+        total_count = len(filtered_invoices)
     paginated_invoices = filtered_invoices[offset:offset + limit]
     
     return {
@@ -381,7 +422,12 @@ async def update_invoice_status(invoice_id: str, status_update: InvoiceStatus):
 @router.get("/analytics")
 async def get_analytics():
     """Get analytics dashboard data"""
-    return mock_analytics
+    if DATABASE_AVAILABLE and database_service:
+        # Use real database analytics
+        return await database_service.get_analytics()
+    else:
+        # Fallback to mock analytics
+        return mock_analytics
 
 # Agent configuration endpoints
 @router.get("/agents/config")
