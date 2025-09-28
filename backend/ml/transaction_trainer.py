@@ -252,6 +252,23 @@ class TransactionAnomalyTrainer:
                 pass
 
             write_manifest(os.path.join(save_dir, "manifest.json"), manifest)
+            # Attempt to register model in a lightweight registry (best-effort)
+            try:
+                from backend.ml.registry import register_model
+
+                registry_path = os.environ.get("MODEL_REGISTRY_PATH", os.path.join(save_dir, "model_registry.json"))
+                entry = {
+                    "manifest": manifest,
+                    "saved_at": os.path.join(save_dir, "manifest.json"),
+                }
+                try:
+                    register_model(registry_path, entry)
+                except Exception:
+                    # don't fail training because registry write failed
+                    log.warning("Failed to register model in registry")
+            except Exception:
+                # registry module may not be present; ignore
+                pass
         except Exception:
             pass
 
