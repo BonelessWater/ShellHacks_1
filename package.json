@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "lucide-react": "^0.544.0"
+    "express": "^5.1.0"
   }
 }
