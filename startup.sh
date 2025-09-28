@@ -1,29 +1,34 @@
 #!/bin/bash
-set -euo pipefail
 
-echo "🚀 Starting Node + FastAPI app..."
+# 🚀 SETUP FOR LOCALHOST:3000
 
-# --- Step 1: Root npm install ---
-echo "📦 Installing root Node.js dependencies..."
-npm ci || npm install --no-audit --no-fund
+echo "🛑 Stopping existing containers..."
+docker-compose down
 
-# --- Step 2: Frontend build ---
-echo "📦 Installing frontend dependencies and building React app..."
+echo "📦 Installing http-proxy-middleware in frontend..."
 cd frontend
-npm ci || npm install --no-audit --no-fund
-npm run build
+npm install http-proxy-middleware
 cd ..
 
-# --- Step 3: Python dependencies ---
-if [ -f "requirements.txt" ]; then
-  echo "🐍 Installing Python dependencies..."
-  pip install --no-cache-dir -r requirements.txt
-fi
+echo "🏗️  Building for development (React dev server on :3000)..."
+docker-compose -f docker-compose.dev.yml build --no-cache
 
-# --- Step 4: Start FastAPI backend ---
-echo "🐍 Starting FastAPI backend (backend/main.py) on :8000..."
-( uvicorn backend.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips="*" ) &
+echo "🚀 Starting development environment..."
+docker-compose -f docker-compose.dev.yml up -d
 
-# --- Step 5: Start Node server ---
-echo "🟩 Starting Node/Express server.js on ${PORT:-8080}..."
-exec node server.js
+echo "📋 Container status:"
+docker-compose -f docker-compose.dev.yml ps
+
+echo "🔗 URLs:"
+echo "   Frontend (React Dev): http://localhost:3000"
+echo "   Backend API:          http://localhost:8000"
+echo "   Health Check:         http://localhost:8000/health"
+
+echo "📋 View logs:"
+echo "   docker-compose -f docker-compose.dev.yml logs -f"
+
+# Alternative: Production with Express on port 3000
+echo ""
+echo "🏭 For production (Express server on :3000):"
+echo "   docker-compose build --no-cache"
+echo "   docker-compose up -d"
