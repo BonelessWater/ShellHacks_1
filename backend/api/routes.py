@@ -387,46 +387,6 @@ async def get_invoices(
     risk_level: Optional[str] = None
 ):
     """Get invoices with filtering and pagination"""
-<<<<<<< HEAD
-    if DATABASE_AVAILABLE and database_service:
-        # Use real database
-        result = await database_service.get_invoices(limit=limit, offset=offset)
-        
-        # Apply frontend filters if needed
-        invoices = result["invoices"]
-        if status:
-            invoices = [inv for inv in invoices if inv.get("status") == status]
-        
-        if risk_level:
-            # Map risk level based on confidence
-            if risk_level == "high":
-                invoices = [inv for inv in invoices if inv.get("confidence", 1.0) < 0.5]
-            elif risk_level == "medium":
-                invoices = [inv for inv in invoices if 0.5 <= inv.get("confidence", 1.0) < 0.8]
-            elif risk_level == "low":
-                invoices = [inv for inv in invoices if inv.get("confidence", 1.0) >= 0.8]
-        
-        return {
-            "invoices": invoices,
-            "total": result["total"],
-            "limit": limit,
-            "offset": offset,
-            "has_more": result["has_more"]
-        }
-    else:
-        # Fallback to mock data
-        filtered_invoices = mock_invoices.copy()
-        
-        # Apply filters
-        if status:
-            filtered_invoices = [inv for inv in filtered_invoices if inv.get("verification_status") == status]
-        
-        if risk_level:
-            filtered_invoices = [inv for inv in filtered_invoices if inv.get("risk_level") == risk_level]
-        
-        # Apply pagination
-        total_count = len(filtered_invoices)
-=======
     # Prefer BigQuery ETL table when available; otherwise return in-memory mock
     try:
         bq = get_bq_manager()
@@ -489,7 +449,6 @@ async def get_invoices(
 
     # Apply pagination
     total_count = len(filtered_invoices)
->>>>>>> origin/wip/remove-redundant-shims
     paginated_invoices = filtered_invoices[offset:offset + limit]
     # Normalize for frontend
     normalized = [normalize_invoice_record(inv) for inv in paginated_invoices]
