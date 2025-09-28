@@ -154,10 +154,10 @@ async def upload_file(file: UploadFile = File(...)):
         
         # CORRECTED: Import and use UltraFastFraudDetector directly
         # Don't call main() - it expects command line arguments
-        from main_detector import UltraFastFraudDetector
+        from main_detector import EnhancedParallelInvoiceFraudDetector
         
         # Initialize the detector
-        detector = UltraFastFraudDetector(max_workers=8)
+        detector = EnhancedParallelInvoiceFraudDetector(max_workers=8)
         
         # Read file content based on type
         try:
@@ -188,7 +188,7 @@ async def upload_file(file: UploadFile = File(...)):
         start_time = time.time()
         
         # Call analyze_invoice_ultra_fast directly - this is the correct method
-        analysis_result = await detector.analyze_invoice_ultra_fast(file_content)
+        analysis_result = await detector.analyze_invoice_parallel(file_content)
         
         analysis_duration = time.time() - start_time
         
@@ -240,16 +240,16 @@ async def upload_file(file: UploadFile = File(...)):
 async def test_file_analysis(file_path: str):
     """Test function to analyze any file manually"""
     try:
-        from main_detector import UltraFastFraudDetector
+        from main_detector import EnhancedParallelInvoiceFraudDetector
         
-        detector = UltraFastFraudDetector(max_workers=8)
+        detector = EnhancedParallelInvoiceFraudDetector(max_workers=8)
         
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
         print(f"🔍 Analyzing file: {file_path}")
         start = time.time()
-        result = await detector.analyze_invoice_ultra_fast(content)
+        result = await detector.analyze_invoice_parallel(content)
         duration = time.time() - start
         
         print(f"⚡ Analysis completed in {duration:.3f}s")
