@@ -1,5 +1,5 @@
-# .github/workflows/main_agentzero.yml - Updated for Node.js deployment
-name: Build and deploy Node.js app to Azure Web App - AgentZero
+# .github/workflows/main_agentzero.yml - Fixed for Azure Static Web App
+name: Build and deploy React app to Azure Web App - AgentZero
 
 on:
   push:
@@ -24,29 +24,36 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
           
+      # Install dependencies with error handling
       - name: Install dependencies
         run: |
           cd frontend
-          npm install
+          npm cache clean --force
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
           
+      # Build React app with proper environment
       - name: Build React frontend
+        env:
+          CI: false
+          GENERATE_SOURCEMAP: false
+          NODE_OPTIONS: "--max-old-space-size=4096"
         run: |
           cd frontend
           npm run build
           
-      - name: Create deployment package
+      # Verify build output
+      - name: Verify build
         run: |
-          mkdir deployment
-          cp -r frontend/build/* deployment/
-          cp frontend/package.json deployment/
-          cp frontend/index.js deployment/
-          cp frontend/web.config deployment/
+          cd frontend
+          ls -la build/
+          echo "Build completed successfully"
         
-      - name: Upload artifact for deployment jobs
+      # Upload the build directory directly
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
-          name: node-app
-          path: deployment/
+          name: react-build
+          path: frontend/build/
 
   deploy:
     runs-on: ubuntu-latest
@@ -59,7 +66,16 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: node-app
+          name: react-build
+          path: ./build
+      
+      # Verify downloaded files
+      - name: Verify deployment files
+        run: |
+          echo "Contents of deployment directory:"
+          ls -la ./build/
+          echo "Checking for index.html:"
+          ls -la ./build/index.html || echo "index.html not found!"
       
       - name: Login to Azure
         uses: azure/login@v2
@@ -68,10 +84,11 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7DE0416DFB4B4CB88EDDCA0CC26BC123 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AD05817C00C745649FDAAE35BB36A645 }}
 
+      # Deploy static files to Azure
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'AgentZero'
           slot-name: 'Production'
-          package: '.'
+          package: './build'
