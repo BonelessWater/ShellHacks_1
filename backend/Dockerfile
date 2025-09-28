@@ -13,11 +13,12 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies with caching
+RUN pip install --no-cache-dir --user -r requirements.txt
 
-# Copy application code
-COPY . .
+# Copy application code (exclude unnecessary files)
+COPY *.py ./
+COPY --chown=appuser:appuser . .
 
 # Create non-root user for security
 RUN adduser --disabled-password --gecos '' appuser && \

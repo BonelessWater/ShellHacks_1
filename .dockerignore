@@ -1,0 +1,31 @@
+# Dependencies
+node_modules
+.npm
+.venv
+__pycache__
+
+# Build outputs
+build
+dist
+*.log
+
+# Development files
+.git
+.github
+*.md
+.env*
+.vscode
+.idea
+
+# Test files
+test
+tests
+*.test.js
+*.test.py
+coverage
+
+# Cache
+.cache
+.parcel-cache
+.next
+.nuxt
