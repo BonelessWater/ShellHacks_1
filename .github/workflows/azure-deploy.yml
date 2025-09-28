@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: 'shellhacks-backend'  # Single web app for both frontend and backend
+  AZURE_WEBAPP_NAME: 'AgentZero'  # Updated to match your actual app name
   NODE_VERSION: '22.x'
   PYTHON_VERSION: '3.11'
 
