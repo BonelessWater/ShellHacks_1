@@ -37,7 +37,7 @@ class AgentStatus(Enum):
     FAILED = "failed"
     TIMEOUT = "timeout"
 
-
+ 
 @dataclass
 class LLMAgentResult:
     """Result from LLM agent execution"""
