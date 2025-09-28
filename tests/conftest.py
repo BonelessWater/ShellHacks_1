@@ -111,7 +111,7 @@ def sample_transaction_data():
             "card6": np.random.choice(["debit", "credit"], n_samples),
             "TransactionDT": np.random.randint(10000000, 20000000, n_samples),
             "isFraud": np.random.choice([0, 1], n_samples, p=[0.95, 0.05]),
-            "Timestamp": pd.date_range(start="2024-01-01", periods=n_samples, freq="H"),
+            "Timestamp": pd.date_range(start="2024-01-01", periods=n_samples, freq="h"),
         }
     )
 
