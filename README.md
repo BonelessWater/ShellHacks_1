@@ -400,6 +400,39 @@ poetry run pytest tests/unit -q
 - These shims are temporary — plan a cleanup PR to migrate call sites and
   remove the shims.
 
+## API keys & DSPy integration (recent changes)
+
+This repository now includes a flexible API key discovery and prioritization
+mechanism to make local development and CI more resilient to differing
+environment setups.
+
+- Key discovery: The system will scan environment variables for names
+  containing common keywords (case-insensitive) such as `API_KEY`,
+  `GOOGLE`, `GENAI`, `GCP`, `BIGQUERY`, or `DOCUMENT`. That means keys named
+  `MY_PROJECT_GENAI_KEY`, `ILAN_GOOGLE_KEY`, or `PROD_GCP_API_KEY` will be
+  discovered automatically.
+
+- Prioritization: At startup a best-effort validation pass runs and any
+  keys that validate are moved to the front of the list so the runtime
+  will prefer working keys first. Validation attempts the official SDK
+  if available, otherwise it performs a minimal REST call to the
+  `v1beta/{model}:generateContent` endpoint to check a key's usability.
+
+- DSPy integration: Lightweight shims are provided so `backend.dspy_*`
+  imports work even if the full archived implementations are in
+  `backend/archive/`. There is also a `scripts/dspy_integration_test.py`
+  script you can run to quickly verify that keys, imports, and basic
+  DSPy initialization succeed:
+
+```bash
+poetry run python scripts/dspy_integration_test.py
+```
+
+If you plan to run integration tests on CI, consider adding a CI-only
+mock mode (opt-in) so tests don't call real Generative AI endpoints in
+pull-request builds. Contact the maintainer if you'd like me to scaffold
+that mock mode and a GitHub Actions workflow.
+
 ## Security & secrets
 
 - Do NOT commit `.env`, service-account JSON files, or other secret
