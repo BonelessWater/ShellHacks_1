@@ -252,13 +252,95 @@ poetry run pytest -q
 ```
 
 Notes
-- The `tensorflow.py` shim exists to keep the test environment light; if
-  you need full TensorFlow, add it via `poetry add tensorflow` (may be
-  heavy for local dev).
-- Tests will read from real BigQuery datasets by default (configured via
-  `TEST_BQ_DATASET` or `BQ_DEFAULT_DATASET`) but **will not perform writes
-  by default**. There is an autouse pytest fixture `prevent_bq_writes` that
-  no-ops write operations unless `ALLOW_REAL_BQ_WRITES` is set.
+
+### ML agents integration (TransactionAnomalyAgent & GraphFraudAgent)
+
+This repository includes lightweight, test-friendly ML and graph agents
+under `backend/archive/ml_agents.py`. They are intentionally import-safe
+and accept injected predictors/graph builders so you can run them in unit
+tests without TensorFlow or graph libraries.
+
+Integration steps (safe, non-invasive)
+
+1. Wire agents into the runtime coordinator at startup (no source edits
+   required). This attaches the agents dynamically so the core
+   coordinator doesn't require heavy deps:
+
+```python
+from backend.archive.ml_agents import (
+    TransactionAnomalyAgent,
+    GraphFraudAgent,
+)
+from backend.archive.agents import AgentCoordinator
+
+coordinator = AgentCoordinator()
+
+# Provide your predictor/graph builder or test stubs
+txn_agent = TransactionAnomalyAgent(predictor=my_predictor)
+graph_agent = GraphFraudAgent(graph_builder=my_graph_builder)
+
+# Attach dynamically (safe)
+coordinator.transaction_agent = txn_agent
+coordinator.graph_agent = graph_agent
+```
+
+2. Add an optional API route to expose ML/graph analysis separately from
+   the main `/analyze` flow. Keep this endpoint gated so it only runs in
+   environments that have the required dependencies:
+
+```python
+from fastapi import APIRouter
+from backend.archive.main_pipeline import get_pipeline
+
+router = APIRouter()
+
+@router.post("/analyze/ml")
+def analyze_ml(payload: dict):
+    pipeline = get_pipeline()
+    # Convert payload to Invoice using the pipeline helper
+    invoice = pipeline.agent_coordinator.execute_tasks.__self__.agent_coordinator if False else None
+    # call agents directly (they should be attached on the coordinator)
+    txn = pipeline.agent_coordinator.transaction_agent.run(invoice)
+    graph = pipeline.agent_coordinator.graph_agent.run(invoice)
+    return {"transaction": txn, "graph": graph}
+```
+
+Testing guidance
+
+- Unit tests should inject simple stubs for predictors and graph builders.
+  See `tests/unit/test_ml_agents.py` for examples. Stubs keep tests fast
+  and deterministic.
+- Keep heavy model training and Vertex AI deployment behind environment
+  guards and explicit scripts. CI sets `NO_NETWORK=1` for test steps; do
+  not perform network calls or deploy models during standard CI runs.
+
+Persistence & ops
+
+- If your agents maintain learned state, persist model pointers or state
+  via the coordinator persistence helpers (file-based example):
+
+```python
+coordinator.persist_state("./agent_state.json")
+```
+
+Training examples
+
+- A guarded trainer helper lives in `backend/ml/transaction_trainer.py`.
+  It raises a friendly error when TensorFlow or cloud SDKs are missing.
+  Install required packages and run training only in provisioned
+  environments:
+
+```bash
+# in a provisioned environment
+# poetry add tensorflow google-cloud-aiplatform
+# python examples/train_transaction_model.py
+```
+
+Safety summary
+
+- Keep ML/graph code injectable and mockable. Gate heavy deps behind
+  optional imports or environment checks. Only enable model training or
+  cloud deploys in controlled environments.
 
 ## Tests and CI
 

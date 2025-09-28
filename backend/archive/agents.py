@@ -1594,6 +1594,9 @@ __all__ = [
     # API integration agents
     "ExchangeRateAgent",
     "GeoLocationAgent",
+    # ML / Graph agents
+    "TransactionAnomalyAgent",
+    "GraphFraudAgent",
     "create_agent_coordinator",
     "validate_agent_config",
     "APPROVED_VENDORS",
