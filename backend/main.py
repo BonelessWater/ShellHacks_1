@@ -67,7 +67,4 @@ if frontend_build_path.exists():
 # The startup command handles the uvicorn execution
 if __name__ == "__main__":
     import uvicorn
-    # Use WEBSITES_PORT environment variable (Azure sets this automatically)
-    port = int(os.environ.get("WEBSITES_PORT", 8000))
-    print(f"Starting server on port {port}")
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
