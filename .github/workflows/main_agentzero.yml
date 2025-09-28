@@ -1,10 +1,12 @@
 name: Deploy Full-Stack App to Azure - AgentZero
 
+# Only run when you create a tag that starts with 'd'
 on:
   push:
-    branches:
-      - prod
-  workflow_dispatch:
+    tags:
+      - 'd*'        # Matches: d, d1, d2, deploy, dev, etc.
+      # - 'd'       # Uncomment this line if you want ONLY the exact tag 'd'
+  workflow_dispatch:  # Keep manual option as backup
 
 jobs:
   deploy:
@@ -14,6 +16,12 @@ jobs:
       id-token: write
 
     steps:
+      - name: Show deployment info
+        run: |
+          echo "🚀 Deploying with tag: ${{ github.ref_name }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Commit: ${{ github.sha }}"
+          
       - uses: actions/checkout@v4
 
       # Set up Docker Buildx for multi-platform builds
