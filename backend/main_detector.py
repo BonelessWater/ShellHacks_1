@@ -16,7 +16,7 @@ Usage:
     python main_detector.py --file invoice.json
     python main_detector.py --parallel --max-workers 6
 """
-
+ 
 import os
 import sys
 import json
