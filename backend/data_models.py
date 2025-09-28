@@ -6,6 +6,15 @@ This shim re-exports the archived implementations to preserve backward
 compatibility for tests and other imports.
 """
 
+"""Temporary shim for `backend.data_models`.
+
+This module re-exports public symbols from `backend.archive.data_models` so
+existing imports continue to work during/after a large merge. It's a
+short-term compatibility layer; see `backend/compat.py` for the re-export
+implementation and add a cleanup PR to remove this shim once callers are
+updated.
+"""
+
 from backend import compat
 
 # Re-export public symbols from backend.archive.data_models (or fallbacks)
