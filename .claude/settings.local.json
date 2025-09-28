@@ -4,7 +4,8 @@
       "Bash(env)",
       "Bash(set GOOGLE_API_KEY_0=test_key_placeholder)",
       "Bash(python:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
