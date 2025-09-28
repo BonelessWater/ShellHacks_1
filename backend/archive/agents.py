@@ -730,6 +730,14 @@ class AgentCoordinator:
         self.vendor_agent = VendorAgent()
         self.totals_agent = TotalsAgent()
         self.pattern_agent = PatternAgent()
+        # New validation & integration agents
+        self.metadata_agent = MetadataValidationAgent()
+        self.frequency_agent = FrequencyAnomalyAgent()
+        self.benford_agent = BenfordsLawAgent()
+        self.threshold_agent = SimpleThresholdAgent()
+        # API integration agents (fetchers can be injected later)
+        self.exchange_agent = ExchangeRateAgent()
+        self.geo_agent = GeoLocationAgent()
         self.execution_history = []
 
         log.info("✅ Agent coordinator initialized")
@@ -822,6 +830,26 @@ class AgentCoordinator:
             # Track execution
             execution_time = (datetime.now() - start_time).total_seconds()
             self._track_execution(invoice, tasks, results, execution_time)
+
+            # Run additional validation agents (always safe, additive)
+            try:
+                results.setdefault("validation", {})
+                results["validation"]["metadata"] = self.metadata_agent.run(invoice)
+                results["validation"]["frequency"] = self.frequency_agent.run(invoice)
+                results["validation"]["benfords"] = self.benford_agent.run(invoice)
+                results["validation"]["thresholds"] = self.threshold_agent.run(invoice)
+            except Exception as e:
+                log.error(f"Additional validation agents failed: {e}")
+
+            # Run optional integration agents (non-blocking)
+            try:
+                results.setdefault("integration", {})
+                # geo_agent may need an API key provided via invoice data
+                api_key = getattr(invoice, "_geocode_api_key", None)
+                results["integration"]["exchange_rate"] = self.exchange_agent.run(invoice)
+                results["integration"]["geolocation"] = self.geo_agent.run(invoice, api_key=api_key)
+            except Exception as e:
+                log.error(f"Integration agents failed: {e}")
 
             log.info(f"✅ Agent execution completed in {execution_time:.2f}s")
             return results
@@ -1052,6 +1080,16 @@ class AgentCoordinator:
             self.totals_agent.calculation_history.clear()
             self.pattern_agent.pattern_history.clear()
 
+            # Reset vendor lists to defaults
+            self.vendor_agent.approved_vendors = APPROVED_VENDORS.copy()
+            self.vendor_agent.blacklisted_vendors.clear()
+
+            # Reset totals and pattern thresholds to defaults
+            self.totals_agent.tolerance = TOTAL_MISMATCH_TOLERANCE
+            self.pattern_agent.suspicious_keywords = SUSPICIOUS_KEYWORDS.copy()
+            self.pattern_agent.high_value_threshold = HIGH_VALUE_THRESHOLD
+            self.pattern_agent.high_quantity_threshold = HIGH_QUANTITY_THRESHOLD
+
             log.info("✅ All agent states reset")
             return True
 
@@ -1117,6 +1155,124 @@ class AgentCoordinator:
             log.error(f"Error calculating performance metrics: {e}")
             return {"error": str(e)}
 
+    # ---------------- Persistence Helpers ----------------
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize coordinator state to a JSON-serializable dict"""
+        try:
+            state = {
+                "vendor": {
+                    "approved_vendors": list(self.vendor_agent.approved_vendors),
+                    "blacklisted_vendors": list(self.vendor_agent.blacklisted_vendors),
+                    "vendor_history": {
+                        k: {
+                            "first_seen": v["first_seen"].isoformat()
+                            if v.get("first_seen")
+                            else None,
+                            "last_seen": v["last_seen"].isoformat()
+                            if v.get("last_seen")
+                            else None,
+                            "valid_count": v.get("valid_count", 0),
+                            "invalid_count": v.get("invalid_count", 0),
+                            "total_amount": v.get("total_amount", 0.0),
+                        }
+                        for k, v in self.vendor_agent.vendor_history.items()
+                    },
+                },
+                "totals": {"tolerance": self.totals_agent.tolerance},
+                "patterns": {
+                    "suspicious_keywords": self.pattern_agent.suspicious_keywords,
+                    "high_value_threshold": self.pattern_agent.high_value_threshold,
+                    "high_quantity_threshold": self.pattern_agent.high_quantity_threshold,
+                },
+            }
+            return state
+        except Exception as e:
+            log.error(f"Error serializing coordinator state: {e}")
+            return {}
+
+    def load_from_dict(self, state: Dict[str, Any]) -> bool:
+        """Load coordinator state from a dict produced by to_dict"""
+        try:
+            vendor = state.get("vendor", {})
+            approved = vendor.get("approved_vendors", [])
+            blacklisted = vendor.get("blacklisted_vendors", [])
+
+            # Replace approved vendors set
+            self.vendor_agent.approved_vendors = set(approved)
+            self.vendor_agent.blacklisted_vendors = set(blacklisted)
+
+            # Load vendor history (simple fields)
+            vh = vendor.get("vendor_history", {})
+            self.vendor_agent.vendor_history = {}
+            for k, v in vh.items():
+                self.vendor_agent.vendor_history[k] = {
+                    "first_seen": datetime.fromisoformat(v["first_seen"]) if v.get("first_seen") else None,
+                    "last_seen": datetime.fromisoformat(v["last_seen"]) if v.get("last_seen") else None,
+                    "valid_count": v.get("valid_count", 0),
+                    "invalid_count": v.get("invalid_count", 0),
+                    "total_amount": v.get("total_amount", 0.0),
+                }
+
+            # Totals
+            totals = state.get("totals", {})
+            if "tolerance" in totals:
+                try:
+                    self.totals_agent.tolerance = float(totals["tolerance"])
+                except Exception:
+                    pass
+
+            # Patterns
+            patterns = state.get("patterns", {})
+            if "suspicious_keywords" in patterns:
+                self.pattern_agent.suspicious_keywords = list(patterns.get("suspicious_keywords", []))
+            if "high_value_threshold" in patterns:
+                try:
+                    self.pattern_agent.high_value_threshold = float(patterns.get("high_value_threshold"))
+                except Exception:
+                    pass
+            if "high_quantity_threshold" in patterns:
+                try:
+                    self.pattern_agent.high_quantity_threshold = float(patterns.get("high_quantity_threshold"))
+                except Exception:
+                    pass
+
+            log.info("✅ AgentCoordinator state loaded from dict")
+            return True
+        except Exception as e:
+            log.error(f"Error loading coordinator state: {e}")
+            return False
+
+    def persist_state(self, path: str) -> bool:
+        """Persist coordinator state to a JSON file"""
+        try:
+            import json
+
+            state = self.to_dict()
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(state, f, indent=2)
+            log.info(f"✅ AgentCoordinator state persisted to {path}")
+            return True
+        except Exception as e:
+            log.error(f"Error persisting coordinator state: {e}")
+            return False
+
+    def load_state(self, path: str) -> bool:
+        """Load coordinator state from a JSON file if it exists"""
+        try:
+            import os, json
+
+            if not os.path.exists(path):
+                log.info(f"No agent state file found at {path}")
+                return False
+
+            with open(path, "r", encoding="utf-8") as f:
+                state = json.load(f)
+
+            return self.load_from_dict(state)
+        except Exception as e:
+            log.error(f"Error loading coordinator state from {path}: {e}")
+            return False
+
 
 # Utility functions for external use
 def create_agent_coordinator() -> AgentCoordinator:
@@ -1179,14 +1335,268 @@ def validate_agent_config(config: Dict[str, Any]) -> tuple:
         return [f"Configuration validation error: {e}"], []
 
 
+# ------------------ Additional Validation & Integration Agents ------------------
+
+
+class MetadataValidationAgent:
+    """Validate invoice metadata such as dates and invoice numbers."""
+
+    def __init__(self):
+        pass
+
+    def run(self, invoice: Invoice) -> Dict[str, Any]:
+        issues = []
+        try:
+            # Parse dates conservatively
+            invoice_date = None
+            due_date = None
+            try:
+                invoice_date = datetime.strptime(invoice.date, "%Y-%m-%d")
+            except Exception:
+                issues.append("Invalid invoice date format")
+
+            # If invoice provides a due_date field in the items or extras, ignore for now
+            # Basic date checks
+            if invoice_date and invoice_date > datetime.now():
+                issues.append("Invoice date in future")
+
+            # Basic invoice number checks (invoice_id)
+            if not getattr(invoice, "invoice_id", ""):
+                issues.append("Missing invoice ID")
+            elif len(str(invoice.invoice_id)) < 3:
+                issues.append("Invoice ID too short")
+
+            risk_score = min(len(issues) * 0.25, 1.0)
+
+            return {"risk_score": risk_score, "issues": issues}
+        except Exception as e:
+            log.error(f"MetadataValidationAgent error: {e}")
+            return {"risk_score": 1.0, "issues": [f"error: {e}"]}
+
+
+class FrequencyAnomalyAgent:
+    """Detect abnormal invoice frequency for a vendor (in-memory simple approach)."""
+
+    def __init__(self):
+        # Keep a simple in-memory history: vendor -> list of invoice dates
+        self.vendor_history: Dict[str, List[datetime]] = {}
+
+    def run(self, invoice: Invoice) -> Dict[str, Any]:
+        try:
+            vendor = DataValidator.normalize_vendor_name(invoice.vendor)
+            inv_date = None
+            try:
+                inv_date = datetime.strptime(invoice.date, "%Y-%m-%d")
+            except Exception:
+                # If date invalid fall back to now
+                inv_date = datetime.now()
+
+            history = self.vendor_history.setdefault(vendor, [])
+            history.append(inv_date)
+
+            # Simple heuristic: if more than 5 invoices in last day -> suspicious
+            cutoff = inv_date - timedelta(days=1)
+            recent = [d for d in history if d >= cutoff]
+            issues = []
+            if len(recent) > 5:
+                issues.append(f"High invoice frequency: {len(recent)} in last 24h")
+
+            risk = min(len(issues) * 0.5, 1.0) if issues else 0.0
+            return {"risk_score": risk, "issues": issues}
+        except Exception as e:
+            log.error(f"FrequencyAnomalyAgent error: {e}")
+            return {"risk_score": 1.0, "issues": [f"error: {e}"]}
+
+
+class BenfordsLawAgent:
+    """Apply a simplified Benford's Law check on leading digits of line item amounts."""
+
+    def __init__(self):
+        pass
+
+    def run(self, invoice: Invoice) -> Dict[str, Any]:
+        try:
+            leading = []
+            for item in invoice.items:
+                amt = getattr(item, "line_total", None)
+                if amt is None:
+                    # Try to compute
+                    try:
+                        amt = float(item.quantity) * float(item.unit_price)
+                    except Exception:
+                        continue
+                if amt <= 0:
+                    continue
+                s = str(int(abs(amt)))
+                leading.append(int(s[0]))
+
+            if not leading:
+                return {"risk_score": 0.0, "issues": []}
+
+            # Compute simple distribution and compare to expected Benford first-digit distribution
+            counts = {d: 0 for d in range(1, 10)}
+            for d in leading:
+                if 1 <= d <= 9:
+                    counts[d] += 1
+
+            total = sum(counts.values())
+            observed = {d: counts[d] / total for d in counts}
+
+            # Benford expected proportions (first digits 1-9)
+            expected = {d: math.log10(1 + 1 / d) for d in range(1, 10)}
+
+            # Calculate sum absolute deviation
+            deviation = sum(abs(observed[d] - expected[d]) for d in range(1, 10))
+
+            # Normalize to 0..1 roughly (max possible deviation < 2)
+            risk = min(deviation / 2.0, 1.0)
+            issues = []
+            if risk > 0.2:
+                issues.append(f"Benford deviation: {deviation:.3f}")
+
+            return {"risk_score": risk, "issues": issues}
+        except Exception as e:
+            log.error(f"BenfordsLawAgent error: {e}")
+            return {"risk_score": 1.0, "issues": [f"error: {e}"]}
+
+
+class SimpleThresholdAgent:
+    """Simple thresholds for amounts and quantities"""
+
+    def __init__(self, amount_threshold: float = HIGH_VALUE_THRESHOLD, quantity_threshold: int = HIGH_QUANTITY_THRESHOLD):
+        self.amount_threshold = amount_threshold
+        self.quantity_threshold = quantity_threshold
+
+    def run(self, invoice: Invoice) -> Dict[str, Any]:
+        try:
+            issues = []
+            for item in invoice.items:
+                if getattr(item, "unit_price", 0) >= self.amount_threshold:
+                    issues.append(f"High unit price: {item.description} ${item.unit_price:.2f}")
+                if getattr(item, "quantity", 0) >= self.quantity_threshold:
+                    issues.append(f"High quantity: {item.description} qty={item.quantity}")
+
+            risk = min(len(issues) * 0.3, 1.0)
+            return {"risk_score": risk, "issues": issues}
+        except Exception as e:
+            log.error(f"SimpleThresholdAgent error: {e}")
+            return {"risk_score": 1.0, "issues": [f"error: {e}"]}
+
+
+# ------------------ Simple API integration agents ------------------
+
+
+class ExchangeRateAgent:
+    """Fetch exchange rates from a free API to validate USD equivalence.
+
+    This implementation uses a thin HTTP call and supports injecting a
+    custom fetcher for tests.
+    """
+
+    def __init__(self, fetcher=None):
+        # fetcher(url) -> dict expected
+        self.fetcher = fetcher
+
+    def _get_rates(self, base: str = "USD") -> Dict[str, float]:
+        # Default lightweight fetcher using requests if available
+        if self.fetcher:
+            return self.fetcher(base)
+        try:
+            import requests
+
+            url = f"https://api.exchangerate.host/latest?base={base}"
+            r = requests.get(url, timeout=5)
+            data = r.json()
+            return data.get("rates", {})
+        except Exception:
+            return {}
+
+    def run(self, invoice: Invoice) -> Dict[str, Any]:
+        try:
+            currency = getattr(invoice, "currency", "USD")
+            usd_amount = getattr(invoice, "total", None)
+            if currency == "USD" or not usd_amount:
+                return {"risk_score": 0.0, "details": "USD or missing amount"}
+
+            rates = self._get_rates(base=currency)
+            usd_rate = rates.get("USD") if rates else None
+            if not usd_rate:
+                return {"risk_score": 0.0, "details": "no_rate_available"}
+
+            expected_usd = float(usd_amount) * float(usd_rate)
+            reported_usd = getattr(invoice, "usd_amount", expected_usd)
+            deviation = abs(expected_usd - float(reported_usd)) / expected_usd if expected_usd else 0.0
+            risk = min(deviation * 2.0, 1.0)
+            details = f"Exchange rate deviation: {deviation:.2%}"
+            return {"risk_score": risk, "details": details}
+        except Exception as e:
+            log.error(f"ExchangeRateAgent error: {e}")
+            return {"risk_score": 1.0, "details": str(e)}
+
+
+class GeoLocationAgent:
+    """Basic geolocation agent using Google Maps Geocoding API (mockable).
+
+    Expects an API key to be managed externally; this implementation keeps the
+    call minimal and allows a custom fetcher for tests.
+    """
+
+    def __init__(self, fetcher=None):
+        self.fetcher = fetcher
+
+    def _geocode(self, address: str, api_key: str = None) -> Dict[str, Any]:
+        if self.fetcher:
+            return self.fetcher(address, api_key)
+        try:
+            import requests
+            params = {"address": address}
+            if api_key:
+                params["key"] = api_key
+            r = requests.get("https://maps.googleapis.com/maps/api/geocode/json", params=params, timeout=5)
+            return r.json()
+        except Exception:
+            return {}
+
+    def run(self, invoice: Invoice, api_key: str = None) -> Dict[str, Any]:
+        try:
+            vendor_addr = getattr(invoice, "vendor_address", None)
+            if not vendor_addr:
+                return {"risk_score": 0.0, "details": "no_address"}
+
+            res = self._geocode(vendor_addr, api_key=api_key)
+            if not res:
+                return {"risk_score": 0.0, "details": "geocode_failed"}
+
+            # Minimal check: if geocoding returns no results -> suspicious
+            results = res.get("results", [])
+            if not results:
+                return {"risk_score": 0.5, "details": "no_geocode_results"}
+
+            # Otherwise low risk
+            return {"risk_score": 0.0, "details": "geocode_ok"}
+        except Exception as e:
+            log.error(f"GeoLocationAgent error: {e}")
+            return {"risk_score": 1.0, "details": str(e)}
+
+
+
 # Export main classes and functions
 __all__ = [
     "VendorAgent",
     "TotalsAgent",
     "PatternAgent",
     "AgentCoordinator",
+    # Validation agents
+    "MetadataValidationAgent",
+    "FrequencyAnomalyAgent",
+    "BenfordsLawAgent",
+    "SimpleThresholdAgent",
+    # API integration agents
+    "ExchangeRateAgent",
+    "GeoLocationAgent",
     "create_agent_coordinator",
     "validate_agent_config",
     "APPROVED_VENDORS",
     "SUSPICIOUS_KEYWORDS",
 ]
+

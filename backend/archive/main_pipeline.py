@@ -27,11 +27,18 @@ class FraudDetectionPipeline:
 
     def __init__(self):
         self.agent_coordinator = AgentCoordinator()
+        # Path to persist agent state; default in workspace
+        self._agent_state_path = "./agent_state.json"
         self.llm_working = False
         self.dspy_modules = None
         self.initialization_attempted = False
 
         log.info("Fraud Detection Pipeline initialized")
+        # Try to load persisted agent coordinator state if available
+        try:
+            self.agent_coordinator.load_state(self._agent_state_path)
+        except Exception:
+            log.info("No persisted agent state loaded")
 
     def _initialize_llm(self) -> bool:
         """Initialize LLM and DSPy modules"""
@@ -321,6 +328,11 @@ class FraudDetectionPipeline:
 
                 # Step 3: Execute specialist agents
                 log.info("Step 3: Executing specialist agents...")
+                # If caller provided a geocode API key via invoice payload, attach it privately
+                api_key = invoice_data.get("_geocode_api_key") or invoice_data.get("geocode_api_key")
+                if api_key:
+                    setattr(invoice, "_geocode_api_key", api_key)
+
                 results = self.agent_coordinator.execute_tasks(invoice, validated_tasks)
 
                 # Step 4: Summarize results
@@ -439,6 +451,18 @@ def reset_api_keys():
     """Reset API key failure tracking"""
     api_key_manager.reset_failures()
     log.info("API key failures reset")
+
+
+def persist_agent_state(path: str = None) -> bool:
+    pipeline = get_pipeline()
+    p = path or pipeline._agent_state_path
+    return pipeline.agent_coordinator.persist_state(p)
+
+
+def load_agent_state(path: str = None) -> bool:
+    pipeline = get_pipeline()
+    p = path or pipeline._agent_state_path
+    return pipeline.agent_coordinator.load_state(p)
 
 
 def rotate_api_key():
