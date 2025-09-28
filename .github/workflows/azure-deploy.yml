@@ -1,5 +1,5 @@
 # GitHub Actions workflow for Azure deployment
-name: Deploy to Azure App Service
+name: Deploy to Single Azure App Service
 
 on:
   push:
@@ -7,13 +7,12 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME_FRONTEND: 'shellhacks-frontend'
-  AZURE_WEBAPP_NAME_BACKEND: 'shellhacks-backend'
+  AZURE_WEBAPP_NAME: 'AgentZero'  # Single web app for both frontend and backend
   NODE_VERSION: '22.x'
   PYTHON_VERSION: '3.11'
 
 jobs:
-  build-and-deploy-frontend:
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     permissions:
@@ -23,6 +22,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    # Build Frontend
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
@@ -40,36 +40,7 @@ jobs:
         cd frontend
         npm run build
 
-    - name: Copy server files
-      run: |
-        cp server.js frontend/
-        cp package.json frontend/
-        cp package-lock.json frontend/
-
-    # ✅ ADD AZURE LOGIN STEP
-    - name: Login to Azure
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_88FBF5A58CF4436E8F8955E200248A41 }}
-        tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7DE0416DFB4B4CB88EDDCA0CC26BC123 }}
-        subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AD05817C00C745649FDAAE35BB36A645 }}
-
-    - name: Deploy to Azure Web App (Frontend)
-      uses: azure/webapps-deploy@v3
-      with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME_FRONTEND }}
-        package: frontend/
-
-  build-and-deploy-backend:
-    runs-on: ubuntu-latest
-    
-    permissions:
-      contents: read
-      id-token: write
-    
-    steps:
-    - uses: actions/checkout@v4
-
+    # Set up Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -80,19 +51,24 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    # Create unified deployment package
     - name: Create deployment package
       run: |
         mkdir -p deploy
         
-        # Copy Python files
+        # Copy backend Python files
         cp requirements.txt deploy/
         cp -r backend/* deploy/
+        
+        # Copy built frontend files to static directory
+        mkdir -p deploy/static
+        cp -r frontend/build/* deploy/static/
         
         # Create startup script for Azure App Service
         cat > deploy/startup.sh << 'EOF'
         #!/bin/bash
         set -e
-        echo "🚀 Starting FastAPI backend..."
+        echo "🚀 Starting unified FastAPI backend with static frontend..."
         cd /home/site/wwwroot
         python -m pip install --upgrade pip
         pip install -r requirements.txt
@@ -101,7 +77,7 @@ jobs:
         
         chmod +x deploy/startup.sh
 
-    # ✅ ADD AZURE LOGIN STEP
+    # Azure Login
     - name: Login to Azure
       uses: azure/login@v1
       with:
@@ -109,9 +85,10 @@ jobs:
         tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7DE0416DFB4B4CB88EDDCA0CC26BC123 }}
         subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AD05817C00C745649FDAAE35BB36A645 }}
 
-    - name: Deploy to Azure Web App (Backend)
+    # Deploy to single Azure Web App
+    - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v3
       with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME_BACKEND }}
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
         package: deploy/
         startup-command: './startup.sh'
