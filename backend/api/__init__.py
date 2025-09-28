@@ -1,3 +1,3 @@
 # Minimal package marker for backend.api
-# Expose an entrypoint for running via uvicorn if needed
-from .app import app
+# Temporarily disable app import to avoid dependencies
+# from .app import app

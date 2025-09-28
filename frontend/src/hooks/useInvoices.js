@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { apiService } from '../services/api';
 
 const mockInvoices = [
   {
@@ -126,61 +127,148 @@ const mockInvoices = [
 export const useInvoices = () => {
   const [invoices, setInvoices] = useState([]);
   const [processing, setProcessing] = useState(false);
+  const [error, setError] = useState(null);
+  const [backendConnected, setBackendConnected] = useState(false);
 
-  useEffect(() => {
-    // Simulate loading delay
-    setTimeout(() => {
-      setInvoices(mockInvoices);
-    }, 500);
-  }, []);
-
-  const handleFileUpload = (event) => {
-    const files = Array.from(event.target.files);
-    setProcessing(true);
-    
-    // Simulate processing time
-    setTimeout(() => {
-      const newInvoices = files.map((file, index) => ({
-        id: `INV-2024-${String(invoices.length + index + 1).padStart(3, '0')}`,
-        vendor: `New Vendor ${index + 1}`,
-        amount: Math.round((Math.random() * 15000 + 500) * 100) / 100,
-        status: 'processing',
-        confidence: Math.round((Math.random() * 0.4 + 0.6) * 100) / 100, // 60-100%
-        issues: Math.floor(Math.random() * 4), // 0-3 issues
-        date: new Date().toISOString().split('T')[0],
-        fileName: file.name,
-        description: `Uploaded invoice from ${file.name}`
-      }));
-      
-      setInvoices(prev => [...prev, ...newInvoices]);
-      setProcessing(false);
-      
-      // Simulate status updates after processing
-      setTimeout(() => {
-        setInvoices(prev => prev.map(invoice => {
-          if (invoice.status === 'processing') {
-            const finalStatus = invoice.issues > 2 ? 'rejected' : 
-                               invoice.issues > 0 ? 'review_required' : 'approved';
-            return { ...invoice, status: finalStatus };
-          }
-          return invoice;
-        }));
-      }, 3000);
-    }, 2000);
+  const checkBackendConnection = async () => {
+    try {
+      const connected = await apiService.checkBackendConnection();
+      setBackendConnected(connected);
+      return connected;
+    } catch (err) {
+      setBackendConnected(false);
+      return false;
+    }
   };
 
-  const updateInvoiceStatus = (invoiceId, newStatus) => {
-    setInvoices(prev => prev.map(invoice => 
-      invoice.id === invoiceId 
-        ? { ...invoice, status: newStatus }
-        : invoice
-    ));
+  const loadInvoices = useCallback(async () => {
+    try {
+      setProcessing(true);
+      
+      // First check if backend is available
+      const isConnected = await checkBackendConnection();
+      
+      if (isConnected) {
+        const response = await apiService.getInvoices();
+        if (response.invoices && response.invoices.length > 0) {
+          setInvoices(response.invoices);
+          setError(null);
+        } else {
+          // Backend connected but no data, keep mock data
+          console.log('Backend connected but no invoices found, using mock data');
+        }
+      } else {
+        // Backend not available, use mock data (already set)
+        setError('Backend not available. Using offline mode with sample data.');
+      }
+    } catch (err) {
+      console.error('Failed to load invoices:', err);
+      setError('Unable to connect to backend. Using offline mode with sample data.');
+      setBackendConnected(false);
+    } finally {
+      setProcessing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Start with mock data immediately for better UX
+    setInvoices(mockInvoices);
+    setBackendConnected(false);
+    
+    // Then try to load from backend
+    loadInvoices();
+  }, [loadInvoices]);
+
+  const handleFileUpload = async (event) => {
+    const files = Array.from(event.target.files);
+    setProcessing(true);
+    setError(null);
+    
+    try {
+      if (backendConnected) {
+        // Try to upload to backend
+        const response = await apiService.uploadInvoices(files);
+        
+        if (response.success && response.results) {
+          const newInvoices = response.results
+            .filter(result => result.success && result.invoice)
+            .map(result => ({
+              id: result.invoice.id || result.invoice.invoice_number,
+              vendor: result.invoice.vendor?.name || 'Unknown Vendor',
+              amount: result.invoice.total_amount || 0,
+              status: result.invoice.verification_status || 'processed',
+              confidence: result.invoice.confidence_score || 0,
+              riskLevel: result.invoice.risk_level || 'unknown',
+              issues: result.invoice.verification_results?.length || 0,
+              date: result.invoice.invoice_date || new Date().toISOString().split('T')[0],
+              fileName: result.filename || 'unknown',
+              description: `Processed invoice: ${result.invoice.vendor?.name || 'Unknown'}`
+            }));
+          
+          setInvoices(prev => [...prev, ...newInvoices]);
+        } else {
+          throw new Error(response.message || 'Upload failed');
+        }
+      } else {
+        // Fallback to mock processing
+        const newInvoices = files.map((file, index) => ({
+          id: `INV-2024-${String(invoices.length + index + 1).padStart(3, '0')}`,
+          vendor: `New Vendor ${index + 1}`,
+          amount: Math.round((Math.random() * 15000 + 500) * 100) / 100,
+          status: 'processing',
+          confidence: Math.round((Math.random() * 0.4 + 0.6) * 100) / 100,
+          issues: Math.floor(Math.random() * 4),
+          date: new Date().toISOString().split('T')[0],
+          fileName: file.name,
+          description: `Uploaded invoice from ${file.name}`
+        }));
+        
+        setInvoices(prev => [...prev, ...newInvoices]);
+        
+        // Simulate status updates
+        setTimeout(() => {
+          setInvoices(prev => prev.map(invoice => {
+            if (invoice.status === 'processing') {
+              const finalStatus = invoice.issues > 2 ? 'rejected' : 
+                                 invoice.issues > 0 ? 'review_required' : 'approved';
+              return { ...invoice, status: finalStatus };
+            }
+            return invoice;
+          }));
+        }, 3000);
+      }
+    } catch (err) {
+      console.error('Upload failed:', err);
+      setError(`Upload failed: ${err.message}`);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const updateInvoiceStatus = async (invoiceId, newStatus) => {
+    try {
+      if (backendConnected) {
+        await apiService.updateInvoiceStatus(invoiceId, newStatus);
+      }
+      
+      setInvoices(prev => prev.map(invoice => 
+        invoice.id === invoiceId 
+          ? { ...invoice, status: newStatus }
+          : invoice
+      ));
+    } catch (err) {
+      console.error('Failed to update invoice status:', err);
+      setError(`Failed to update status: ${err.message}`);
+    }
   };
 
   return { 
     invoices, 
     processing, 
+    error,
+    backendConnected,
     handleFileUpload, 
-    updateInvoiceStatus 
+    updateInvoiceStatus,
+    refreshInvoices: loadInvoices
   };
 };
