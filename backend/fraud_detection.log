@@ -309,3 +309,59 @@
 2025-09-28 05:46:43,382 [INFO] main_detector: ✅ Agent payment_analyzer completed in 12.63s
 2025-09-28 05:46:43,382 [INFO] main_detector: ✅ Parallel execution completed in 36.63s (3/3 successful)
 2025-09-28 05:46:43,382 [INFO] main_detector: ✅ Analysis completed in 44.54s
+2025-09-28 06:23:00,462 [INFO] main_detector: 📋 Registered agent: amount_validator
+2025-09-28 06:23:00,462 [INFO] main_detector: 📋 Registered agent: vendor_validator
+2025-09-28 06:23:00,462 [INFO] main_detector: 📋 Registered agent: date_analyzer
+2025-09-28 06:23:00,462 [INFO] main_detector: 📋 Registered agent: payment_analyzer
+2025-09-28 06:23:00,462 [INFO] main_detector: 📋 Registered 4 specialized fraud detection agents
+2025-09-28 06:23:00,462 [INFO] main_detector: 🔍 Starting enhanced parallel invoice fraud analysis...
+2025-09-28 06:23:00,462 [INFO] main_detector: 🤔 Core LLM determining which agents to summon...
+2025-09-28 06:23:08,872 [INFO] main_detector: 🎯 Core LLM selected agents: amount_validator, vendor_validator, payment_analyzer
+2025-09-28 06:23:08,872 [INFO] main_detector: 📋 Summoning 3 specialized agents: amount_validator, vendor_validator, payment_analyzer
+2025-09-28 06:23:08,873 [INFO] main_detector: 🚀 Executing 3 LLM tasks in parallel
+2025-09-28 06:23:08,873 [INFO] main_detector: 🔄 Starting 3 agents concurrently...
+2025-09-28 06:23:08,874 [INFO] main_detector: 🚀 Started agent amount_validator for task amount_validator_analysis
+2025-09-28 06:23:08,874 [INFO] main_detector: 🚀 Started agent vendor_validator for task vendor_validator_analysis
+2025-09-28 06:23:08,874 [INFO] main_detector: 🚀 Started agent payment_analyzer for task payment_analyzer_analysis
+2025-09-28 06:23:08,874 [INFO] main_detector: ⏳ Waiting for all agents to complete...
+2025-09-28 06:23:08,874 [INFO] main_detector: 🤖 Agent amount_validator starting task amount_validator_analysis
+2025-09-28 06:23:21,426 [ERROR] main_detector: ❌ LLM API call failed for amount_validator: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none were returned. The candidate's [finish_reason](https://ai.google.dev/api/generate-content#finishreason) is 2.
+2025-09-28 06:23:21,426 [INFO] main_detector: ✅ Agent amount_validator completed in 12.55s
+2025-09-28 06:23:21,427 [INFO] main_detector: 🤖 Agent vendor_validator starting task vendor_validator_analysis
+2025-09-28 06:23:34,708 [ERROR] main_detector: ❌ LLM API call failed for vendor_validator: Unknown field for UsageMetadata: get
+2025-09-28 06:23:34,708 [INFO] main_detector: ✅ Agent vendor_validator completed in 13.28s
+2025-09-28 06:23:34,709 [INFO] main_detector: 🤖 Agent payment_analyzer starting task payment_analyzer_analysis
+2025-09-28 06:23:46,838 [ERROR] main_detector: ❌ LLM API call failed for payment_analyzer: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none were returned. The candidate's [finish_reason](https://ai.google.dev/api/generate-content#finishreason) is 2.
+2025-09-28 06:23:46,839 [INFO] main_detector: ✅ Agent payment_analyzer completed in 12.13s
+2025-09-28 06:23:46,839 [INFO] main_detector: ✅ Parallel execution completed in 37.97s (3/3 successful)
+2025-09-28 06:23:46,839 [INFO] main_detector: ✅ Analysis completed in 46.38s
+2025-09-28 06:23:46,839 [INFO] main_detector: 📋 Registered agent: urgency_detector
+2025-09-28 06:23:46,840 [INFO] main_detector: 🚀 Executing 1 LLM tasks in parallel
+2025-09-28 06:23:46,840 [INFO] main_detector: 🔄 Starting 1 agents concurrently...
+2025-09-28 06:23:46,840 [INFO] main_detector: 🚀 Started agent urgency_detector for task urgency_analysis
+2025-09-28 06:23:46,840 [INFO] main_detector: ⏳ Waiting for all agents to complete...
+2025-09-28 06:23:46,841 [INFO] main_detector: 🤖 Agent urgency_detector starting task urgency_analysis
+2025-09-28 06:23:59,336 [ERROR] main_detector: ❌ LLM API call failed for urgency_detector: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none were returned. The candidate's [finish_reason](https://ai.google.dev/api/generate-content#finishreason) is 2.
+2025-09-28 06:23:59,336 [INFO] main_detector: ✅ Agent urgency_detector completed in 12.50s
+2025-09-28 06:23:59,336 [INFO] main_detector: ✅ Parallel execution completed in 12.50s (1/1 successful)
+2025-09-28 06:23:59,336 [INFO] main_detector: 🔍 Starting enhanced parallel invoice fraud analysis...
+2025-09-28 06:23:59,337 [INFO] main_detector: 🤔 Core LLM determining which agents to summon...
+2025-09-28 06:24:11,220 [INFO] main_detector: 🎯 Core LLM selected agents: vendor_validator, payment_analyzer, amount_validator
+2025-09-28 06:24:11,220 [INFO] main_detector: 📋 Summoning 3 specialized agents: vendor_validator, payment_analyzer, amount_validator
+2025-09-28 06:24:11,220 [INFO] main_detector: 🚀 Executing 3 LLM tasks in parallel
+2025-09-28 06:24:11,220 [INFO] main_detector: 🔄 Starting 3 agents concurrently...
+2025-09-28 06:24:11,221 [INFO] main_detector: 🚀 Started agent vendor_validator for task vendor_validator_analysis
+2025-09-28 06:24:11,221 [INFO] main_detector: 🚀 Started agent payment_analyzer for task payment_analyzer_analysis
+2025-09-28 06:24:11,221 [INFO] main_detector: 🚀 Started agent amount_validator for task amount_validator_analysis
+2025-09-28 06:24:11,221 [INFO] main_detector: ⏳ Waiting for all agents to complete...
+2025-09-28 06:24:11,221 [INFO] main_detector: 🤖 Agent vendor_validator starting task vendor_validator_analysis
+2025-09-28 06:24:23,978 [ERROR] main_detector: ❌ LLM API call failed for vendor_validator: Unknown field for UsageMetadata: get
+2025-09-28 06:24:23,978 [INFO] main_detector: ✅ Agent vendor_validator completed in 12.76s
+2025-09-28 06:24:23,978 [INFO] main_detector: 🤖 Agent payment_analyzer starting task payment_analyzer_analysis
+2025-09-28 06:24:35,531 [ERROR] main_detector: ❌ LLM API call failed for payment_analyzer: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none were returned. The candidate's [finish_reason](https://ai.google.dev/api/generate-content#finishreason) is 2.
+2025-09-28 06:24:35,532 [INFO] main_detector: ✅ Agent payment_analyzer completed in 11.55s
+2025-09-28 06:24:35,532 [INFO] main_detector: 🤖 Agent amount_validator starting task amount_validator_analysis
+2025-09-28 06:24:47,763 [ERROR] main_detector: ❌ LLM API call failed for amount_validator: Invalid operation: The `response.text` quick accessor requires the response to contain a valid `Part`, but none were returned. The candidate's [finish_reason](https://ai.google.dev/api/generate-content#finishreason) is 2.
+2025-09-28 06:24:47,763 [INFO] main_detector: ✅ Agent amount_validator completed in 12.23s
+2025-09-28 06:24:47,763 [INFO] main_detector: ✅ Parallel execution completed in 36.54s (3/3 successful)
+2025-09-28 06:24:47,764 [INFO] main_detector: ✅ Analysis completed in 48.43s

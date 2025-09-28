@@ -126,7 +126,7 @@ async def upload_file(file: UploadFile = File(...)):
     """
     try:
         # Validate file type
-        allowed_extensions = {'.pdf', '.png', '.jpg', '.jpeg', '.xlsx', '.xls'}
+        allowed_extensions = {'.pdf', '.png', '.jpg', '.jpeg', '.xlsx', '.xls', '.json'}
         file_extension = Path(file.filename).suffix.lower()
         
         if file_extension not in allowed_extensions:
@@ -150,10 +150,15 @@ async def upload_file(file: UploadFile = File(...)):
         
         print(f"✅ File uploaded successfully: {safe_filename} ({file_size_mb}MB)")
         
+        from main_detector import main as run_detector
+        analysis_result = await run_detector(file=str(file_path))
+
+        print(f"📝 Analysis Result: {json.dumps(analysis_result, indent=2)}")
+
         # Return success response
         return {
             "success": True,
-            "message": f"File '{file.filename}' uploaded successfully!",
+            "message": f"Analysis Result: {json.dumps(analysis_result, indent=2)}",
             "data": {
                 "filename": file.filename,
                 "saved_as": safe_filename,
@@ -480,4 +485,4 @@ async def update_agent_config(config: dict):
 # FastAPI runs on port 8000 as API-only service
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="localhost", port=8000)

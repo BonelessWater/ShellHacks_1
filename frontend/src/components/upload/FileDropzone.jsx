@@ -51,7 +51,7 @@ const FileDropzone = ({ onFileUpload, processing }) => {
           id="file-upload"
           name="file-upload"
           type="file"
-          accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls"
+          accept=".pdf,.png,.jpg,.jpeg,.xlsx,.xls,.json"
           className="sr-only"
           onChange={handleFileChange}
         />

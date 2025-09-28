@@ -1006,7 +1006,7 @@ Return JSON format:
     print("\n🏁 Demo completed successfully!")
 
 
-async def main():
+async def main(file=None):
     """Main function for command-line usage"""
     parser = argparse.ArgumentParser(description="Enhanced Invoice Fraud Detection with Parallel LLM Agents")
     
@@ -1033,7 +1033,10 @@ async def main():
     
     # Initialize detector
     detector = EnhancedParallelInvoiceFraudDetector(max_workers=args.max_workers)
-    
+
+    if file is not None:
+        args.file = file
+        
     # Get invoice data
     invoice_data = None
     try:
