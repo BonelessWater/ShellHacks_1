@@ -58,23 +58,20 @@ jobs:
       - name: Create deployment package
         run: |
           echo "📦 Preparing deploy/"
-
           rm -rf deploy
           mkdir -p deploy/api
 
-          # Frontend: production bits only
-          cp package.json package-lock.json deploy/
-          cp server.js deploy/
+          # Frontend: production build
+          cp package.json package-lock.json server.js deploy/
           cp -r frontend/build deploy/build
 
-          # Backend: Python files + requirements (no tests, no __pycache__)
+          # Backend: Python files + requirements
           if [ -f requirements.txt ]; then
             cp requirements.txt deploy/api/requirements.txt
           elif [ -f backend/requirements.txt ]; then
             cp backend/requirements.txt deploy/api/requirements.txt
           fi
 
-          # prefer main.py, fallback to any .py
           if [ -f backend/main.py ]; then
             cp backend/main.py deploy/api/
           fi
@@ -84,7 +81,7 @@ jobs:
             -not -path "*/test/*" \
             -exec cp -n {} deploy/api/ \;
 
-          # Startup script (uses your content below)
+          # Startup script goes directly into deploy/
           cat > deploy/startup.sh << 'EOF'
           #!/bin/bash
           set -e
@@ -94,80 +91,59 @@ jobs:
           echo "📂 Directory contents:"
           ls -la
 
-          # Respect Azure's PORT if set; default to 3000
           export NODE_ENV=production
           export PORT="${PORT:-3000}"
           export REACT_APP_API_URL="http://localhost:8000"
 
-          # ---------- Node (primary) ----------
+          # Node.js deps
           if [ ! -d "node_modules" ]; then
-              echo "📦 Installing Node.js production dependencies..."
-              npm install --production --silent
+            echo "📦 Installing Node.js production dependencies..."
+            npm install --production --silent
           else
-              echo "✅ Node.js dependencies already installed"
+            echo "✅ Node.js dependencies already installed"
           fi
 
-          # ---------- FastAPI (secondary) ----------
+          # FastAPI backend
           if [ -d "api" ]; then
-              echo "🐍 Setting up FastAPI backend..."
-              cd api
-
-              echo "📦 Installing Python dependencies..."
-              if command -v python3 >/dev/null 2>&1; then
-                PY=python3
-              else
-                PY=python
-              fi
-              $PY -m pip install --upgrade pip --quiet || true
-              $PY -m pip install -r requirements.txt --quiet
-
-              echo "🔄 Starting FastAPI backend on port 8000..."
-              $PY -m uvicorn main:app --host 0.0.0.0 --port 8000 --workers 1 &
-              FASTAPI_PID=$!
-              echo "🐍 FastAPI started with PID: $FASTAPI_PID"
-
-              # Optional grace period & soft health check
-              sleep 2
-              if command -v curl >/dev/null 2>&1; then
-                curl -fsS http://localhost:8000/health >/dev/null 2>&1 \
-                  && echo "✅ FastAPI backend is healthy" \
-                  || echo "⚠️  FastAPI health check failed (continuing)..."
-              fi
-              cd ..
-          else
-              echo "⚠️  No FastAPI backend found, running Node.js only"
+            echo "🐍 Setting up FastAPI backend..."
+            cd api
+            if command -v python3 >/dev/null 2>&1; then
+              PY=python3
+            else
+              PY=python
+            fi
+            $PY -m pip install --upgrade pip --quiet || true
+            $PY -m pip install -r requirements.txt --quiet
+            echo "🔄 Starting FastAPI backend on :8000..."
+            $PY -m uvicorn main:app --host 0.0.0.0 --port 8000 --workers 1 &
+            FASTAPI_PID=$!
+            cd ..
           fi
 
-          # ---------- React build presence ----------
           if [ -d "build" ]; then
-              echo "✅ React build directory found"
-              ls -la build | head -10
+            echo "✅ React build directory found"
           else
-              echo "❌ No React build directory found"
-              exit 1
+            echo "❌ No React build directory found"
+            exit 1
           fi
 
-          # ---------- server.js presence ----------
           if [ -f "server.js" ]; then
-              echo "✅ Node.js server.js found"
+            echo "✅ server.js found"
           else
-              echo "❌ server.js not found"
-              exit 1
+            echo "❌ server.js missing"
+            exit 1
           fi
 
-          # Clean exit for background processes
           trap 'echo "🛑 Stopping services..."; kill ${FASTAPI_PID:-0} 2>/dev/null || true; exit 0' SIGTERM SIGINT
 
           echo "🟢 Starting Node.js Express server on port $PORT..."
-          echo "🌐 NODE_ENV=$NODE_ENV"
-          echo "🔗 REACT_APP_API_URL=$REACT_APP_API_URL"
           node server.js
           EOF
 
           chmod +x deploy/startup.sh
 
           echo "📋 Preview deploy structure:"
-          find deploy -maxdepth 2 -type f -name "*.js" -o -name "*.py" -o -name "*.json" -o -name "*.sh" | sed 's/^/ - /' | head -40
+          find deploy -maxdepth 2 -type f -print | sed 's/^/ - /'
 
       # ---- Azure Login ----
       - name: Login to Azure
@@ -177,12 +153,17 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7DE0416DFB4B4CB88EDDCA0CC26BC123 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AD05817C00C745649FDAAE35BB36A645 }}
 
-      # ---- Deploy to Azure Web App ----
+      - name: Zip deploy contents
+        run: |
+          cd deploy
+          zip -r ../deploy.zip .
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'Agentzero'           # <- must match your Web App name
-          slot-name: 'Production'         # or omit if no slots
-          package: './deploy'             # push the deploy/ folder
+          app-name: 'AgentZero'
+          slot-name: 'Production'
+          package: './deploy.zip'
           clean: true
           restart: true
+
