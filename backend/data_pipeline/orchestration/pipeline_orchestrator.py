@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 import pandas as pd
 import schedule
 
-from data_pipeline.core.data_access import DataPipeline
-from data_pipeline.features.feature_store import FeatureStore
+from backend.data_pipeline.core.data_access import DataPipeline
+from backend.data_pipeline.features.feature_store import FeatureStore
 
 # Configure logging to see pipeline output
 logging.basicConfig(

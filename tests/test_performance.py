@@ -10,8 +10,8 @@ import pandas as pd
 import pytest
 from unittest.mock import Mock, patch
 
-from data_pipeline.core.data_access import DataPipeline
-from data_pipeline.features.feature_store import FeatureStore
+from backend.data_pipeline.core.data_access import DataPipeline
+from backend.data_pipeline.features.feature_store import FeatureStore
 
 
 class TestPerformance:

@@ -10,8 +10,10 @@ import pytest
 import tensorflow as tf
 import torch
 
-from data_pipeline.integrations.ml_frameworks import (PyTorchDataPipeline,
-                                                      TensorFlowDataPipeline)
+from backend.data_pipeline.integrations.ml_frameworks import (
+    PyTorchDataPipeline,
+    TensorFlowDataPipeline,
+)
 
 
 class TestTensorFlowIntegration:
@@ -20,9 +22,9 @@ class TestTensorFlowIntegration:
     @pytest.fixture
     def tf_pipeline(self, mock_bigquery_client):
         """Create TensorFlow pipeline"""
-        with patch("data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
+        with patch("backend.data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
             with patch(
-                "data_pipeline.features.feature_store.FeatureStore"
+                "backend.data_pipeline.features.feature_store.FeatureStore"
             ) as mock_feature_store:
                 pipeline = mock_pipeline.return_value
                 feature_store = mock_feature_store.return_value
@@ -74,9 +76,9 @@ class TestPyTorchIntegration:
     @pytest.fixture
     def pytorch_pipeline(self, mock_bigquery_client, mock_storage_client):
         """Create PyTorch pipeline"""
-        with patch("data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
+        with patch("backend.data_pipeline.core.data_access.DataPipeline") as mock_pipeline:
             with patch(
-                "data_pipeline.features.feature_store.FeatureStore"
+                "backend.data_pipeline.features.feature_store.FeatureStore"
             ) as mock_feature_store:
                 pipeline = mock_pipeline.return_value
                 pipeline.storage_client = mock_storage_client

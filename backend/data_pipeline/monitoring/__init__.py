@@ -6,7 +6,7 @@ The actual monitoring implementation is located under
 here.
 """
 
-from data_pipeline.data_pipeline.monitoring.data_monitor import (
+from backend.data_pipeline.monitoring.data_monitor import (
     DataMonitor,
     DataVersion,
 )
