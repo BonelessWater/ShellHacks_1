@@ -6,7 +6,6 @@ import asyncio
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime
-import time
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,12 +22,23 @@ except ImportError:
     from parallel_llm_agents import ParallelLLMExecutor, LLMTask, get_fraud_detection_agent_configs
     from agent_definitions import FRAUD_DETECTION_AGENTS
 
-# Import API routes
-try:
-    from .api.routes import router as api_router
-except ImportError:
-    # Fallback for direct execution from backend directory
-    from api.routes import router as api_router
+# Import API routes (robust to different execution contexts)
+import importlib
+api_router = None
+for mod_name in (".api.routes", "backend.api.routes", "api.routes"):
+    try:
+        if mod_name.startswith("."):
+            # package relative import when running as a package
+            api_mod = importlib.import_module(mod_name, package="backend")
+        else:
+            api_mod = importlib.import_module(mod_name)
+        api_router = getattr(api_mod, "router")
+        break
+    except Exception:
+        api_router = None
+
+if api_router is None:
+    raise ImportError("Failed to import API router from api.routes in any expected location")
 
 # Create upload directory
 UPLOAD_DIR = Path("uploads")
@@ -119,22 +129,21 @@ async def get_message():
     }
 
 # FILE UPLOAD ENDPOINT - Main feature for connecting to frontend
-# Replace your upload_file function in main.py with this corrected version:
-
 @app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
     """
-    Upload and analyze invoice file with ultra-fast fraud detection
+    Upload file endpoint for invoice processing
+    Accepts PDF, PNG, JPG, JPEG, XLSX, XLS files
     """
     try:
         # Validate file type
-        file_extension = file.filename.split('.')[-1].lower()
-        allowed_extensions = {'json', 'txt', 'pdf', 'png', 'jpg', 'jpeg'}
+        allowed_extensions = {'.pdf', '.png', '.jpg', '.jpeg', '.xlsx', '.xls'}
+        file_extension = Path(file.filename).suffix.lower()
         
         if file_extension not in allowed_extensions:
             raise HTTPException(
                 status_code=400, 
-                detail=f"File type '{file_extension}' not allowed. Allowed types: {', '.join(allowed_extensions)}"
+                detail=f"File type {file_extension} not allowed. Allowed types: {', '.join(allowed_extensions)}"
             )
         
         # Create unique filename with timestamp
@@ -152,56 +161,10 @@ async def upload_file(file: UploadFile = File(...)):
         
         print(f"✅ File uploaded successfully: {safe_filename} ({file_size_mb}MB)")
         
-        # CORRECTED: Import and use UltraFastFraudDetector directly
-        # Don't call main() - it expects command line arguments
-        from main_detector import EnhancedParallelInvoiceFraudDetector
-        
-        # Initialize the detector
-        detector = EnhancedParallelInvoiceFraudDetector(max_workers=8)
-        
-        # Read file content based on type
-        try:
-            if file_extension == 'json':
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    file_content = f.read()
-                # Validate JSON
-                json.loads(file_content)  # This will raise JSONDecodeError if invalid
-                print(f"📄 Valid JSON file processed")
-            else:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    file_content = f.read()
-                print(f"📄 Text file processed")
-        except json.JSONDecodeError as e:
-            print(f"⚠️ JSON parsing error: {e}")
-            # Treat as text anyway
-            with open(file_path, 'r', encoding='utf-8') as f:
-                file_content = f.read()
-        except UnicodeDecodeError:
-            # For binary files, read as binary and convert to string representation
-            with open(file_path, 'rb') as f:
-                binary_content = f.read()
-                file_content = f"Binary file: {file.filename}, size: {len(binary_content)} bytes"
-                print(f"📄 Binary file processed")
-        
-        # Run the ultra-fast analysis
-        print(f"⚡ Starting ultra-fast fraud analysis...")
-        start_time = time.time()
-        
-        # Call analyze_invoice_ultra_fast directly - this is the correct method
-        analysis_result = await detector.analyze_invoice_parallel(file_content)
-        
-        analysis_duration = time.time() - start_time
-        
-        # Log results
-        print(f"✅ Analysis completed in {analysis_duration:.3f}s")
-        print(f"🎯 Risk Score: {analysis_result['overall_risk_score']}/10")
-        print(f"📋 Recommendation: {analysis_result['recommendation']}")
-        print(f"🚩 Red Flags: {len(analysis_result['red_flags'])}")
-        
-        # Return comprehensive response with analysis results
+        # Return success response
         return {
             "success": True,
-            "message": f"File analyzed successfully in {analysis_duration:.3f}s",
+            "message": f"File '{file.filename}' uploaded successfully!",
             "data": {
                 "filename": file.filename,
                 "saved_as": safe_filename,
@@ -209,58 +172,15 @@ async def upload_file(file: UploadFile = File(...)):
                 "size_mb": file_size_mb,
                 "file_type": file_extension,
                 "upload_time": datetime.now().isoformat(),
-                "file_path": str(file_path),
-                "analysis_duration_seconds": round(analysis_duration, 3)
+                "file_path": str(file_path)
             },
-            "fraud_analysis": {
-                "overall_risk_score": analysis_result['overall_risk_score'],
-                "recommendation": analysis_result['recommendation'], 
-                "red_flags": analysis_result['red_flags'],
-                "confidence": analysis_result.get('confidence', 'N/A'),
-                "agents_used": analysis_result.get('agents_used', 'Multiple AI agents'),
-                "analysis_summary": analysis_result.get('analysis_summary', 'Comprehensive fraud analysis completed')
-            },
-            "performance": {
-                "target_time_seconds": 3.0,
-                "actual_time_seconds": round(analysis_duration, 3),
-                "performance_status": "✅ FAST" if analysis_duration < 3.0 else "⚠️ SLOW",
-                "efficiency_rating": "Excellent" if analysis_duration < 1.0 else "Good" if analysis_duration < 3.0 else "Needs optimization"
-            }
+            "next_steps": "File is ready for processing by fraud detection agents"
         }
         
     except Exception as e:
-        error_msg = f"Upload and analysis failed: {str(e)}"
-        print(f"❌ {error_msg}")
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=error_msg)
+        print(f"❌ Upload error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
-
-# Add this helper function to test files manually:
-async def test_file_analysis(file_path: str):
-    """Test function to analyze any file manually"""
-    try:
-        from main_detector import EnhancedParallelInvoiceFraudDetector
-        
-        detector = EnhancedParallelInvoiceFraudDetector(max_workers=8)
-        
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        print(f"🔍 Analyzing file: {file_path}")
-        start = time.time()
-        result = await detector.analyze_invoice_parallel(content)
-        duration = time.time() - start
-        
-        print(f"⚡ Analysis completed in {duration:.3f}s")
-        print(f"📊 Results: {json.dumps(result, indent=2)}")
-        
-        return result
-        
-    except Exception as e:
-        print(f"❌ Test failed: {e}")
-        return None
-    
 # Multiple file upload endpoint
 @app.post("/api/upload/multiple")
 async def upload_multiple_files(files: List[UploadFile] = File(...)):
@@ -568,352 +488,7 @@ async def update_agent_config(config: dict):
         "config": config
     }
 
-# Additional FastAPI Endpoints for Enhanced Invoice Processing
-# Add these to your existing backend/main.py
-
-from typing import List, Optional
-from fastapi import HTTPException, UploadFile, File, Form, BackgroundTasks
-from pydantic import BaseModel
-import asyncio
-import uuid
-from datetime import datetime
-
-# Additional Pydantic Models
-class UploadStatus(BaseModel):
-    file_id: str
-    filename: str
-    status: str  # 'uploading', 'processing', 'completed', 'failed'
-    progress: Optional[int] = 0
-    current_step: Optional[str] = None
-    error: Optional[str] = None
-    processing_time: Optional[float] = None
-    result: Optional[dict] = None
-
-class BatchUploadResponse(BaseModel):
-    batch_id: str
-    total_files: int
-    successful_uploads: int
-    failed_uploads: int
-    upload_statuses: List[UploadStatus]
-
-class InvoiceProcessingStatus(BaseModel):
-    invoice_id: str
-    status: str
-    progress: int
-    current_agent: Optional[str] = None
-    agents_completed: int
-    total_agents: int
-    estimated_time_remaining: Optional[float] = None
-
-# In-memory storage for tracking uploads (use Redis in production)
-upload_tracking = {}
-processing_status = {}
-
-# Enhanced file upload endpoint with progress tracking
-@app.post("/api/upload/batch", response_model=BatchUploadResponse)
-async def upload_batch_files(
-    background_tasks: BackgroundTasks,
-    files: List[UploadFile] = File(...)
-):
-    """
-    Upload multiple files with progress tracking
-    """
-    batch_id = str(uuid.uuid4())
-    upload_statuses = []
-    successful_uploads = 0
-    failed_uploads = 0
-
-    for file in files:
-        file_id = str(uuid.uuid4())
-        
-        try:
-            # Validate file
-            allowed_extensions = {'.pdf', '.png', '.jpg', '.jpeg', '.xlsx', '.xls', '.json'}
-            file_extension = Path(file.filename).suffix.lower()
-            
-            if file_extension not in allowed_extensions:
-                status = UploadStatus(
-                    file_id=file_id,
-                    filename=file.filename,
-                    status="failed",
-                    error=f"File type {file_extension} not allowed"
-                )
-                upload_statuses.append(status)
-                failed_uploads += 1
-                continue
-
-            # Save file
-            file_path = UPLOAD_DIR / f"{file_id}_{file.filename}"
-            with open(file_path, "wb") as buffer:
-                content = await file.read()
-                buffer.write(content)
-
-            # Create upload status
-            status = UploadStatus(
-                file_id=file_id,
-                filename=file.filename,
-                status="completed",
-                progress=100,
-                processing_time=0.5  # Mock processing time
-            )
-            
-            upload_tracking[file_id] = status
-            upload_statuses.append(status)
-            successful_uploads += 1
-
-            # Start background processing
-            background_tasks.add_task(process_invoice_async, file_id, file_path)
-
-        except Exception as e:
-            status = UploadStatus(
-                file_id=file_id,
-                filename=file.filename,
-                status="failed",
-                error=str(e)
-            )
-            upload_statuses.append(status)
-            failed_uploads += 1
-
-    return BatchUploadResponse(
-        batch_id=batch_id,
-        total_files=len(files),
-        successful_uploads=successful_uploads,
-        failed_uploads=failed_uploads,
-        upload_statuses=upload_statuses
-    )
-
-# Get upload status
-@app.get("/api/upload/status/{file_id}")
-async def get_upload_status(file_id: str):
-    """
-    Get the status of a specific file upload/processing
-    """
-    if file_id not in upload_tracking:
-        raise HTTPException(status_code=404, detail="File not found")
-    
-    return upload_tracking[file_id]
-
-# Get processing status for an invoice
-@app.get("/api/invoices/{invoice_id}/status", response_model=InvoiceProcessingStatus)
-async def get_processing_status(invoice_id: str):
-    """
-    Get real-time processing status for an invoice
-    """
-    if invoice_id not in processing_status:
-        raise HTTPException(status_code=404, detail="Invoice not found")
-    
-    return processing_status[invoice_id]
-
-# Enhanced invoice analysis with progress tracking
-@app.post("/api/invoices/analyze/async")
-async def analyze_invoice_async(
-    background_tasks: BackgroundTasks,
-    request: InvoiceAnalysisRequest
-):
-    """
-    Start asynchronous invoice analysis with progress tracking
-    """
-    invoice_id = request.invoice_data.get('invoice_id', f"inv_{int(datetime.now().timestamp())}")
-    
-    # Initialize processing status
-    status = InvoiceProcessingStatus(
-        invoice_id=invoice_id,
-        status="started",
-        progress=0,
-        agents_completed=0,
-        total_agents=6,  # Based on your fraud detection agents
-        estimated_time_remaining=30.0
-    )
-    processing_status[invoice_id] = status
-    
-    # Start background processing
-    background_tasks.add_task(analyze_invoice_background, invoice_id, request)
-    
-    return {
-        "invoice_id": invoice_id,
-        "status": "processing_started",
-        "message": "Invoice analysis started. Use /api/invoices/{invoice_id}/status to track progress."
-    }
-
-# Background task for invoice processing simulation
-async def process_invoice_async(file_id: str, file_path: Path):
-    """
-    Background task to simulate invoice processing with status updates
-    """
-    try:
-        status = upload_tracking[file_id]
-        
-        # Simulate processing steps
-        steps = [
-            ("Data extraction", 20),
-            ("Fraud detection", 40),
-            ("Vendor validation", 60),
-            ("Amount verification", 80),
-            ("Final analysis", 100)
-        ]
-        
-        for step_name, progress in steps:
-            status.status = "processing"
-            status.current_step = step_name
-            status.progress = progress
-            upload_tracking[file_id] = status
-            
-            # Simulate processing time
-            await asyncio.sleep(2)
-        
-        # Complete processing
-        status.status = "completed"
-        status.progress = 100
-        status.result = {
-            "riskScore": 25,  # Mock result
-            "confidence": 95,
-            "status": "approved"
-        }
-        upload_tracking[file_id] = status
-        
-    except Exception as e:
-        status.status = "failed"
-        status.error = str(e)
-        upload_tracking[file_id] = status
-
-# Background task for invoice analysis
-async def analyze_invoice_background(invoice_id: str, request: InvoiceAnalysisRequest):
-    """
-    Background task for invoice analysis with progress updates
-    """
-    try:
-        status = processing_status[invoice_id]
-        
-        # Simulate agent processing
-        agents = [
-            "Data Extractor",
-            "Fraud Detector", 
-            "Vendor Validator",
-            "Amount Checker",
-            "Duplicate Scanner",
-            "Risk Analyzer"
-        ]
-        
-        for i, agent in enumerate(agents):
-            status.current_agent = agent
-            status.progress = int((i + 1) / len(agents) * 100)
-            status.agents_completed = i + 1
-            status.estimated_time_remaining = (len(agents) - i - 1) * 3
-            processing_status[invoice_id] = status
-            
-            # Simulate agent processing time
-            await asyncio.sleep(3)
-        
-        # Complete analysis
-        status.status = "completed"
-        status.progress = 100
-        status.current_agent = None
-        status.estimated_time_remaining = 0
-        processing_status[invoice_id] = status
-        
-    except Exception as e:
-        status.status = "failed"
-        processing_status[invoice_id] = status
-
-# Bulk invoice processing endpoint
-@app.post("/api/invoices/process/bulk")
-async def process_bulk_invoices(
-    background_tasks: BackgroundTasks,
-    invoice_ids: List[str]
-):
-    """
-    Process multiple invoices in parallel
-    """
-    batch_id = str(uuid.uuid4())
-    
-    for invoice_id in invoice_ids:
-        # Create mock invoice request
-        mock_request = InvoiceAnalysisRequest(
-            invoice_data={"invoice_id": invoice_id}
-        )
-        background_tasks.add_task(analyze_invoice_background, invoice_id, mock_request)
-    
-    return {
-        "batch_id": batch_id,
-        "message": f"Started processing {len(invoice_ids)} invoices",
-        "invoice_ids": invoice_ids
-    }
-
-# Get batch processing status
-@app.get("/api/invoices/batch/{batch_id}/status")
-async def get_batch_status(batch_id: str):
-    """
-    Get status of batch processing
-    """
-    # This would typically query your database
-    # For demo, return mock data
-    return {
-        "batch_id": batch_id,
-        "total_invoices": 5,
-        "completed": 3,
-        "processing": 1,
-        "failed": 1,
-        "overall_progress": 60
-    }
-
-# Enhanced invoice retrieval with filtering
-@app.get("/api/invoices")
-async def get_invoices(
-    status: Optional[str] = None,
-    limit: int = 50,
-    offset: int = 0,
-    sort_by: str = "date",
-    order: str = "desc"
-):
-    """
-    Get invoices with filtering and pagination
-    """
-    # Mock data - replace with actual database query
-    mock_invoices = [
-        {
-            "id": f"INV-2024-{str(i).zfill(3)}",
-            "vendor": f"Vendor {i}",
-            "amount": 1000 + (i * 100),
-            "status": ["approved", "rejected", "review_required"][i % 3],
-            "date": "2024-01-15",
-            "confidence": 0.95 - (i * 0.05),
-            "risk_score": 20 + (i * 5)
-        }
-        for i in range(1, 21)
-    ]
-    
-    # Apply filters
-    if status:
-        mock_invoices = [inv for inv in mock_invoices if inv["status"] == status]
-    
-    # Apply pagination
-    total = len(mock_invoices)
-    invoices = mock_invoices[offset:offset + limit]
-    
-    return {
-        "invoices": invoices,
-        "total": total,
-        "limit": limit,
-        "offset": offset,
-        "has_more": offset + limit < total
-    }
-
-# Simple health check for components
-@app.get("/api/upload/health")
-async def upload_health():
-    """
-    Check upload system health
-    """
-    return {
-        "status": "healthy",
-        "upload_dir": str(UPLOAD_DIR.absolute()),
-        "upload_dir_exists": UPLOAD_DIR.exists(),
-        "active_uploads": len(upload_tracking),
-        "processing_queue": len(processing_status)
-    }
-
 # FastAPI runs on port 8000 as API-only service
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="localhost", port=8000)
-
+    uvicorn.run(app, host="0.0.0.0", port=8000)

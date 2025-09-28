@@ -7,6 +7,13 @@ const InvoiceTable = ({ invoices, filteredInvoices }) => {
 
   const displayInvoices = filteredInvoices || invoices;
 
+  const vendorName = (v) => {
+    if (!v && v !== '') return 'Unknown Vendor';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'object' && v !== null) return v.name || v.vendor || 'Unknown Vendor';
+    return String(v);
+  };
+
   const getRiskColor = (risk) => {
     switch (risk) {
       case 'high': return 'text-red-400';
@@ -29,8 +36,8 @@ const InvoiceTable = ({ invoices, filteredInvoices }) => {
   const enhancedInvoices = displayInvoices.map(invoice => ({
     ...invoice,
     riskLevel: invoice.issues > 2 ? 'high' : invoice.issues > 0 ? 'medium' : 'low',
-    description: invoice.vendor.includes('ABC') ? 'Monthly office supplies' : 
-                invoice.vendor.includes('TechCorp') ? 'Software licensing fees' : 
+  description: vendorName(invoice.vendor).includes('ABC') ? 'Monthly office supplies' : 
+        vendorName(invoice.vendor).includes('TechCorp') ? 'Software licensing fees' : 
                 'Suspicious vendor transaction',
     detailedIssues: invoice.issues > 0 ? [
       { type: 'duplicate', severity: 'high', description: 'Potential duplicate payment detected' },
@@ -96,8 +103,8 @@ const InvoiceTable = ({ invoices, filteredInvoices }) => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {invoice.id}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {invoice.vendor}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {vendorName(invoice.vendor)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     ${invoice.amount.toLocaleString()}
@@ -190,7 +197,7 @@ const InvoiceTable = ({ invoices, filteredInvoices }) => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Vendor:</span>
-                      <span className="font-medium">{selectedInvoice.vendor}</span>
+                        <span className="font-medium">{vendorName(selectedInvoice.vendor)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Amount:</span>

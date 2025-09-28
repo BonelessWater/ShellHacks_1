@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { vendorName } from '../../utils/vendor';
 import { Users, TrendingUp, AlertTriangle, DollarSign, Clock, Star, Filter, Eye } from 'lucide-react';
 
 const VendorAnalytics = ({ invoices }) => {
@@ -8,9 +9,10 @@ const VendorAnalytics = ({ invoices }) => {
 
   // Process vendor data
   const vendorData = invoices.reduce((acc, invoice) => {
-    if (!acc[invoice.vendor]) {
-      acc[invoice.vendor] = {
-        name: invoice.vendor,
+    const name = vendorName(invoice.vendor);
+    if (!acc[name]) {
+      acc[name] = {
+        name,
         totalValue: 0,
         invoiceCount: 0,
         approvedCount: 0,
@@ -22,21 +24,20 @@ const VendorAnalytics = ({ invoices }) => {
         invoices: []
       };
     }
-    
-    acc[invoice.vendor].totalValue += invoice.amount;
-    acc[invoice.vendor].invoiceCount += 1;
-    acc[invoice.vendor].totalIssues += invoice.issues;
-    acc[invoice.vendor].invoices.push(invoice);
-    
-    if (invoice.status === 'approved') acc[invoice.vendor].approvedCount += 1;
-    if (invoice.status === 'rejected') acc[invoice.vendor].rejectedCount += 1;
-    if (invoice.status === 'review_required') acc[invoice.vendor].reviewCount += 1;
-    
+    acc[name].totalValue += invoice.amount;
+    acc[name].invoiceCount += 1;
+    acc[name].totalIssues += invoice.issues;
+    acc[name].invoices.push(invoice);
+
+    if (invoice.status === 'approved') acc[name].approvedCount += 1;
+    if (invoice.status === 'rejected') acc[name].rejectedCount += 1;
+    if (invoice.status === 'review_required') acc[name].reviewCount += 1;
+
     // Update last invoice date
-    if (new Date(invoice.date) > new Date(acc[invoice.vendor].lastInvoiceDate)) {
-      acc[invoice.vendor].lastInvoiceDate = invoice.date;
+    if (new Date(invoice.date) > new Date(acc[name].lastInvoiceDate)) {
+      acc[name].lastInvoiceDate = invoice.date;
     }
-    
+
     return acc;
   }, {});
 

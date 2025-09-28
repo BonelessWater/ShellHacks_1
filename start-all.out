@@ -1,0 +1,63 @@
+Starting backend (uvicorn) on port 8000...
+Found poetry, starting backend with 'poetry run uvicorn'
+Backend PID: 31333 (logs -> backend.log)
+Waiting a moment for backend to become ready...
+Starting frontend (npm start) in /Users/ilandanial/ShellHacks_1/frontend...
+
+> agentzero-frontend@1.0.0 start
+> react-scripts start
+
+(node:31371) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:31371) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+Starting the development server...
+
+Compiled successfully!
+
+You can now view agentzero-frontend in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://10.108.15.155:3000
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+webpack compiled successfully
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+Compiling...
+Compiled successfully!
+webpack compiled successfully
+Compiling...
+Compiled with warnings.
+
+[eslint] 
+src/components/dashboard/Dashboard.jsx
+  Line 50:11:  Unreachable code  no-unreachable
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+WARNING in [eslint] 
+src/components/dashboard/Dashboard.jsx
+  Line 50:11:  Unreachable code  no-unreachable
+
+webpack compiled with 1 warning
+The build failed because the process exited too early. This probably means the system ran out of memory or someone called `kill -9` on the process.
+Stopping backend (31333)

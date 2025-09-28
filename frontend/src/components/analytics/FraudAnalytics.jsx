@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Shield, AlertTriangle, TrendingUp, DollarSign, Clock, Eye, Target, Activity } from 'lucide-react';
+import { vendorName } from '../../utils/vendor';
 
 const FraudAnalytics = ({ invoices }) => {
   const [timeFilter, setTimeFilter] = useState('all');
@@ -25,7 +26,10 @@ const FraudAnalytics = ({ invoices }) => {
     roundAmounts: filteredInvoices.filter(inv => inv.amount % 100 === 0 || inv.amount % 1000 === 0),
     justUnderLimits: filteredInvoices.filter(inv => (inv.amount > 9000 && inv.amount < 10000) || (inv.amount > 4500 && inv.amount < 5000)),
     duplicateRisk: filteredInvoices.filter(inv => inv.issues > 2),
-    suspiciousVendors: filteredInvoices.filter(inv => inv.vendor.includes('Suspicious') || inv.vendor.includes('Fraud')),
+    suspiciousVendors: filteredInvoices.filter(inv => {
+      const v = vendorName(inv.vendor).toLowerCase();
+      return v.includes('suspicious') || v.includes('fraud');
+    }),
     weekendSubmissions: filteredInvoices.filter(inv => {
       const day = new Date(inv.date).getDay();
       return day === 0 || day === 6; // Sunday = 0, Saturday = 6
@@ -33,8 +37,9 @@ const FraudAnalytics = ({ invoices }) => {
     rapidSequence: (() => {
       // Group by vendor and check for rapid submissions
       const vendorGroups = filteredInvoices.reduce((acc, inv) => {
-        if (!acc[inv.vendor]) acc[inv.vendor] = [];
-        acc[inv.vendor].push(inv);
+        const v = vendorName(inv.vendor);
+        if (!acc[v]) acc[v] = [];
+        acc[v].push(inv);
         return acc;
       }, {});
       
@@ -302,7 +307,7 @@ const FraudAnalytics = ({ invoices }) => {
                   <div key={invoice.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                     <div>
                       <span className="font-medium">{invoice.id}</span>
-                      <span className="text-gray-500 ml-2">{invoice.vendor}</span>
+                      <span className="text-gray-500 ml-2">{vendorName(invoice.vendor)}</span>
                     </div>
                     <div className="flex items-center gap-4">
                       <span className="font-medium">{formatCurrency(invoice.amount)}</span>

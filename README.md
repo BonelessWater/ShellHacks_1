@@ -148,7 +148,6 @@ Testing, CI, and safety
   files. Consider `detect-secrets` for CI scanning.
 
 Deployment & observability
---------------------------
 
 - Containerize the API and workers with a Dockerfile. Provide a Docker
   Compose for local development and a Helm chart for k8s deployment.
@@ -185,7 +184,6 @@ This README documents the repository layout, runtime and developer
 instructions, architecture overview, and deployment considerations.
 
 ## Table of contents
-- Repository layout
 - Architecture overview
 - How to run locally (development)
 - Tests and CI
